@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 #include <stdint.h>
 //#include <windows.h>
@@ -71,76 +72,71 @@ void iniA(void) { cntstacka=0; }
 void pushA(int n) { stacka[cntstacka++]=n; }
 int popA(void) { return stacka[--cntstacka]; }
 
+const char *r3asm[]={
+";","LIT1","ADR","CALL","VAR",
+"JMP","JMPR","LIT2","LIT3"			// internal only
+};
+
 const char *r3bas[]={
 ";","(",")","[","]",
-"EX","0?","1?","+?","-?", 									// 10
-"<?",">?","=?",">=?","<=?","<>?","AN?","NA?","BTW?", 		// 19
-"DUP","DROP","OVER","PICK2","PICK3","PICK4","SWAP","NIP", 	// 27
-"ROT","2DUP","2DROP","3DROP","4DROP","2OVER","2SWAP", 		// 34
-">R","R>","R@",												// 37
-"AND","OR","XOR","NOT","NEG", 								// 42
-"+","-","*","/","*/", 										// 47
-"/MOD","MOD","ABS","SQRT","CLZ", 							// 52
-"<<",">>",">>>","*>>","<</", 								// 57
-"@","C@","Q@","@+","C@+","Q@+",  							// 65
-"!","C!","Q!","!+","C!+","Q!+",  							// 71
-"+!","C+!","Q+!",  											// 74
-">A","A>","A@","A!","A+","A@+","A!+", 						// 81
-">B","B>","B@","B!","B+","B@+","B!+", 						// 88
-"MOVE","MOVE>","FILL", 										// 91
-"CMOVE","CMOVE>","CFILL", 									// 94
-"QMOVE","QMOVE>","QFILL", 									// 97
-
+"|","|","|","|",			// internal only
+"EX",
+"0?","1?","+?","-?", 								
+"<?",">?","=?",">=?","<=?","<>?","AN?","NA?","BTW?",
+"DUP","DROP","OVER","PICK2","PICK3","PICK4","SWAP","NIP",
+"ROT","2DUP","2DROP","3DROP","4DROP","2OVER","2SWAP",
+">R","R>","R@",
+"AND","OR","XOR","NOT","NEG",
+"+","-","*","/","*/",
+"/MOD","MOD","ABS","SQRT","CLZ",
+"<<",">>",">>>","*>>","<</",
+"@","C@","Q@","@+","C@+","Q@+",
+"!","C!","Q!","!+","C!+","Q!+",
+"+!","C+!","Q+!",
+">A","A>","A@","A!","A+","A@+","A!+",
+">B","B>","B@","B!","B+","B@+","B!+",
+"MOVE","MOVE>","FILL",
+"CMOVE","CMOVE>","CFILL",
+"QMOVE","QMOVE>","QFILL",
 "UPDATE","REDRAW",
 "MEM","SW","SH","VFRAME",
 "XYPEN","BPEN","KEY",
 "MSEC","TIME","DATE",
 "LOAD","SAVE","APPEND",
 "FFIRST","FNEXT",
-
 "INK","OP","LINE","CURVE","CURVE3","PLINE","PCURVE","PCURVE3","POLI",
-
-"SYSCALL","SYSMEM",
 "SYS",""
 };
 
 enum {
-FIN,LIT,ADR,CALL,JMP,//JMPR, EXEC,//hasta JMPR no es visible
-IF,PIF,NIF,UIF,IFN,IFL,IFG,IFLE,IFGE,IFNO,IFAND,IFNAND,// condicionales 0 - y +  y no 0
-DUP,DROP,OVER,PICK2,PICK3,PICK4,SWAP,NIP,ROT,
-DUP2,DROP2,DROP3,DROP4,OVER2,SWAP2,//--- pila
-TOR,RFROM,ERRE,//ERREM,ERRFM,ERRSM,ERRDR,//--- pila direcciones
-AND,OR,XOR,NOT,//--- logica
-SUMA,RESTA,MUL,DIV,MULDIV,MULSHR,DIVMOD,MOD,ABS,
-CSQRT,CLZ,CDIVSH,
-NEG,INC,INC4,DEC,DIV2,MUL2,SHL,SHR,SHR0,//--- aritmetica
-FECH,CFECH,WFECH,STOR,CSTOR,WSTOR,INCSTOR,CINCSTOR,WINCSTOR,//--- memoria
-FECHPLUS,STOREPLUS,CFECHPLUS,CSTOREPLUS,WFECHPLUS,WSTOREPLUS,
+FIN,LIT,ADR,CALL,VAR, 
+JMP,JMPR,LIT2,LIT3,
+EX,
+ZIF,UIF,PIF,NIF,
+IFL,IFG,IFE,IFGE,IFLE,IFNE,IFAND,IFNAND,IFBT,
+DUP,DROP,OVER,PICK2,PICK3,PICK4,SWAP,NIP,
+ROT,DUP2,DROP2,DROP3,DROP4,OVER2,SWAP2,
+TOR,RFROM,ERRE,
+AND,OR,XOR,NOT,NEG,
+ADD,SUB,MUL,DIV,MULDIV,
+DIVMOD,MOD,ABS,CSQRT,CLZ,
+SHL,SHR,SHR0,MULSHR,CDIVSH,
+FECH,CFECH,QFECH,FECHPLUS,CFECHPLUS,QFECHPLUS,
+STOR,CSTOR,QSTOR,STOREPLUS,CSTOREPLUS,QSTOREPLUS,
+INCSTOR,CINCSTOR,QINCSTOR,
 TOA,ATO,AF,AS,AA,AFA,ASA,
 TOB,BTO,BF,BS,BA,BFA,BSA,
-MOVED,MOVEA,FILL,CMOVED,CMOVEA,CFILL,
-MEM,
+MOVED,MOVEA,FILL,
+CMOVED,CMOVEA,CFILL,
+QMOVED,QMOVEA,QFILL,
+UPDATE,REDRAW,
+MEM,SW,SH,FRAMEV,
+XYPEN,BPEN,KEY,
+MSEC,TIME,IDATE,
+LOAD,SAVE,APPEND,
 FFIRST,FNEXT,
-LOAD,SAVE,APPEND,//--- bloques de memoria, bloques
-UPDATE,
-XYMOUSE,BMOUSE, //MOUSE
-SKEY, KEY,
-CNTJOY,GETJOY,
-MSEC,TIME,IDATE,SISEND,SISRUN,//--- sistema
-WIDTH,HEIGHT,
-REDRAW,FRAMEV,//--- pantalla
-COLOR,COLORA,ALPHA,//--- color
-OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,//--- dibujo
-FCOL,FCEN,FMAT,SFILL,LFILL,RFILL,TFILL, //--- pintado
-
-SLOAD,SPLAY,SINFO,SSET,
-
-#ifdef NET
-OPENURL,
-#endif
-
-SYSTEM,
-ULTIMAPRIMITIVA// de aqui en mas.. apila los numeros 0..255-ULTIMAPRIMITIVA
+INK,OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
+SYS
 };
 
 //////////////////////////////////////
@@ -274,7 +270,7 @@ void closevar()
 if (cntdicc==0) { return; }
 if ((dicc[cntdicc-1].info&0x10)==0) { return; } // prev is var
 if (dicc[cntdicc].mem<memd) { return; } // have val
-*(int*)memdata[memd]=0;memd+=4;
+memdata[memd]=0;memd+=4;
 }
 
 void compilaDATA(char *str) 
@@ -318,7 +314,7 @@ void compilaSTR(char *str)
 {
 str++;
 int ini=datasave(str);	
-if (modo<2) codetok((ini<<7)+2); // lit data
+if (modo<2) codetok((ini<<8)+ADR); // lit data
 }
 
 void datanro(int n) { 
@@ -335,13 +331,13 @@ void compilaADDR(int n)
 {
 // si es code, directo, si es data.. puntero	
 if (modo>1) { datanro(dicc[n].mem);return; }
-codetok((dicc[n].mem<<7)+1+((dicc[n].info>>4)&1));  //1 code 2 data
+codetok((dicc[n].mem<<8)+LIT+((dicc[n].info>>4)&1));  //1 code 2 data
 }
 
 void compilaLIT(int n) 
 {
 if (modo>1) { datanro(n);return; }
-codetok((n<<7)+1); 
+codetok((n<<8)+LIT); 
 }
 
 void blockIn(void)
@@ -354,9 +350,9 @@ int solvejmp(int from,int to)
 {
 int whi=false;
 for (int i=from;i<to;i++) {
-	unsigned char op=memcode[i];
-	if (op>21 && op<35 && (memcode[i]>>7)==0) {
-		memcode[i]+=(memc-i)<<7;	// patch while
+	int op=memcode[i]&0xff;
+	if (op>=ZIF && op<=IFBT && (memcode[i]>>8)==0) {
+		memcode[i]+=(memc-i)<<8;	// patch while
 		whi=true;
 		}
 	}
@@ -368,16 +364,15 @@ void blockOut(void)
 int from=popA();
 int dist=memc-from;
 if (solvejmp(from,memc)) { // salta
-	codetok((-(dist+1)<<7)+18); 	// jmpr
+	codetok((-(dist+1)<<8)+JMPR); 	// jmpr
 } else {
-	memcode[from-1]+=(dist<<7);		// patch if
+	memcode[from-1]|=(dist<<8);		// patch if
 	}
 level--;
 }
 
 void anonIn(void)
 {
-	
 }
 
 void anonOut(void)
@@ -400,24 +395,21 @@ if (n==1) { blockIn();return; }		//(	etiqueta
 if (n==2) { blockOut();return; }	//)	salto
 if (n==3) { anonIn();return; }		//[	salto:etiqueta
 if (n==4) { anonOut();return; }		//]	etiqueta;push
-codetok(n+16);	
+codetok(n);	
 if (n==0) { if (level==0) {modo=0;} } // ;
 }
 
 void compilaWORD(int n) 
 {
 if (modo>1) { datanro(n);return; }
-codetok((dicc[n].mem<<7)+12+((dicc[n].info>>4)&1));
+codetok((dicc[n].mem<<8)+CALL+((dicc[n].info>>4)&1));
 }
-
 
 int r3token(char *str) 
 {
-//printf("token...\n")	;
 level=0;
 while(*str!=0) {
 	str=trim(str);if (*str==0) return -1;
-//	printf(">");printword(str);printf("<");
 	switch (*str) {
 		case '^':	// include
 			str=nextcr(str);break;
@@ -431,16 +423,13 @@ while(*str!=0) {
 			compilaDATA(str);str=nextw(str);break;	
 		case 0x27:	// $27 ' Direccion	// 'ADR
 			nro=isWord(str+1);
-//			printword(str+1);printf("<dir>%d",nro);printf("\n");			
-			if (nro<0) return 0;
+			if (nro<0) { werror="adr not found";return 0; }
 			compilaADDR(nro);str=nextw(str);break;		
 		default:
-//	printword(str);printf(" ");			
 			if (isNro(str)) { compilaLIT(nro);str=nextw(str);break; }
 			if (isBas(str)) { compilaMAC(nro);str=nextw(str);break; }
 			nro=isWord(str);
-//			printf("<wrd>");printword(str);printf("<wrd>%d",nro);printf("\n");
-			if (nro<0) { printf("palabra no encontrada\n");return 0; }
+			if (nro<0) { werror="word not found";return 0; }
 			if (modo==2) { compilaADDR(nro);str=nextw(str);break; }
 			compilaWORD(nro);str=nextw(str);break;
 		}
@@ -528,12 +517,23 @@ return;
 }
 
 ///////////////////////////////////////////////
+void printcode(int n)
+{
+if ((n&0xff)<8&&n!=0) {
+	printf(r3asm[n&0xff]);printf(" %d",n>>8);
+} else
+	printf(r3bas[n&0xff]);
+printf("\n");
+}
+
 void dumpcode()
 {
 printf("code\n");
 printf("boot:%d\n",boot);
-for(int i=0;i<memc;i++)
-	printf("%d ",memcode[i]);
+for(int i=1;i<memc;i++) {
+	printf("%d.",i);
+	printcode(memcode[i]); //printf("%d ",memcode[i]);
+	}
 printf("\n");
 }
 
@@ -589,9 +589,7 @@ memcode=(int*)malloc(sizeof(int)*memcsize);
 memdata=(char*)malloc(memdsize);
 // tokenize
 for (int i=0;i<cntstacki;i++) {
-//	printf("%d %d!",i,cntstacki);
-	printword(includes[stacki[i]].nombre);printf("\n");
-	
+//	printword(includes[stacki[i]].nombre);printf("\n");
 	if (!r3token(includes[stacki[i]].str)) return 0;
 //	r3token(includes[stacki[i]].str);
 	dicclocal=cntdicc;
@@ -599,13 +597,18 @@ for (int i=0;i<cntstacki;i++) {
 	
 // last tokenizer		
 if (!r3token(str)) return 0;
-memcode[memc++]=0;
+//memcode[memc++]=0;
 
 //printf("estimate tokens:%d\ntokens:%d\n",memcsize,memc);
+//dumpdicc();
+
+dumpcode();
+
+freeinc();
+free(str);
 
 return -1;
 }
-
 
 	
 //----------------------
@@ -650,6 +653,13 @@ return g;
 }
 
 //---------------------------//
+SDL_Event evt;
+WIN32_FIND_DATA ffd;
+HANDLE hFind=NULL;
+
+time_t sit;
+tm *sitime;
+
 int sw,sh;
 int xm=0;
 int ym=0;
@@ -660,291 +670,287 @@ int gy1=0;
 int ke=0;
 int kc=0;
 
+void r3update()
+{
+//SDL_WaitEvent(&evt);
+SDL_PollEvent(&evt);
+switch (evt.type) {
+	case SDL_KEYDOWN:
+		ke=evt.key.keysym.sym;
+      	break;
+	case SDL_KEYUP:
+		ke=evt.key.keysym.sym;
+      	break;
+	case SDL_MOUSEBUTTONDOWN:	      	
+		bm|=evt.button.button;
+		break;
+	case SDL_MOUSEBUTTONUP:	      	
+		bm&=~evt.button.button;
+		break;
+	case SDL_MOUSEMOTION:
+	    xm=evt.motion.x;
+	    ym=evt.motion.y;		
+	    break;
+	}
+
+}
+         
 //---------------------------//
 // TOS..DSTACK--> <--RSTACK  //
 //---------------------------//
 int64_t stack[256];
+FILE *file;
 
-void runr3(int adr) 
+void runr3(int boot) 
 {
-register int ip=adr;
+stack[255]=0;	
+register int ip=boot;
 register int64_t TOS=0;
+register int64_t *NOS=&stack[0];
+register int64_t *RTOS=&stack[255];
 register int64_t REGA=0;
 register int64_t REGB=0;
-
 register int op=0;
 register int64_t W=0;
 register int64_t W1=0; 
-
-register unsigned char NOS=0;
-register unsigned char RTOS=255;
-stack[255]=0;
 while(ip!=0) { 
 	op=memcode[ip++]; 
+	
+//	printcode(op);
+	
 	switch(op&0xff){
-	case 0:ip=stack[RTOS];RTOS++;continue; 						// ;
-	case 1:NOS++;stack[NOS]=TOS;TOS=op>>8;continue;				// LIT1
-	case 2:NOS++;stack[NOS]=TOS;TOS=(int64_t)&memdata[(unsigned int)op>>8];continue;	// LIT data
-
-	case 3:RTOS--;stack[RTOS]=ip;ip=(unsigned int)op>>8;continue;			// CALL
-	case 4:ip=(op>>7);continue;//JMP	
+	case FIN:ip=*RTOS;RTOS++;continue; 							// ;
+	case LIT:NOS++;*NOS=TOS;TOS=op>>8;continue;					// LIT1
+	case ADR:NOS++;*NOS=TOS;TOS=(int64_t)&memdata[op>>8];continue;		// LIT adr
+	case CALL:RTOS--;*RTOS=ip;ip=(unsigned int)op>>8;continue;	// CALL
+	case VAR:NOS++;*NOS=TOS;TOS=memdata[op>>8];continue;		// VAR
+	case JMP:ip=(op>>8);continue;//JMP							// JMP
+	case JMPR:ip+=(op>>8);continue;//JMP						// JMPR	
+	case LIT2:TOS^=(op&0xffffff00)<<24;continue;				// LIT xor xxxxxx....aaaaaa
+	case LIT3:TOS^=(op&0xffffff00)<<16;continue;				// LIT xor ....xxxxxxaaaaaa	
+	case EX:W=TOS;TOS=*NOS;NOS--;RTOS--;*RTOS=ip;ip=W;continue;//EX
+	case ZIF:if (TOS!=0) {ip+=(op>>8);}; continue;//ZIF
+	case UIF:if (TOS==0) {ip+=(op>>8);}; continue;//UIF
+	case PIF:if (TOS<0) {ip+=(op>>8);}; continue;//PIF
+	case NIF:if (TOS>=0) {ip+=(op>>8);}; continue;//NIF
+	case IFL:if (TOS<=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFL
+	case IFG:if (TOS>=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFG
+	case IFE:if (TOS!=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFN
+	case IFGE:if (TOS<*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFGE
+	case IFLE:if (TOS>*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFLE
+	case IFNE:if (TOS==*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFNO
+	case IFAND:if (!(TOS&*NOS)) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFNA
+	case IFNAND:if (TOS&*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFAN
+	case IFBT:if (TOS<=*NOS&&*NOS<=*(NOS+1)) {ip+=(op>>8);} 
+		TOS=*(NOS-1);NOS-=2;continue;//BTW (need bit trick)
+	case DUP:NOS++;*NOS=TOS;continue;				//DUP
+	case DROP:TOS=*NOS;NOS--;continue;				//DROP
+	case OVER:NOS++;*NOS=TOS;TOS=*(NOS-1);continue;	//OVER
+	case PICK2:NOS++;*NOS=TOS;TOS=*(NOS-2);continue;//PICK2
+	case PICK3:NOS++;*NOS=TOS;TOS=*(NOS-3);continue;//PICK3
+	case PICK4:NOS++;*NOS=TOS;TOS=*(NOS-4);continue;//PICK4
+	case SWAP:W=*NOS;*NOS=TOS;TOS=W;continue;		//SWAP
+	case NIP:NOS--;continue; 						//NIP
+	case ROT:W=TOS;TOS=*(NOS-1);*(NOS-1)=*NOS;*NOS=W;continue;	//ROT
+	case DUP2:W=*NOS;NOS++;*NOS=TOS;NOS++;*NOS=W;continue;//DUP2
+	case DROP2:NOS--;TOS=*NOS;NOS--;continue;				//DROP2
+	case DROP3:NOS-=2;TOS=*NOS;NOS--;continue;				//DROP3
+	case DROP4:NOS-=3;TOS=*NOS;NOS--;continue;				//DROP4
+	case OVER2:NOS++;*NOS=TOS;TOS=*(NOS-3);
+		NOS++;*NOS=TOS;TOS=*(NOS-3);continue;	//OVER2
+	case SWAP2:W=*NOS;*NOS=*(NOS-2);*(NOS-2)=W;
+		W=TOS;TOS=*(NOS-1);*(NOS-1)=W;continue;	//SWAP2
+	case TOR:RTOS--;*RTOS=TOS;TOS=*NOS;NOS--;continue;	//>r
+	case RFROM:NOS++;*NOS=TOS;TOS=*RTOS;RTOS++;continue;	//r>
+	case ERRE:NOS++;*NOS=TOS;TOS=*RTOS;continue;			//r@
+	case AND:TOS&=*NOS;NOS--;continue;					//AND
+	case OR:TOS|=*NOS;NOS--;continue;					//OR
+	case XOR:TOS^=*NOS;NOS--;continue;					//XOR
+	case NOT:TOS=~TOS;continue;									//NOT
+	case NEG:TOS=-TOS;continue;									//NEG
+	case ADD:TOS=*NOS+TOS;NOS--;continue;					//SUMA
+	case SUB:TOS=*NOS-TOS;NOS--;continue;					//RESTA
+	case MUL:TOS=*NOS*TOS;NOS--;continue;					//MUL
+	case DIV:TOS=(*NOS/TOS);NOS--;continue;					//DIV
+	case MULDIV:TOS=(*(NOS-1)*(*NOS)/TOS);NOS-=2;continue;	//MULDIV
+	case DIVMOD:W=*NOS%TOS;*NOS=(*NOS/TOS);TOS=W;continue;	//DIVMOD
+	case MOD:TOS=*NOS%TOS;NOS--;continue;					//MOD
+	//case ABS:W=(TOS>>31);TOS=(TOS+W)^W;continue;			//ABS
+	case ABS:W=(TOS>>63);TOS=(TOS+W)^W;continue;			//ABS
+	case CSQRT:TOS=isqrt(TOS);continue;					//CSQRT
+	case CLZ:TOS=iclz(TOS);continue;					//CLZ
+	case SHL:TOS=*NOS<<TOS;NOS--;continue;				//SAl
+	case SHR:TOS=*NOS>>TOS;NOS--;continue;				//SAR
+	case SHR0:TOS=((unsigned)*NOS)>>TOS;NOS--;continue;	//SHR
+	case MULSHR:TOS=(*(NOS-1)*(*NOS))>>TOS;NOS-=2;continue;	//MULSHR
+	case CDIVSH:TOS=((*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
+	case FECH:TOS=*(int*)TOS;continue;//@
+	case CFECH:TOS=*(char*)TOS;continue;//C@
+	case QFECH:TOS=*(int64_t*)TOS;continue;//Q@	
+	case FECHPLUS:NOS++;*NOS=TOS+4;TOS=*(int*)TOS;continue;//@+
+	case CFECHPLUS:NOS++;*NOS=TOS+1;TOS=*(char*)TOS;continue;// C@+
+	case QFECHPLUS:NOS++;*NOS=TOS+8;TOS=*(int64_t*)TOS;continue;//Q@+		
+	case STOR:*(int*)TOS=(int)*NOS;NOS--;TOS=*NOS;NOS--;continue;// !
+	case CSTOR:*(char*)TOS=(char)*NOS;NOS--;TOS=*NOS;NOS--;continue;//C!
+	case QSTOR:*(int64_t*)TOS=*NOS;NOS--;TOS=*NOS;NOS--;continue;//Q!
+	case STOREPLUS:*(int*)TOS=*NOS;NOS--;TOS+=4;continue;// !+
+	case CSTOREPLUS:*(char*)TOS=*NOS;NOS--;TOS++;continue;//C!+
+	case QSTOREPLUS:*(int64_t*)TOS=*NOS;NOS--;TOS+=8;continue;//Q!+
 	
-	case 5:
-	case 6:				
-	case 7: NOS++;stack[NOS]=TOS;TOS=(op<<16)>>23;continue;		// LIT9
-	case 8: NOS++;stack[NOS]=TOS;TOS=op>>7;continue;				// LITres
-	case 9: NOS++;stack[NOS]=TOS;TOS=(op&0xffffff80);continue;		// LIT1
-	case 10:TOS|=(op>>7)&0x7f;continue;		// LIT2
-	case 11:NOS++;stack[NOS]=TOS;TOS=op>>7;continue;				// STR
-	case 12:RTOS--;stack[RTOS]=ip;ip=(unsigned int)op>>7;continue;				// CALL
-	case 13:NOS++;stack[NOS]=TOS;TOS=memdata[(unsigned int)op>>7];continue;	// VAR
-	case 14:NOS++;stack[NOS]=TOS;TOS=op>>7;continue;				// DWORD
-	case 15:NOS++;stack[NOS]=TOS;TOS=op>>7;continue;				// DVAR
-	case 16:ip=stack[RTOS];RTOS++;continue; 						// ;
-	case 17:ip=(op>>7);continue;//JMP
-	case 18:ip+=(op>>7);continue;//JMPR
-	case 19:continue;
-	case 20:continue;
-	
-	
-	case 21:W=TOS;TOS=stack[NOS];NOS--;RTOS--;stack[RTOS]=ip;ip=W;continue;//EX
-
-	case 22:if (TOS!=0) {ip+=(op>>7);}; continue;//ZIF
-	case 23:if (TOS==0) {ip+=(op>>7);}; continue;//UIF
-	case 24:if (TOS<0) {ip+=(op>>7);}; continue;//PIF
-	case 25:if (TOS>=0) {ip+=(op>>7);}; continue;//NIF
-	
-	case 26:if (TOS<stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFGE
-	case 27:if (TOS>stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFLE
-	case 28:if (TOS!=stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFN
-	case 29:if (TOS>=stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFG
-	case 30:if (TOS<=stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFL
-	case 31:if (TOS==stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFNO
-	case 32:if (!(TOS&stack[NOS])) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFNA
-	case 33:if (TOS&stack[NOS]) {ip+=(op>>7);} TOS=stack[NOS];NOS--;continue;//IFAN
-	case 34:if (TOS<=stack[NOS]&&stack[NOS]<=stack[NOS]) {ip+=(op>>7);} 
-				TOS=stack[NOS-1];NOS-=2;continue;//BTW (need bit trick)
-
-	case 35:NOS++;stack[NOS]=TOS;continue;						//DUP
-	case 36:TOS=stack[NOS];NOS--;continue;						//DROP
-	case 37:NOS++;stack[NOS]=TOS;TOS=stack[NOS-1];continue;	//OVER
-	case 38:NOS++;stack[NOS]=TOS;TOS=stack[NOS-2];continue;	//PICK2
-	case 39:NOS++;stack[NOS]=TOS;TOS=stack[NOS-3];continue;	//PICK3
-	case 40:NOS++;stack[NOS]=TOS;TOS=stack[NOS-4];continue;	//PICK4
-	case 41:W=stack[NOS];stack[NOS]=TOS;TOS=W;continue;		//SWAP
-	case 42:NOS--;continue; 									//NIP
-	case 43:W=TOS;TOS=stack[NOS-1];stack[NOS-1]=stack[NOS];stack[NOS]=W;continue;//ROT
-	case 44:W=stack[NOS];NOS++;stack[NOS]=TOS;NOS++;stack[NOS]=W;continue;//DUP2
-	case 45:NOS--;TOS=stack[NOS];NOS--;continue;				//DROP2
-	case 46:NOS-=2;TOS=stack[NOS];NOS--;continue;				//DROP3
-	case 47:NOS-=3;TOS=stack[NOS];NOS--;continue;				//DROP4
-	case 48:NOS++;stack[NOS]=TOS;TOS=stack[NOS-3];
-			NOS++;stack[NOS]=TOS;TOS=stack[NOS-3];continue;	//OVER2
-	case 49:W=stack[NOS];stack[NOS]=stack[NOS-2];stack[NOS-2]=W;
-			W=TOS;TOS=stack[NOS-1];stack[NOS-1]=W;continue;	//SWAP2
-	
-	case 50:RTOS--;stack[RTOS]=TOS;TOS=stack[NOS];NOS--;continue;	//>r
-	case 51:NOS++;stack[NOS]=TOS;TOS=stack[RTOS];RTOS++;continue;	//r>
-	case 52:NOS++;stack[NOS]=TOS;TOS=stack[RTOS];continue;			//r@
-	
-	case 53:TOS&=stack[NOS];NOS--;continue;					//AND
-	case 54:TOS|=stack[NOS];NOS--;continue;					//OR
-	case 55:TOS^=stack[NOS];NOS--;continue;					//XOR
-	case 56:TOS=~TOS;continue;									//NOT
-	case 57:TOS=-TOS;continue;									//NEG
-	case 58:TOS=stack[NOS]+TOS;NOS--;continue;					//SUMA
-	case 59:TOS=stack[NOS]-TOS;NOS--;continue;					//RESTA
-	case 60:TOS=stack[NOS]*TOS;NOS--;continue;					//MUL
-	case 61:TOS=(stack[NOS]/TOS);NOS--;continue;					//DIV
-	case 62:TOS=((stack[NOS-1]*stack[NOS])/TOS);NOS-=2;continue;	//MULDIV
-	case 63:W=stack[NOS]%TOS;stack[NOS]=(stack[NOS]/TOS);TOS=W;continue;//DIVMOD
-	case 64:TOS=stack[NOS]%TOS;NOS--;continue;					//MOD
-	
-	//case 65:W=(TOS>>31);TOS=(TOS+W)^W;continue;				//ABS
-	case 65:W=(TOS>>63);TOS=(TOS+W)^W;continue;				//ABS
-	case 66:TOS=isqrt(TOS);continue;						//CSQRT
-	case 67:TOS=iclz(TOS);continue;						//CLZ
-	case 68:TOS=stack[NOS]<<TOS;NOS--;continue;				//SAR
-	case 69:TOS=stack[NOS]>>TOS;NOS--;continue;				//SAL
-	case 70:TOS=((unsigned)stack[NOS])>>TOS;NOS--;continue;				//SHL
-	case 71:TOS=(stack[NOS-1]*stack[NOS])>>TOS;NOS-=2;continue;//MULSHR
-	case 72:TOS=((stack[NOS-1]<<TOS)/stack[NOS]);NOS-=2;continue;//CDIVSH
-	
-	case 73:TOS=*(int*)memdata[TOS];continue;//@
-	case 74:TOS=*(char*)memdata[TOS];continue;//C@
-	case 75:TOS=*(int64_t*)memdata[TOS];continue;//Q@	
-
-	case 76:NOS++;stack[NOS]=TOS+4;TOS=*(int*)memdata[TOS];continue;//@+
-	case 77:NOS++;stack[NOS]=TOS+1;TOS=*(char*)memdata[TOS];continue;// C@+
-	case 78:NOS++;stack[NOS]=TOS+8;TOS=*(int64_t*)memdata[TOS];continue;//Q@+		
-			
-	case 79:*(int*)memdata[TOS]=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;// !
-	case 80:*(char*)memdata[TOS]=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;//C!
-	case 81:*(int64_t*)memdata[TOS]=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;//Q!
-	
-	case 82:*(int*)memdata[TOS]=stack[NOS];NOS--;TOS+=4;continue;// !+
-	case 83:*(char*)memdata[TOS]=stack[NOS];NOS--;TOS++;continue;//C!+
-	case 84:*(int64_t*)memdata[TOS]=stack[NOS];NOS--;TOS+=8;continue;//Q!+
-	
-	case 85:*(int*)memdata[TOS]+=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;//+!
-	case 86:*(char*)memdata[TOS]+=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;//C+!
-	case 87:*(int64_t*)memdata[TOS]+=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;//Q+!
-	
-	case 88:REGA=TOS;TOS=stack[NOS];NOS--;continue; //>A
-	case 89:NOS++;stack[NOS]=TOS;TOS=REGA;continue; //A> 
-	case 90:NOS++;stack[NOS]=TOS;TOS=*(int*)memdata[REGA];continue;//A@
-	case 91:*(int*)memdata[REGA]=TOS;TOS=stack[NOS];NOS--;continue;//A! 
-	case 92:REGA+=TOS;TOS=stack[NOS];NOS--;continue;//A+ 
-	case 93:NOS++;stack[NOS]=TOS;TOS=*(int*)memdata[REGA];REGA+=4;continue;//A@+ 
-	case 94:*(int*)memdata[REGA]=TOS;TOS=stack[NOS];NOS--;REGA+=4;continue;//A!+
-
-	case 95:REGB=TOS;TOS=stack[NOS];NOS--;continue; //>B
-	case 96:NOS++;stack[NOS]=TOS;TOS=REGB;continue; //B> 
-	case 97:NOS++;stack[NOS]=TOS;TOS=*(int*)memdata[REGB];continue;//B@
-	case 98:*(int*)memdata[REGB]=TOS;TOS=stack[NOS];NOS--;continue;//B! 
-	case 99:REGB+=TOS;TOS=stack[NOS];NOS--;continue;//B+ 
-	case 100:NOS++;stack[NOS]=TOS;TOS=*(int*)memdata[REGB];REGB+=4;continue;//B@+ 
-	case 101:*(int*)memdata[REGB]=TOS;TOS=stack[NOS];NOS--;REGB+=4;continue;//B!+
-	case 102://MOVE 
-		W=(int64_t)&stack[NOS-1];W1=(int64_t)&stack[NOS];
-		while (TOS--) { *(int*)W=*(int*)W1;W+=4;W1+=4; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 103://MOVE> 
-		W=(int64_t)&stack[NOS-1]+(TOS<<2);W1=(int64_t)&stack[NOS]+(TOS<<2);
+	case INCSTOR:*(int*)TOS+=*NOS;NOS--;TOS=*NOS;NOS--;continue;//+!
+	case CINCSTOR:*(char*)TOS+=*NOS;NOS--;TOS=*NOS;NOS--;continue;//C+!
+	case QINCSTOR:*(int64_t*)TOS+=*NOS;NOS--;TOS=*NOS;NOS--;continue;//Q+!
+	case TOA:REGA=TOS;TOS=*NOS;NOS--;continue; //>A
+	case ATO:NOS++;*NOS=TOS;TOS=REGA;continue; //A> 
+	case AF:NOS++;*NOS=TOS;TOS=*(int*)REGA;continue;//A@
+	case AS:*(int*)REGA=TOS;TOS=*NOS;NOS--;continue;//A! 
+	case AA:REGA+=TOS;TOS=*NOS;NOS--;continue;//A+ 
+	case AFA:NOS++;*NOS=TOS;TOS=*(int*)REGA;REGA+=4;continue;//A@+ 
+	case ASA:*(int*)REGA=TOS;TOS=*NOS;NOS--;REGA+=4;continue;//A!+
+	case TOB:REGB=TOS;TOS=*NOS;NOS--;continue; //>B
+	case BTO:NOS++;*NOS=TOS;TOS=REGB;continue; //B> 
+	case BF:NOS++;*NOS=TOS;TOS=*(int*)REGB;continue;//B@
+	case BS:*(int*)REGB=TOS;TOS=*NOS;NOS--;continue;//B! 
+	case BA:REGB+=TOS;TOS=*NOS;NOS--;continue;//B+ 
+	case BFA:NOS++;*NOS=TOS;TOS=*(int*)REGB;REGB+=4;continue;//B@+ 
+	case BSA:*(int*)REGB=TOS;TOS=*NOS;NOS--;REGB+=4;continue;//B!+
+	case MOVED://MOVE 
+		W=(int64_t)&*(NOS-1);W1=(int64_t)&(*NOS);
+		while (TOS--) { *(int*)W=*(int*)W1;(int)W++;W1++; }
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case MOVEA://MOVE> 
+		W=(int64_t)&*(NOS-1)+(TOS<<2);W1=(int64_t)&(*NOS)+(TOS<<2);
 		while (TOS--) { W-=4;W1-=4;*(int*)W=*(int*)W1; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 104://FILL
-		W1=(int64_t)&stack[NOS-1];op=stack[NOS];
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case FILL://FILL
+		W1=(int64_t)&*(NOS-1);op=*NOS;
 		while (TOS--) { *(int*)W=op;W+=4; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 105://CMOVE 
-		W=(int64_t)&stack[NOS-1];W1=(int64_t)&stack[NOS];
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case CMOVED://CMOVE 
+		W=(int64_t)&*(NOS-1);W1=(int64_t)&*NOS;
 		while (TOS--) { *(char*)W=*(char*)W1;W++;W1++; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 106://CMOVE> 
-		W=(int64_t)&stack[NOS-1]+TOS;W1=(int64_t)&stack[NOS]+TOS;
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case CMOVEA://CMOVE> 
+		W=(int64_t)&*(NOS-1)+TOS;W1=(int64_t)&*NOS+TOS;
 		while (TOS--) { W--;W1--;*(char*)W=*(char*)W1; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 107://CFILL
-		W1=(int64_t)&stack[NOS-1];op=stack[NOS];
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case CFILL://CFILL
+		W1=(int64_t)&*(NOS-1);op=*NOS;
 		while (TOS--) { *(char*)W=op;W++; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 108://QMOVE 
-		W=(int64_t)&stack[NOS-1];W1=(int64_t)&stack[NOS];
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case QMOVED://QMOVE 
+		W=(int64_t)&*(NOS-1);W1=(int64_t)&*NOS;
 		while (TOS--) { *(int64_t*)W=*(int64_t*)W1;W++;W1++; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 109://MOVE> 
-		W=(int64_t)&stack[NOS-1]+(TOS<<3);W1=(int64_t)&stack[NOS]+(TOS<<3);
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case QMOVEA://MOVE> 
+		W=(int64_t)&*(NOS-1)+(TOS<<3);W1=(int64_t)&*NOS+(TOS<<3);
 		while (TOS--) { W--;W1--;*(int64_t*)W=*(int64_t*)W1; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 110://QFILL
-		W1=(int64_t)&stack[NOS-1];op=stack[NOS];
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case QFILL://QFILL
+		W1=(int64_t)&*(NOS-1);op=*NOS;
 		while (TOS--) { *(int64_t*)W=op;W++; }
-		NOS-=2;TOS=stack[NOS];NOS--;continue;
-	case 111://"UPDATE"
-	case 112://"REDRAW"
-	case 113://"MEM"
-	case 114://"SW"
-	case 115://"SH"
-	case 116://"VFRAME"
-	case 117://"XYPEN"
-	case 118://"BPEN"
-	case 119://"KEY"
-	case 120://"MSEC"
-	case 121://"TIME"
-	case 122://"DATE"
-	case 123://"LOAD"
-	case 124://"SAVE"
-	case 125://"APPEND"
-	case 126://"FFIRST"
-	case 127://"FNEXT"
-		continue;
-	case 128://"INK",
+		NOS-=2;TOS=*NOS;NOS--;continue;
+	case UPDATE://"UPDATE"
+		r3update();continue;
+	case REDRAW://"REDRAW"
+		gr_redraw();continue;
+	case MEM://"MEM"
+		NOS++;*NOS=TOS;TOS=(int64_t)&memdata[meminidata];continue;
+	case SW://"SW"
+		NOS++;*NOS=TOS;TOS=gr_ancho;continue;
+	case SH://"SH"
+		NOS++;*NOS=TOS;TOS=gr_alto;continue;
+	case FRAMEV://"VFRAME"
+		NOS++;*NOS=TOS;TOS=(int64_t)gr_buffer;continue;
+	case XYPEN://"XYPEN"
+		NOS++;*NOS=TOS;NOS++;*NOS=xm;TOS=ym;continue;
+	case BPEN://"BPEN"
+		NOS++;*NOS=TOS;TOS=bm;continue;
+	case KEY://"KEY"
+		NOS++;*NOS=TOS;TOS=ke;continue;	
+	case MSEC://"MSEC"
+		NOS++;*NOS=TOS;TOS=SDL_GetTicks();continue;		
+	case TIME://"TIME"
+		time(&sit);sitime=localtime(&sit);
+		NOS++;*NOS=TOS;TOS=(sitime->tm_hour<<16)|(sitime->tm_min<<8)|sitime->tm_sec;continue;	
+	case IDATE://"DATE"
+		time(&sit);sitime=localtime(&sit);
+		NOS++;*NOS=TOS;TOS=(sitime->tm_year+1900)<<16|(sitime->tm_mon+1)<<8|sitime->tm_mday;continue;
+	case LOAD: //LOAD: // 'from "filename" -- 'to
+        if (TOS==0||*NOS==0) { TOS=*NOS;NOS--;continue; }
+        file=fopen((char*)TOS,"rb");
+        TOS=*NOS;NOS--;
+        if (file==NULL) continue;
+        do { W=fread((void*)TOS,sizeof(char),1024,file); TOS+=W; } while (W==1024);
+        fclose(file);continue;
+    case SAVE: //SAVE: // 'from cnt "filename" --
+        if (TOS==0||*NOS==0) 
+			{ DeleteFile((char*)TOS);NOS-=2;TOS=*NOS;NOS--;continue; }
+        file=fopen((char*)TOS,"wb");
+        TOS=*NOS;NOS--;
+        if (file==NULL) { NOS--;TOS=*NOS;NOS--;continue; }
+        fwrite((void*)*NOS,sizeof(char),TOS,file);
+        fclose(file);
+        NOS--;TOS=*NOS;NOS--;continue;
+    case APPEND: //APPEND: // 'from cnt "filename" --
+        if (TOS==0||*NOS==0) { NOS-=2;TOS=*NOS;NOS--;continue; }
+        file=fopen((char*)TOS,"ab");
+        TOS=*NOS;NOS--;
+        if (file==NULL) { NOS--;TOS=*NOS;NOS--;continue; }
+        fwrite((void*)*NOS,sizeof(char),TOS,file);
+        fclose(file);
+        NOS--;TOS=*NOS;NOS--;continue;
+	case FFIRST://"FFIRST"
+        if (hFind!=NULL) FindClose(hFind);
+        strcpy(path,(char*)TOS);strcat(path,"\\*");
+        hFind=FindFirstFile(path, &ffd);
+        if (hFind == INVALID_HANDLE_VALUE) TOS=0; else TOS=(int64_t)&ffd;
+        continue;
+	case FNEXT://"FNEXT"
+        NOS++;*NOS=TOS;
+        if (FindNextFile(hFind, &ffd)==0) TOS=0; else TOS=(int64_t)&ffd;
+        continue ;
+	case INK://"INK",
 		gr_alpha((TOS>>24)^0xff);gr_color1=TOS;
-		TOS=stack[NOS];NOS--;continue;
-	case 129://"OP",
-		gy1=TOS;gx1=stack[NOS];NOS--;TOS=stack[NOS];NOS--;continue;
-	case 130:
-		gr_line(gx1,gy1,stack[NOS],TOS);gx1=stack[NOS];gy1=TOS;
-        NOS--;TOS=stack[NOS];NOS--;continue;
-    case 131: 
-		gr_spline(gx1,gy1,stack[NOS],TOS,stack[NOS-2],stack[NOS-1]);gx1=stack[NOS-2];gy1=stack[NOS-1];
-		NOS-=3;TOS=stack[NOS];NOS--;continue;
-    case 132: 
-		gr_spline3(gx1,gy1,stack[NOS],TOS,stack[NOS-2],stack[NOS-1],stack[NOS-4],stack[NOS-3]);gx1=stack[NOS-4];gy1=stack[NOS-3];
-		NOS-=5;TOS=stack[NOS];NOS--;continue;
-	case 133:
-		gr_pline(gx1,gy1,stack[NOS],TOS);gx1=stack[NOS];gy1=TOS;
-        NOS--;TOS=stack[NOS];NOS--;continue;
-    case 134:
-		gr_pcurve(gx1,gy1,stack[NOS],TOS,stack[NOS-2],stack[NOS-1]);gx1=stack[NOS-2];gy1=stack[NOS-1];
-		NOS-=3;TOS=stack[NOS];NOS--;continue;
-    case 135:
-		gr_pcurve3(gx1,gy1,stack[NOS],TOS,stack[NOS-2],stack[NOS-1],stack[NOS-4],stack[NOS-3]);gx1=stack[NOS-4];gy1=stack[NOS-3];
-		NOS-=5;TOS=stack[NOS];NOS--;continue;
-	case 136: 
+		TOS=*NOS;NOS--;continue;
+	case OP://"OP",
+		gy1=TOS;gx1=*NOS;NOS--;TOS=*NOS;NOS--;continue;
+	case LINE:
+		gr_line(gx1,gy1,*NOS,TOS);gx1=*NOS;gy1=TOS;
+        NOS--;TOS=*NOS;NOS--;continue;
+    case CURVE: 
+		gr_spline(gx1,gy1,*NOS,TOS,*(NOS-2),*(NOS-1));gx1=*(NOS-2);gy1=*(NOS-1);
+		NOS-=3;TOS=*NOS;NOS--;continue;
+    case CURVE3: 
+		gr_spline3(gx1,gy1,*NOS,TOS,*(NOS-2),*(NOS-1),*(NOS-4),*(NOS-3));gx1=*(NOS-4);gy1=*(NOS-3);
+		NOS-=5;TOS=*NOS;NOS--;continue;
+	case PLINE:
+		gr_pline(gx1,gy1,*NOS,TOS);gx1=*NOS;gy1=TOS;
+        NOS--;TOS=*NOS;NOS--;continue;
+    case PCURVE:
+		gr_pcurve(gx1,gy1,*NOS,TOS,*(NOS-2),*(NOS-1));gx1=*(NOS-2);gy1=*(NOS-1);
+		NOS-=3;TOS=*NOS;NOS--;continue;
+    case PCURVE3:
+		gr_pcurve3(gx1,gy1,*NOS,TOS,*(NOS-2),*(NOS-1),*(NOS-4),*(NOS-3));gx1=*(NOS-4);gy1=*(NOS-3);
+		NOS-=5;TOS=*NOS;NOS--;continue;
+	case POLI: 
 		gr_drawPoli();continue;
 //	case 111:systemcall(TOS,stack[NOS]);TOS=stack[NOS-1];NOS-=2;continue; //SYSCALL | nro int -- 
 //	case 112:TOS=systemmem(TOS);continue;//SYSMEM | nro -- ini
+//case SYS:
 	}
    }
 }
 	
-SDL_Event evt;
 	
 ////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
+gr_init("r3",800,600);
 
 r3compile("main.r3");
-//dumpdicc();
+runr3(boot);
 
-dumpcode();
-
-//freeinc();
-//free(str);
-
-//------------------------------------------------------------------------	
-gr_init("r3tv",800,600);
-
-int salida=0;
-while (!salida) {
-	
-	SDL_WaitEvent(&evt);
-	switch (evt.type) {
-	    case SDL_KEYDOWN:
-	      switch(evt.key.keysym.sym) {
-/*	      	
-	    	case SDLK_F1: videoclose();videoopen("salud.mp4",500,300);break;
-	    	case SDLK_F2: videoclose();videoopen("bigbuckbunny_480x272.h265",500,300);break;
-	    	case SDLK_F3: videoclose();videoopen("Titanic.ts",500,300);break;
-	    	case SDLK_F4: videoclose();videoopen("coso.mp3",500,300);break;
-*/	    	
-	    	case SDLK_ESCAPE: salida=1;break;
-			default:break;
-      		}
-      	  break;
-		//default: break;
-		}
-			
-	gr_cls(0);
-	gr_color1=0xf000f0;
-	gr_psegmento(100,100,600,200);
-	gr_psegmento(600,200,2500,2400);
-	gr_psegmento(2500,2400,50,450);
-	gr_psegmento(50,450,100,100);
-	gr_drawPoli();
-	gr_color1=0xff;	
-	gr_psegmento(200,200,200,1800);
-	gr_psegmento(200,1800,1200,1800);	
-	gr_psegmento(1200,200,1200,1800);		
-	gr_psegmento(200,200,1200,200);			
-	gr_drawPoli();	
-	gr_color1=0xff00;gr_line(10,450,600,40);
-	gr_color1=0xff0000;gr_line(600,450,10,40);
-	gr_redraw();
-	}
-	
 gr_fin();
 return 0;
 }
