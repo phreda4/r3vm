@@ -28,9 +28,7 @@ extern "C" {
 // 0-imm 1-code 2-data 3-reserve 4-bytes 5-qwords
 int modo=0; 
 
-int nerror=0;	
-int lerror=0;
-int cerror=0;
+char *cerror=0;
 char *werror;
 
 int boot=-1;
@@ -47,7 +45,7 @@ char *memdata;
 char path[1024];
 
 int base;
-int nro=0;
+int64_t nro=0;
 
 //---- includes
 struct Include { char *nombre;char *str; };
@@ -140,12 +138,58 @@ SYS
 };
 
 //////////////////////////////////////
+// DEBUG
 //////////////////////////////////////
 void printword(char *s)
 {
 while (*s>32) putchar(*s++);
 putchar(' ');
 }
+
+void printcode(int n)
+{
+if ((n&0xff)<8&&n!=0) {
+	printf(r3asm[n&0xff]);printf(" %d",n>>8);
+} else
+	printf(r3bas[n&0xff]);
+printf("\n");
+}
+
+void dumpcode()
+{
+printf("code\n");
+printf("boot:%d\n",boot);
+for(int i=1;i<memc;i++) {
+	printf("%d.",i);
+	printcode(memcode[i]); //printf("%d ",memcode[i]);
+	}
+printf("\n");
+}
+
+void dumpinc()
+{
+printf("includes\n");
+for(int i=0;i<cntincludes;i++) {
+	printf("%d. ",i);
+	printword(includes[i].nombre);
+	printf("\n");
+	}
+for(int i=0;i<cntstacki;i++) {
+	printf("%d. %d\n",i,stacki[i]);
+	}
+}
+
+void dumpdicc()
+{
+printf("diccionario\n");
+for(int i=0;i<cntdicc;i++) {
+	printf("%d. ",i);
+	printword(dicc[i].nombre);
+	printf("%d \n",dicc[i].info);	
+	}
+}
+
+
 //////////////////////////////////////
 //////////////////////////////////////
 
@@ -368,41 +412,60 @@ if (solvejmp(from,memc)) { // salta
 } else {
 	memcode[from-1]|=(dist<<8);		// patch if
 	}
-level--;
+level--;	
 }
 
 void anonIn(void)
 {
+pushA(memc);
+codetok(JMP);	
+level++;	
 }
 
 void anonOut(void)
 {
+int from=popA();
+memcode[from]|=(memc<<8);	// patch jmp
+codetok((from+1)<<8|LIT);
+level--;	
 }
 
 void dataMAC(int n)
 {
-if (n==44) {modo=3;} // * reserva bytes
-if (n==1) {modo=4;} // (	bytes
-if (n==2) {modo=2;} // )
-if (n==3) {modo=5;} // [	qwords
-if (n==4) {modo=2;} // ]
+if (n==1) modo=4; // (	bytes
+if (n==2) modo=2; // )
+if (n==3) modo=5; // [	qwords
+if (n==4) modo=2; // ]
+if (n==44) modo=3; // * reserva bytes Qword Dword Kbytes
 }
 
 void compilaMAC(int n) 
 {
 if (modo>1) { dataMAC(n);return; }
+if (n==0) { 					// ;
+	if (level==0) modo=0; 
+	if ((memcode[memc-1]&0xff)==CALL) {
+		memcode[memc-1]=(memcode[memc-1]^CALL)|JMP; // call->jmp avoid ret
+		return;
+		}
+	}
 if (n==1) { blockIn();return; }		//(	etiqueta
 if (n==2) { blockOut();return; }	//)	salto
 if (n==3) { anonIn();return; }		//[	salto:etiqueta
 if (n==4) { anonOut();return; }		//]	etiqueta;push
 codetok(n);	
-if (n==0) { if (level==0) {modo=0;} } // ;
 }
 
 void compilaWORD(int n) 
 {
 if (modo>1) { datanro(n);return; }
 codetok((dicc[n].mem<<8)+CALL+((dicc[n].info>>4)&1));
+}
+
+void seterror(char *f,char *s)
+{
+werror=s;
+cerror=f;	
 }
 
 int r3token(char *str) 
@@ -423,15 +486,20 @@ while(*str!=0) {
 			compilaDATA(str);str=nextw(str);break;	
 		case 0x27:	// $27 ' Direccion	// 'ADR
 			nro=isWord(str+1);
-			if (nro<0) { werror="adr not found";return 0; }
+			if (nro<0) { seterror(str,"adr not found");return 0; }
 			compilaADDR(nro);str=nextw(str);break;		
 		default:
-			if (isNro(str)) { compilaLIT(nro);str=nextw(str);break; }
-			if (isBas(str)) { compilaMAC(nro);str=nextw(str);break; }
+			if (isNro(str)||isNrof(str)) 
+				{ compilaLIT(nro);str=nextw(str);break; }
+			if (isBas(str)) 
+				{ compilaMAC(nro);str=nextw(str);break; }
 			nro=isWord(str);
-			if (nro<0) { werror="word not found";return 0; }
-			if (modo==2) { compilaADDR(nro);str=nextw(str);break; }
-			compilaWORD(nro);str=nextw(str);break;
+			if (nro<0) { seterror(str,"word not found");return 0; }
+			if (modo==1) 
+				compilaWORD(nro); 
+			else 
+				compilaADDR(nro);
+			str=nextw(str);break;
 		}
 	}
 return -1;
@@ -516,49 +584,6 @@ while(*str!=0) {
 return;
 }
 
-///////////////////////////////////////////////
-void printcode(int n)
-{
-if ((n&0xff)<8&&n!=0) {
-	printf(r3asm[n&0xff]);printf(" %d",n>>8);
-} else
-	printf(r3bas[n&0xff]);
-printf("\n");
-}
-
-void dumpcode()
-{
-printf("code\n");
-printf("boot:%d\n",boot);
-for(int i=1;i<memc;i++) {
-	printf("%d.",i);
-	printcode(memcode[i]); //printf("%d ",memcode[i]);
-	}
-printf("\n");
-}
-
-void dumpinc()
-{
-printf("includes\n");
-for(int i=0;i<cntincludes;i++) {
-	printf("%d. ",i);
-	printword(includes[i].nombre);
-	printf("\n");
-	}
-for(int i=0;i<cntstacki;i++) {
-	printf("%d. %d\n",i,stacki[i]);
-	}
-}
-
-void dumpdicc()
-{
-printf("diccionario\n");
-for(int i=0;i<cntdicc;i++) {
-	printf("%d. ",i);
-	printword(dicc[i].nombre);
-	printf("%d \n",dicc[i].info);	
-	}
-}
 
 ///////////////////////////////////////////////
 int r3compile(char *name) 
@@ -587,6 +612,7 @@ memd=0;
 
 memcode=(int*)malloc(sizeof(int)*memcsize);
 memdata=(char*)malloc(memdsize);
+
 // tokenize
 for (int i=0;i<cntstacki;i++) {
 //	printword(includes[stacki[i]].nombre);printf("\n");
@@ -597,11 +623,9 @@ for (int i=0;i<cntstacki;i++) {
 	
 // last tokenizer		
 if (!r3token(str)) return 0;
-//memcode[memc++]=0;
 
 //printf("estimate tokens:%d\ntokens:%d\n",memcsize,memc);
 //dumpdicc();
-
 dumpcode();
 
 freeinc();
@@ -614,28 +638,7 @@ return -1;
 //----------------------
 /*--------RUNER--------*/
 //----------------------
-#ifdef __GNUC__
 #define iclz(x) __builtin_clz(x)
-#else
-static inline int popcnt(int x)
-{
-    x -= ((x >> 1) & 0x55555555);
-    x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
-    x = (((x >> 4) + x) & 0x0f0f0f0f);
-    x += (x >> 8);
-    x += (x >> 16);
-    return x & 0x0000003f;
-}
-static inline int iclz(int x)
-{
-    x |= (x >> 1);
-    x |= (x >> 2);
-    x |= (x >> 4);
-    x |= (x >> 8);
-    x |= (x >> 16);
-    return 32 - popcnt(x);
-}
-#endif
 
 // http://www.devmaster.net/articles/fixed-point-optimizations/
 static inline int isqrt(int value)
