@@ -1,3 +1,10 @@
+////////////////////////////////////////////////////////////
+// r3 concatenative programing language - Pablo Hugo Reda
+//
+// Compiler to dword-code and virtual machine for r3 lang, 
+//  with cell size of 64 bits, 
+//	SDL graphics windows
+//
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -55,13 +62,14 @@ Include includes[128];
 int cntstacki;
 int stacki[128];
 
-//---- diccionario local
+//---- local dicctionary
 struct Indice {	char *nombre;int mem;int info; };
 
 int cntdicc;
 int dicclocal;
 Indice dicc[8192];
 
+//----- aux stack for compilation
 int level;
 int cntstacka;
 int stacka[256];
@@ -70,11 +78,13 @@ void iniA(void) { cntstacka=0; }
 void pushA(int n) { stacka[cntstacka++]=n; }
 int popA(void) { return stacka[--cntstacka]; }
 
+//----- internal tokens, replace 8 first names
 const char *r3asm[]={
 ";","LIT1","ADR","CALL","VAR",
 "JMP","JMPR","LIT2","LIT3"			// internal only
 };
 
+//------ base dictionary, machine-forth or machine-r3
 const char *r3bas[]={
 ";","(",")","[","]",
 "|","|","|","|",			// internal only
@@ -106,6 +116,7 @@ const char *r3bas[]={
 "SYS",""
 };
 
+//------ enumaration for table jump
 enum {
 FIN,LIT,ADR,CALL,VAR, 
 JMP,JMPR,LIT2,LIT3,
@@ -138,7 +149,7 @@ SYS
 };
 
 //////////////////////////////////////
-// DEBUG
+// DEBUG -- remove when all work ok
 //////////////////////////////////////
 void printword(char *s)
 {
@@ -191,18 +202,22 @@ for(int i=0;i<cntdicc;i++) {
 
 
 //////////////////////////////////////
+// Compiler: from text to dwordcodes
 //////////////////////////////////////
+
+// scan for a valid number begin in *p char
+// return number in global var "nro"
 
 int isNro(char *p)
 {//if (*p=='&') { p++;numero=*p;return 1;} // codigo ascii
 int dig=0,signo=0;
 if (*p=='-') { p++;signo=1; } else if (*p=='+') p++;
-if (*p==0) return 0;// no es numero
+if ((unsigned char)*p<33) return 0;// no es numero
 switch(*p) {
   case '$': base=16;p++;break;// hexa
   case '%': base=2;p++;break;// binario
   default:  base=10;break; }; 
-nro=0;if (*p==0) return 0;// no es numero
+nro=0;if ((unsigned char)*p<33) return 0;// no es numero
 while ((unsigned char)*p>32) {
   if (*p<='9') dig=*p-'0'; 
   else if (*p>='a') dig=*p-'a'+10;  
@@ -217,15 +232,18 @@ if (signo==1) nro=-nro;
 return -1; 
 };
 
+// scan for a valid fixed point number begin in *p char
+// return number in global var "nro"
+
 int isNrof(char *p)         // decimal punto fijo 16.16
 {
 int64_t parte0;
 int dig=0,signo=0;
 if (*p=='-') { p++;signo=1; } else if (*p=='+') p++;
-if (*p==0) return 0;// no es numero
+if ((unsigned char)*p<33) return 0;// no es numero
 nro=0;
 while ((unsigned char)*p>32) {
-  if (*p=='.') { parte0=nro;nro=1;if (nro==0 && *(p+1)<33) return 0; } 
+  if (*p=='.') { parte0=nro;nro=1;if (*(p+1)<33) return 0; } 
   else  {
   	if (*p<='9') dig=*p-'0'; else dig=-1;
   	if (dig<0 || dig>=10) return 0;
@@ -241,11 +259,13 @@ if (signo==1) nro=-nro;
 return -1; 
 };
 
+// uppercase a char
 char toupp(char c)
 { 
 return c&0xdf;
 }
-	
+
+// compare two words, until space	
 int strequal(char *s1,char *s2)
 {
 while ((unsigned char)*s1>32) {
@@ -255,24 +275,28 @@ if (((unsigned char)*s2)>32) return 0;
 return -1;
 }
 	
+// advance pointer with space	
 char *trim(char *s)	
 {
 while (((unsigned char)*s)<33&&*s!=0) s++;
 return s;
 }
 
+// advance to next word
 char *nextw(char *s)	
 {
 while (((unsigned char)*s)>32) s++;
 return s;
 }
 
+// advance to next line
 char *nextcr(char *s)	
 {
 while (((unsigned char)*s)>31) s++;
 return s;
 }
 
+// advance to next string ("), admit "" for insert " in a string, multiline is ok too
 char *nextstr(char *s)
 {
 s++;
@@ -285,6 +309,7 @@ while (*s!=0)	{
 return s;
 }
 
+// ask for a word in the basic dicc
 int isBas(char *p)
 {    
 nro=0;
@@ -295,6 +320,7 @@ while (**m!=0) {
 return 0;  
 };
 
+// ask for a word in the dicc, calculate local or exported too
 int isWord(char *p) 
 { 
 int i=cntdicc;
@@ -304,11 +330,13 @@ while (--i>-1) {
 return -1;
 };
 
+// compile a token (int)
 void codetok(int nro) 
 { 
 memcode[memc++]=nro; 
 }
 
+// close variable definition with a place when no definition
 void closevar() 
 {
 if (cntdicc==0) { return; }
@@ -317,11 +345,12 @@ if (dicc[cntdicc].mem<memd) { return; } // have val
 memdata[memd]=0;memd+=4;
 }
 
+// compile data definition, a VAR
 void compilaDATA(char *str) 
 { 
 int ex=0;
 closevar();
-if (*(str+1)=='#') { ex=1;str++; }
+if (*(str+1)=='#') { ex=1;str++; } // exported
 dicc[cntdicc].nombre=str+1;
 dicc[cntdicc].mem=memd;
 dicc[cntdicc].info=ex+0x10;	// 0x10 es dato
@@ -329,12 +358,12 @@ cntdicc++;
 modo=2;
 }
 
-	
+// compile a code definition, a WORD	
 void compilaCODE(char *str) 
 { 
 int ex=0;
 closevar();
-if (*(str+1)==':') { ex=1;str++; }
+if (*(str+1)==':') { ex=1;str++; } // exported
 if (*(str+1)<33) { boot=memc; }
 dicc[cntdicc].nombre=str+1;
 dicc[cntdicc].mem=memc;
@@ -343,6 +372,7 @@ cntdicc++;
 modo=1;
 }
 
+// store in datamemory a string
 int datasave(char *str) 
 {
 int r=memd;
@@ -354,6 +384,7 @@ memdata[memd++]=0;
 return r;
 }
 
+// compile a string, in code save the token to retrieve too.
 void compilaSTR(char *str) 
 {
 str++;
@@ -361,6 +392,7 @@ int ini=datasave(str);
 if (modo<2) codetok((ini<<8)+ADR); // lit data
 }
 
+// Store in datamemory a number or reserve mem
 void datanro(int n) { 
 char *p=&memdata[memd];	
 switch(modo){
@@ -371,25 +403,29 @@ switch(modo){
 	}
 }
 
+// Compile adress of var
 void compilaADDR(int n) 
 {
-// si es code, directo, si es data.. puntero	
 if (modo>1) { datanro(dicc[n].mem);return; }
 codetok((dicc[n].mem<<8)+LIT+((dicc[n].info>>4)&1));  //1 code 2 data
 }
 
+// Compile literal
 void compilaLIT(int n) 
 {
 if (modo>1) { datanro(n);return; }
 codetok((n<<8)+LIT); 
+//*************************** falta multiple por 64 bits
 }
 
+// Start block code (
 void blockIn(void)
 {
 pushA(memc);
 level++;
 }
 
+// solve conditional void
 int solvejmp(int from,int to) 
 {
 int whi=false;
@@ -403,6 +439,7 @@ for (int i=from;i<to;i++) {
 return whi;
 }
 
+// end block )
 void blockOut(void)
 {
 int from=popA();
@@ -719,14 +756,14 @@ register int64_t W1=0;
 while(ip!=0) { 
 	op=memcode[ip++]; 
 	
-//	printcode(op);
+	//printcode(op);
 	
 	switch(op&0xff){
 	case FIN:ip=*RTOS;RTOS++;continue; 							// ;
 	case LIT:NOS++;*NOS=TOS;TOS=op>>8;continue;					// LIT1
 	case ADR:NOS++;*NOS=TOS;TOS=(int64_t)&memdata[op>>8];continue;		// LIT adr
 	case CALL:RTOS--;*RTOS=ip;ip=(unsigned int)op>>8;continue;	// CALL
-	case VAR:NOS++;*NOS=TOS;TOS=memdata[op>>8];continue;		// VAR
+	case VAR:NOS++;*NOS=TOS;TOS=*(int*)&memdata[op>>8];continue;		// VAR
 	case JMP:ip=(op>>8);continue;//JMP							// JMP
 	case JMPR:ip+=(op>>8);continue;//JMP						// JMPR	
 	case LIT2:TOS^=(op&0xffffff00)<<24;continue;				// LIT xor xxxxxx....aaaaaa
