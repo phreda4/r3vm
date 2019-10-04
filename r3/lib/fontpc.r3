@@ -261,7 +261,7 @@
 
 :setpix | val mask -- val
 	na? ( 4 a+ ; )
-	ink a!+ ;
+	color a!+ ;
 
 ::char8pc | c --
 	4 << 'font8x16 +

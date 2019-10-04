@@ -113,6 +113,9 @@ const char *r3bas[]={
 "LOAD","SAVE","APPEND",
 "FFIRST","FNEXT",
 "INK","OP","LINE","CURVE","CURVE3","PLINE","PCURVE","PCURVE3","POLI",
+
+"DEBUG","TDEBUG",	// DEBUG
+
 "SYS",""
 };
 
@@ -145,6 +148,9 @@ MSEC,TIME,IDATE,
 LOAD,SAVE,APPEND,
 FFIRST,FNEXT,
 INK,OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
+
+DEBUG,TDEBUG,	// DEBUG
+
 SYS
 };
 
@@ -339,9 +345,9 @@ memcode[memc++]=nro;
 // close variable definition with a place when no definition
 void closevar() 
 {
-if (cntdicc==0) { return; }
-if ((dicc[cntdicc-1].info&0x10)==0) { return; } // prev is var
-if (dicc[cntdicc].mem<memd) { return; } // have val
+if (cntdicc==0) return;
+if (!dicc[cntdicc-1].info&0x10) return; // prev is var
+if (dicc[cntdicc-1].mem<memd) return;  		// have val
 memdata[memd]=0;memd+=4;
 }
 
@@ -452,6 +458,7 @@ if (solvejmp(from,memc)) { // salta
 level--;	
 }
 
+// start anonymous definition (adress only word)
 void anonIn(void)
 {
 pushA(memc);
@@ -459,6 +466,7 @@ codetok(JMP);
 level++;	
 }
 
+// end anonymous definition, save adress in stack
 void anonOut(void)
 {
 int from=popA();
@@ -467,6 +475,7 @@ codetok((from+1)<<8|LIT);
 level--;	
 }
 
+// dicc base in data definition
 void dataMAC(int n)
 {
 if (n==1) modo=4; // (	bytes
@@ -476,6 +485,7 @@ if (n==4) modo=2; // ]
 if (n==44) modo=3; // * reserva bytes Qword Dword Kbytes
 }
 
+// compile word from base diccionary
 void compilaMAC(int n) 
 {
 if (modo>1) { dataMAC(n);return; }
@@ -493,18 +503,38 @@ if (n==4) { anonOut();return; }		//]	etiqueta;push
 codetok(n);	
 }
 
+// compile word
 void compilaWORD(int n) 
 {
 if (modo>1) { datanro(n);return; }
 codetok((dicc[n].mem<<8)+CALL+((dicc[n].info>>4)&1));
 }
 
+// --- error in code --
 void seterror(char *f,char *s)
 {
 werror=s;
 cerror=f;	
 }
 
+// print error info 
+void printerror(char *name,char *src)
+{
+int line=1;
+char *lc=src;
+for (char *p=src;p<cerror;p++)
+	if (*p==10) { 
+		line++;lc=trim(p);
+		}
+*nextcr(lc)=0; // put 0 in the end of line
+printf("in: ");printword(name);printf("\n\n");	
+printf("%s\n",lc);
+for(char *p=lc;p<cerror;p++) printf(" ");
+printf("^-- ");
+printf("ERROR %s in line %d\n\n",werror,line);	
+}
+
+// tokeniza string
 int r3token(char *str) 
 {
 level=0;
@@ -542,7 +572,7 @@ while(*str!=0) {
 return -1;
 }
 
-///////////////////////////////////////////////
+// open, alloc and load file to string in memory
 char *openfile(char *filename)
 {
 //printf("loading %s\n",filename);
@@ -562,6 +592,7 @@ void *data=mmap(0,len,PROT_READ,MAP_PRIVATE,fd,0);
 */  
 }
 
+// include logic, not load many times
 int isinclude(char *str)
 {
 //printf("inc\n");	
@@ -585,6 +616,7 @@ cntincludes++;
 return cntincludes-1;
 }
 
+// free source code of includes
 void freeinc()
 {
 for (int i=0;i<cntincludes;i++){
@@ -592,6 +624,7 @@ for (int i=0;i<cntincludes;i++){
 	}
 }
 
+// resolve includes, recursive definition
 void r3includes(char *str) 
 {
 int ninc;	
@@ -622,22 +655,25 @@ return;
 }
 
 
-///////////////////////////////////////////////
+// Compile code in file
 int r3compile(char *name) 
 {
+printf("r3vm - PHREDA\n");
+printf("compile:%s\n\n",name);
+
 char filename[1024];
-char *str;
+char *sourcecode;
 
 strcpy(path,"r3/");
 sprintf(filename,"%s%s",path,name);
-str=openfile(filename);
+sourcecode=openfile(filename);
 //printf(str);
 
 memcsize=0;
 meminidata=0;
 cntincludes=0;
 cntstacki=0;
-r3includes(str); // load includes
+r3includes(sourcecode); // load includes
 
 //dumpinc();
 
@@ -650,24 +686,28 @@ memd=0;
 memcode=(int*)malloc(sizeof(int)*memcsize);
 memdata=(char*)malloc(memdsize);
 
-// tokenize
+// tokenize includes
 for (int i=0;i<cntstacki;i++) {
-//	printword(includes[stacki[i]].nombre);printf("\n");
-	if (!r3token(includes[stacki[i]].str)) return 0;
-//	r3token(includes[stacki[i]].str);
+	if (!r3token(includes[stacki[i]].str)) {
+		printerror(includes[stacki[i]].nombre,includes[stacki[i]].str);
+		return 0;
+		}
 	dicclocal=cntdicc;
 	}
-	
 // last tokenizer		
-if (!r3token(str)) return 0;
+if (!r3token(sourcecode)) {
+	printerror(name,sourcecode);
+	return 0;
+	}
 
-//printf("estimate tokens:%d\ntokens:%d\n",memcsize,memc);
 //dumpdicc();
-dumpcode();
+//dumpcode();
 
+printf("compile ok.\n");
+printf("includes:%d - words:%d\n",cntincludes,cntdicc);
+printf("mem code:%d - mem data:%d \n",memc,memd);
 freeinc();
-free(str);
-
+free(sourcecode);
 return -1;
 }
 
@@ -693,10 +733,15 @@ return g;
 }
 
 //---------------------------//
+// TOS..DSTACK--> <--RSTACK  //
+//---------------------------//
+int64_t stack[256];
+
 SDL_Event evt;
+
 WIN32_FIND_DATA ffd;
 HANDLE hFind=NULL;
-
+FILE *file;
 time_t sit;
 tm *sitime;
 
@@ -710,6 +755,7 @@ int gy1=0;
 int ke=0;
 int kc=0;
 
+// Update event for OS interaction
 void r3update()
 {
 //SDL_WaitEvent(&evt);
@@ -735,12 +781,7 @@ switch (evt.type) {
 
 }
          
-//---------------------------//
-// TOS..DSTACK--> <--RSTACK  //
-//---------------------------//
-int64_t stack[256];
-FILE *file;
-
+// run code, from adress "boot"
 void runr3(int boot) 
 {
 stack[255]=0;	
@@ -750,9 +791,9 @@ register int64_t *NOS=&stack[0];
 register int64_t *RTOS=&stack[255];
 register int64_t REGA=0;
 register int64_t REGB=0;
-register int op=0;
+register int64_t op=0;
 register int64_t W=0;
-register int64_t W1=0; 
+
 while(ip!=0) { 
 	op=memcode[ip++]; 
 	
@@ -768,7 +809,7 @@ while(ip!=0) {
 	case JMPR:ip+=(op>>8);continue;//JMP						// JMPR	
 	case LIT2:TOS^=(op&0xffffff00)<<24;continue;				// LIT xor xxxxxx....aaaaaa
 	case LIT3:TOS^=(op&0xffffff00)<<16;continue;				// LIT xor ....xxxxxxaaaaaa	
-	case EX:W=TOS;TOS=*NOS;NOS--;RTOS--;*RTOS=ip;ip=W;continue;//EX
+	case EX:RTOS--;*RTOS=ip;ip=TOS;TOS=*NOS;NOS--;continue;//EX
 	case ZIF:if (TOS!=0) {ip+=(op>>8);}; continue;//ZIF
 	case UIF:if (TOS==0) {ip+=(op>>8);}; continue;//UIF
 	case PIF:if (TOS<0) {ip+=(op>>8);}; continue;//PIF
@@ -815,13 +856,12 @@ while(ip!=0) {
 	case MULDIV:TOS=(*(NOS-1)*(*NOS)/TOS);NOS-=2;continue;	//MULDIV
 	case DIVMOD:W=*NOS%TOS;*NOS=(*NOS/TOS);TOS=W;continue;	//DIVMOD
 	case MOD:TOS=*NOS%TOS;NOS--;continue;					//MOD
-	//case ABS:W=(TOS>>31);TOS=(TOS+W)^W;continue;			//ABS
 	case ABS:W=(TOS>>63);TOS=(TOS+W)^W;continue;			//ABS
 	case CSQRT:TOS=isqrt(TOS);continue;					//CSQRT
 	case CLZ:TOS=iclz(TOS);continue;					//CLZ
 	case SHL:TOS=*NOS<<TOS;NOS--;continue;				//SAl
 	case SHR:TOS=*NOS>>TOS;NOS--;continue;				//SAR
-	case SHR0:TOS=((unsigned)*NOS)>>TOS;NOS--;continue;	//SHR
+	case SHR0:TOS=((uint64_t)*NOS)>>TOS;NOS--;continue;	//SHR
 	case MULSHR:TOS=(*(NOS-1)*(*NOS))>>TOS;NOS-=2;continue;	//MULSHR
 	case CDIVSH:TOS=((*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
 	case FECH:TOS=*(int*)TOS;continue;//@
@@ -836,7 +876,6 @@ while(ip!=0) {
 	case STOREPLUS:*(int*)TOS=*NOS;NOS--;TOS+=4;continue;// !+
 	case CSTOREPLUS:*(char*)TOS=*NOS;NOS--;TOS++;continue;//C!+
 	case QSTOREPLUS:*(int64_t*)TOS=*NOS;NOS--;TOS+=8;continue;//Q!+
-	
 	case INCSTOR:*(int*)TOS+=*NOS;NOS--;TOS=*NOS;NOS--;continue;//+!
 	case CINCSTOR:*(char*)TOS+=*NOS;NOS--;TOS=*NOS;NOS--;continue;//C+!
 	case QINCSTOR:*(int64_t*)TOS+=*NOS;NOS--;TOS=*NOS;NOS--;continue;//Q+!
@@ -855,40 +894,40 @@ while(ip!=0) {
 	case BFA:NOS++;*NOS=TOS;TOS=*(int*)REGB;REGB+=4;continue;//B@+ 
 	case BSA:*(int*)REGB=TOS;TOS=*NOS;NOS--;REGB+=4;continue;//B!+
 	case MOVED://MOVE 
-		W=(int64_t)&*(NOS-1);W1=(int64_t)&(*NOS);
-		while (TOS--) { *(int*)W=*(int*)W1;(int)W++;W1++; }
+		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
+		while (TOS--) { *(int*)W=*(int*)op;W+=4;op+=4; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case MOVEA://MOVE> 
-		W=(int64_t)&*(NOS-1)+(TOS<<2);W1=(int64_t)&(*NOS)+(TOS<<2);
-		while (TOS--) { W-=4;W1-=4;*(int*)W=*(int*)W1; }
+		W=(int64_t)*(NOS-1)+(TOS<<2);op=(int64_t)(*NOS)+(TOS<<2);
+		while (TOS--) { W-=4;op-=4;*(int*)W=*(int*)op; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case FILL://FILL
-		W1=(int64_t)&*(NOS-1);op=*NOS;
+		W=(int64_t)*(NOS-1);op=*NOS;
 		while (TOS--) { *(int*)W=op;W+=4; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CMOVED://CMOVE 
-		W=(int64_t)&*(NOS-1);W1=(int64_t)&*NOS;
-		while (TOS--) { *(char*)W=*(char*)W1;W++;W1++; }
+		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
+		while (TOS--) { *(char*)W=*(char*)op;W++;op++; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CMOVEA://CMOVE> 
-		W=(int64_t)&*(NOS-1)+TOS;W1=(int64_t)&*NOS+TOS;
-		while (TOS--) { W--;W1--;*(char*)W=*(char*)W1; }
+		W=(int64_t)*(NOS-1)+TOS;op=(int64_t)*NOS+TOS;
+		while (TOS--) { W--;op--;*(char*)W=*(char*)op; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CFILL://CFILL
-		W1=(int64_t)&*(NOS-1);op=*NOS;
+		W=(int64_t)*(NOS-1);op=*NOS;
 		while (TOS--) { *(char*)W=op;W++; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVED://QMOVE 
-		W=(int64_t)&*(NOS-1);W1=(int64_t)&*NOS;
-		while (TOS--) { *(int64_t*)W=*(int64_t*)W1;W++;W1++; }
+		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
+		while (TOS--) { *(int64_t*)W=*(int64_t*)op;W+=8;op+=8; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVEA://MOVE> 
-		W=(int64_t)&*(NOS-1)+(TOS<<3);W1=(int64_t)&*NOS+(TOS<<3);
-		while (TOS--) { W--;W1--;*(int64_t*)W=*(int64_t*)W1; }
+		W=(int64_t)*(NOS-1)+(TOS<<3);op=(int64_t)*NOS+(TOS<<3);
+		while (TOS--) { W-=8;op-=8;*(int64_t*)W=*(int64_t*)op; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QFILL://QFILL
-		W1=(int64_t)&*(NOS-1);op=*NOS;
-		while (TOS--) { *(int64_t*)W=op;W++; }
+		W=(int64_t)*(NOS-1);op=*NOS;
+		while (TOS--) { *(int64_t*)W=op;W+=8; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case UPDATE://"UPDATE"
 		r3update();continue;
@@ -977,6 +1016,10 @@ while(ip!=0) {
 		gr_drawPoli();continue;
 //	case 111:systemcall(TOS,stack[NOS]);TOS=stack[NOS-1];NOS-=2;continue; //SYSCALL | nro int -- 
 //	case 112:TOS=systemmem(TOS);continue;//SYSMEM | nro -- ini
+//----------------- DEBUG
+	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;
+	case TDEBUG:printf("%d ",TOS);continue;	
+//----------------- DEBUG	
 //case SYS:
 	}
    }
@@ -986,11 +1029,11 @@ while(ip!=0) {
 ////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
+if (!r3compile("main.r3")) return -1;
+
 gr_init("r3",800,600);
-
-r3compile("main.r3");
 runr3(boot);
-
 gr_fin();
+
 return 0;
 }

@@ -3,19 +3,19 @@
 | r3 lib VFRAME play
 | PHREDA 2018
 
-##ink $ff00ff
+##color $ff00ff
 ##paper $ff
 
 ##xa 0 ##ya 0
 
 ::cls
-  paper vframe sw sh * fill ;
+  vframe paper sw sh * fill ;
 
 ::xy>v | x y -- adr
   sw * + 2 << vframe + ;
 
 ::pset | x y --
-  xy>v ink swap ! ;
+  xy>v color swap ! ;
 
 ::pget | x y -- c
   xy>v @ ;
@@ -23,15 +23,15 @@
 :hline | xd yd xa --
   pick2 - 0? ( drop pset ; )
   -? ( rot over + rot rot neg )
-  >r xy>v ink swap r> fill ;
+  >r xy>v color r> fill ;
 
 :hlineo | xmin yd xmax --
   pick2 - 0? ( drop pset ; )
-  >r xy>v ink swap r> fill ;
+  >r xy>v color r> fill ;
 
 :vline | x1 y1 cnt
 	rot rot xy>v >a
-	( 1? 1 - ink a! sw 2 << a+ ) drop ;
+	( 1? 1 - color a! sw 2 << a+ ) drop ;
 
 :iline | xd yd --
   ya =? ( xa hline ; )
@@ -57,7 +57,7 @@
 ::rect  | w h x y --
   xy>v >a
   ( 1? 1 -
-    ink a> pick3 fill
+    a> color pick3 fill
 	sw 2 << a+
     ) 2drop ;
 

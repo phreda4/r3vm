@@ -13,7 +13,7 @@
 		10 update drop
 		dup ex
 		redraw
-		.exit 1? )
+		.exit 0? )
 	2drop
 	0 '.exit !
 	;

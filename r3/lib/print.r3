@@ -23,8 +23,7 @@
 
 ::print | "" --
   ccx ccy xy>v >a
-  ( c@+ 1?
-    emit ) 2drop ;
+  ( c@+ 1? emit ) 2drop ;
 
 ::cr
   cch 'ccy +! 0 'ccx ! ;

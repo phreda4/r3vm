@@ -21,6 +21,6 @@
 
 ::.h | hex -- str
   mbuffi swap
-  ( dup $f and $30 + $39 >? ( 8 + ) pick2 c! swap 1 - swap 4 >>> 1? ) drop
+  ( dup $f and $30 + $39 >? ( 7 + ) pick2 c! swap 1 - swap 4 >>> 1? ) drop
   1 + ;
 
