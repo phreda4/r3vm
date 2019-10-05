@@ -1,7 +1,6 @@
 // Pablo Hugo Reda <pabloreda@gmail.com>
 // rutinas graficas
 
-#include <stdlib.h>
 #include <stdio.h>
 
 #include "graf.h"

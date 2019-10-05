@@ -4,7 +4,18 @@
 #ifndef GRAF_H
 #define GRAF_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_thread.h>
+#include <SDL2/SDL_syswm.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_audio.h>
+#ifdef __cplusplus
+}
+#endif
 
 extern SDL_Window *window;
 extern SDL_Renderer *renderer;

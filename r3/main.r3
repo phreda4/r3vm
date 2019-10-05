@@ -1,35 +1,18 @@
-^lib/str.r3
-^lib/print.r3
+| Example 1
 
-#salir 0
-#val
+^lib/gr.r3
 
-:llenado
-	0 'paper !
-	cls home
-	$ff0000 'color !
-	"Hello Word!" print cr
-	$00ff 'color !
-	"Hola Mundo!" print cr
-	$ffff 'color !
-	"r3" print cr
-	$ffffff 'color !
-	val .d print cr
-	1 'val +!
-	;
+:patternxor
+ vframe >a
+ sh ( 1? 1 -
+  sw ( 1? 1 -
+    2dup xor msec + 8 <<
+	a!+
+    ) drop
+  ) drop
+  key 27 =? ( exit ) drop
+  ;
 
-
-:main
-	0 'salir !
-	( salir 0? drop
-		update
-		key 27 =? ( dup 'salir ! ) drop
-		llenado
-		redraw
-		) drop ;
-
-:m2
-	0 'paper !
-	'llenado onshow ;
-
-: main ;
+:
+ 'patternxor onshow
+;
