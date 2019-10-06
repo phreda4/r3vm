@@ -3,8 +3,8 @@
 | r3 lib VFRAME play
 | PHREDA 2018
 
-##color $ff00ff
-##paper $ff
+##color $ff00
+##paper 0
 
 ##xa 0 ##ya 0
 

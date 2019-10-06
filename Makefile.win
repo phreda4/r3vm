@@ -4,8 +4,8 @@
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
-OBJ      = graf.o r3.o
-LINKOBJ  = graf.o r3.o
+OBJ      = graf.o r3.o video.o
+LINKOBJ  = graf.o r3.o video.o
 LIBS     = -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc -L"C:/Users/r/Desktop/rtv/installlib/ffmpeg-20190914-8efc9fc-win64-dev/lib" -L"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -lmingw32  -lSDL2main -lSDL2 -lavcodec -lavformat -lavutil -lswresample -lswscale -lavdevice -s
 INCS     = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Users/r/Desktop/rtv/installlib/ffmpeg-20190914-8efc9fc-win64-dev/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include"
 CXXINCS  = -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"C:/Users/r/Desktop/rtv/installlib/ffmpeg-20190914-8efc9fc-win64-dev/include" -I"C:/Program Files (x86)/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include"
@@ -29,3 +29,6 @@ graf.o: graf.cpp
 
 r3.o: r3.cpp
 	$(CPP) -c r3.cpp -o r3.o $(CXXFLAGS)
+
+video.o: video.cpp
+	$(CPP) -c video.cpp -o video.o $(CXXFLAGS)

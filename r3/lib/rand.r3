@@ -20,7 +20,7 @@
   seed 3141592621 * 1 + dup 'seed ! ;
 
 ::rerand | --
-  time + + 'seed ! ;
+  time msec + 'seed ! ;
 
   
 |--- Multiply-with-carry random

@@ -19,7 +19,7 @@ $. $. $. $ffff $. $. $. $.
 $. $. $ffff $ffff $ffff $. $. $.
 $. $. $ffff $ffff $ffff $. $. $.
 $. $ffff $ffff $ffff $ffff $ffff $. $.
-$. $ffff $ffff $ffff $ffff $ffff $. $.
+$. $ffff $ff00 $ff00 $ffff $ffff $. $.
 $. $. $. $. $. $. $. $.
 $. $. $. $. $. $. $. $.
 
@@ -29,14 +29,16 @@ $. $. $. $. $. $. $. $.
 #xv #yv
 
 :player
-	xn yn 'nav32 spr
-	xypen 'nav4 spr
+	xn yn 'nav32 sprite
+	xypen 'nav4 sprite
 	;
 
 :ongame
 	cls
 	player
+	key 27 =? ( exit ) drop
 	;
 
+:
 'ongame onshow
-
+;

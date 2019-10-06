@@ -11,6 +11,13 @@
 
 #include "graf.h"
 
+#define DEBUGWORD
+#define VIDEOWORD
+
+#ifdef VIDEOWORD
+#include "video.h"
+#endif
+
 //----------------------
 /*------COMPILER------*/
 //----------------------
@@ -33,7 +40,6 @@ char *memdata;
 
 char path[1024];
 
-int base;
 int64_t nro=0;
 
 //---- includes
@@ -93,11 +99,20 @@ const char *r3bas[]={
 "MSEC","TIME","DATE",
 "LOAD","SAVE","APPEND",
 "FFIRST","FNEXT",
+
 "INK","OP","LINE","CURVE","CURVE3","PLINE","PCURVE","PCURVE3","POLI",
-//"DEBUG","TDEBUG",	// DEBUG
+
+#ifdef VIDEOWORD
+"VIDEO","VIDEOSHOW",
+#endif
+
+#ifdef DEBUGWORD
+"DEBUG","TDEBUG",	// DEBUG
+#endif
+
 "SYS","",// !!cut the dicc!!!
 
-"JMP","JMPR","LIT2","LIT3"	// internal only
+"JMP","JMPR","LIT2","LIT3",	// internal only
 "AND_L","OR_L","XOR_L",		// OPTIMIZATION WORDS
 "+_L","-_L","*_L","/_L",
 "<<_L",">>_L",">>>_L",
@@ -135,7 +150,15 @@ MSEC,TIME,IDATE,
 LOAD,SAVE,APPEND,
 FFIRST,FNEXT,
 INK,OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
-//DEBUG,TDEBUG,	// DEBUG
+
+#ifdef VIDEOWORD
+VIDEO,VIDEOSHOW,
+#endif
+
+#ifdef DEBUGWORD
+DEBUG,TDEBUG,	// DEBUG
+#endif
+
 SYS,ENDWORD, // !! cut the dicc !!!
 
 JMP,JMPR,LIT2,LIT3,	// internal
@@ -209,18 +232,20 @@ for(int i=0;i<cntdicc;i++) {
 // return number in global var "nro"
 
 int isNro(char *p)
-{//if (*p=='&') { p++;numero=*p;return 1;} // codigo ascii
-int dig=0,signo=0;
+{
+//if (*p=='&') { p++;nro=*p;return -1;} // codigo ascii
+int dig=0,signo=0,base;
 if (*p=='-') { p++;signo=1; } else if (*p=='+') p++;
 if ((unsigned char)*p<33) return 0;// no es numero
 switch(*p) {
   case '$': base=16;p++;break;// hexa
   case '%': base=2;p++;break;// binario
-  default:  base=10;break; }; 
+  default:  base=10;break; 
+  }; 
 nro=0;if ((unsigned char)*p<33) return 0;// no es numero
 while ((unsigned char)*p>32) {
-//  if (*p=='.') dig=0; else 
-  if (*p<='9') dig=*p-'0'; 
+  if (base!=10 && *p=='.') dig=0;  
+  else if (*p<='9') dig=*p-'0'; 
   else if (*p>='a') dig=*p-'a'+10;  
   else if (*p>='A') dig=*p-'A'+10;  
   else return 0;
@@ -246,12 +271,13 @@ while ((unsigned char)*p>32) {
   if (*p=='.') { parte0=nro;nro=1;if (*(p+1)<33) return 0; } 
   else  {
   	if (*p<='9') dig=*p-'0'; else dig=-1;
-  	if (dig<0 || dig>=10) return 0;
+  	if (dig<0 || dig>9) return 0;
   	nro=(nro*10)+dig;
   	}
   p++;
   };  
-int decim=1,num=nro;
+int decim=1;
+int64_t num=nro;
 while (num>1) { decim*=10;num/=10; }
 num=0x10000*nro/decim;
 nro=(num&0xffff)|(parte0<<16);
@@ -292,7 +318,7 @@ return s;
 // advance to next line
 char *nextcr(char *s)	
 {
-while (((unsigned char)*s)>31) s++;
+while (((unsigned char)*s)>31||*s==9) s++;
 return s;
 }
 
@@ -414,17 +440,13 @@ codetok((dicc[n].mem<<8)+LIT+((dicc[n].info>>4)&1));  //1 code 2 data
 void compilaLIT(int64_t n) 
 {
 if (modo>1) { datanro(n);return; }
-int token;
-int64_t v1;
-token=n;
+int token=n;
 codetok((token<<8)+LIT); 
-v1=token;
-if (n==v1) return;
 token=n>>24;
+if (token==0||token==-1) return;
 codetok((token<<8)+LIT2); 
-v1=(token<<24)|(v1&0xffffff);
-if (n==v1) return;
 token=n>>48;
+if (token==0||token==-1) return;
 codetok((token<<8)+LIT3); 
 }
 
@@ -690,7 +712,6 @@ char *sourcecode;
 strcpy(path,"r3/");
 sprintf(filename,"%s%s",path,name);
 sourcecode=openfile(filename);
-//printf(str);
 
 memcsize=0;
 meminidata=0;
@@ -726,7 +747,7 @@ if (!r3token(sourcecode)) {
 //dumpdicc();
 dumpcode();
 
-printf("compile ok.\n");
+printf("ok.\n");
 printf("includes:%d - words:%d\n",cntincludes,cntdicc);
 printf("mem code:%d - mem data:%d \n",memc,memd);
 freeinc();
@@ -741,14 +762,14 @@ return -1;
 #define iclz(x) __builtin_clz(x)
 
 // http://www.devmaster.net/articles/fixed-point-optimizations/
-static inline int isqrt(int value)
+static inline int64_t isqrt(int64_t value)
 {
 if (value==0) return 0;
-int g = 0;
-int bshft = (31-iclz(value))>>1;  // spot the difference!
-int b = 1<<bshft;
+int bshft = (63-iclz(value))>>1;  // spot the difference!
+int64_t g = 0;
+int64_t b = 1<<bshft;
 do {
-	int temp = (g+g+b)<<bshft;
+	int64_t temp = (g+g+b)<<bshft;
 	if (value >= temp) { g += b;value -= temp;	}
 	b>>=1;
 } while (bshft--);
@@ -801,7 +822,6 @@ switch (evt.type) {
 	    ym=evt.motion.y;		
 	    break;
 	}
-
 }
          
 // run code, from adress "boot"
@@ -820,7 +840,7 @@ register int64_t W=0;
 while(ip!=0) { 
 	op=memcode[ip++]; 
 
-	//printcode(op);
+//	printcode(op);
 	
 	switch(op&0xff){
 	case FIN:ip=*RTOS;RTOS++;continue; 							// ;
@@ -1009,7 +1029,8 @@ while(ip!=0) {
         if (FindNextFile(hFind, &ffd)==0) TOS=0; else TOS=(int64_t)&ffd;
         continue ;
 	case INK://"INK",
-		gr_alpha((TOS>>24)^0xff);gr_color1=TOS;
+		//gr_alpha((TOS>>24)^0xff);
+		gr_color1=TOS;
 		TOS=*NOS;NOS--;continue;
 	case OP://"OP",
 		gy1=TOS;gx1=*NOS;NOS--;TOS=*NOS;NOS--;continue;
@@ -1034,10 +1055,22 @@ while(ip!=0) {
 	case POLI: 
 		gr_drawPoli();continue;
 		
-//----------------- DEBUG
-//	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;
-//	case TDEBUG:printf("%d ",TOS);continue;	
-//----------------- DEBUG	
+#ifdef VIDEOWORD
+	case VIDEO:
+        if (TOS==0) { NOS-=2;TOS=*NOS;NOS--;videoclose();continue; }
+		videoopen((char*)*(NOS-1),*NOS,TOS);
+		NOS--;TOS=*NOS;NOS--;
+		continue;
+	case VIDEOSHOW:
+		redrawframe(*NOS,TOS);		
+		NOS--;TOS=*NOS;NOS--;
+		continue;		
+#endif
+
+#ifdef DEBUGWORD //----------------- DEBUG
+	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;
+	case TDEBUG:printf("%d ",TOS);continue;	
+#endif//----------------- DEBUG	
 
 	case SYS: continue;
 //	case 111:systemcall(TOS,stack[NOS]);TOS=stack[NOS-1];NOS-=2;continue; //SYSCALL | nro int -- 
@@ -1047,8 +1080,8 @@ while(ip!=0) {
 //----------------- ONLY INTERNAL
 	case JMP:ip=(op>>8);continue;//JMP							// JMP
 	case JMPR:ip+=(op>>8);continue;//JMP						// JMPR	
-	case LIT2:TOS=(TOS&0xffffff)|((op>>8)<<24);continue;		// LIT xor xxxx......aaaaaa
-	case LIT3:TOS=(TOS&0xffffffffffff)|((op>>8)<<48);continue;	// LIT xor ....xxxxxxaaaaaa	
+	case LIT2:TOS=(TOS&0xffffff)|((op>>8)<<24);continue;		// LIT ....xxxxxxaaaaaa
+	case LIT3:TOS=(TOS&0xffffffffffff)|((op>>8)<<48);continue;	// LIT xxxx......aaaaaa	
 //----------------- OPTIMIZED WORD
 	case AND1:TOS&=op>>8;continue;
 	case OR1:TOS|=op>>8;continue;
@@ -1063,7 +1096,7 @@ while(ip!=0) {
 	case MOD1:TOS=TOS%(op>>8);continue;
 	case DIVMOD1:op>>=8;NOS++;*NOS=TOS/op;TOS=TOS%op;continue;	//DIVMOD
 	case MULDIV1:op>>=8;TOS=(*NOS)*TOS/op;NOS--;continue;		//MULDIV
-	case MULSHR1:op>>=8;TOS=(*NOS)*TOS>>op;NOS--;continue;		//MULSHR
+	case MULSHR1:op>>=8;TOS=((*NOS)*TOS)>>op;NOS--;continue;		//MULSHR
 	case CDIVSH1:op>>=8;TOS=((*NOS)<<TOS)/op;NOS--;continue;	//CDIVSH
 	case IFL1:if ((op<<32>>48)<=TOS) ip+=(op<<48>>56);continue;	//IFL
 	case IFG1:if ((op<<32>>48)>=TOS) ip+=(op<<48>>56);continue;	//IFG
@@ -1076,6 +1109,7 @@ while(ip!=0) {
 		
 	}
    }
+//videoclose();
 }
 	
 	

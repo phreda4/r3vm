@@ -18,7 +18,7 @@ Uint32  *gr_buffer;
 //---- variables internas
 int gr_ancho,gr_alto;
 Uint32  gr_color1,gr_color2,col1,col2;
-int gr_ypitch,gr_ypitchbytes;
+int gr_ypitch;
 int MA,MB,MTX,MTY; // matrix de transformacion
 int *mTex; // textura
 int gr_alphav;
@@ -119,15 +119,21 @@ if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
 window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XRES,YRES,0);if (!window) return -1;
 //renderer=SDL_CreateRenderer(window, -1, 0);if (!renderer) return -1;
 //texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STATIC,XRES,YRES);
+
+//SDL_WINDOW_FULLSCREEN .. real
+//SDL_WINDOW_FULLSCREEN_DESKTOP ..simulate
+//0
+SDL_SetWindowFullscreen(window,0);
+SDL_ShowCursor(SDL_DISABLE);
+
 screen = SDL_GetWindowSurface(window);
 
 gr_sizescreen=XRES*YRES;// tamanio en Uint32 
 
 //gr_buffer=(Uint32 *)malloc(gr_sizescreen<<2);
 gr_buffer=(Uint32*)screen->pixels;
-
-gr_ypitch=gr_ancho=XRES;
-gr_ypitchbytes=XRES<<2;
+gr_ancho=XRES;
+gr_ypitch=screen->pitch>>2;
 gr_alto=YRES;
 //---- poligonos2
 fillSol();

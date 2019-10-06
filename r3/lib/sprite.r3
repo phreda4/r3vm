@@ -5,6 +5,7 @@
 | 4-4-12-12
 
 ^lib/gr.r3
+^lib/math.r3
 
 #pal0
 $000000ff $808080ff $C0C0C0ff $FFFFFFff $800000ff $FF0000ff $808000ff $FFFF00ff
@@ -30,18 +31,18 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 
 |---- w/alpha
 :alp!+ | col --
-|	$ff nan? ( drop 4 a+ ; )
+|	$ff na? ( drop 4 a+ ; )
 	dup $ff and 
 	0? ( drop a!+ ; )
 	$ff =? ( 2drop 4 a+ ; )
 	swap
 	dup $ff00ff00 and				| alpha color colorand
 	a@ dup $ff00ff00 and 		| alpha color colorand inkc inkcand
-	pick2 - pick4 8 *>> rot +	| alpha color inkc inkcandl
+	pick2 - pick4 * 8 >> rot +	| alpha color inkc inkcandl
 	$ff00ff00 and >r				| alpha color inkc
 	swap $ff0000 and 				| alpha px colorand
 	swap $ff0000 and 				| alpha colorand pxa
-	over - rot 8 *>> + $ff0000 and
+	over - rot * 8 >> + $ff0000 and
 	r> or $ff or a!+ ;
 
 |----- 1:1
@@ -54,8 +55,8 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 
 :cliph
 	sh >? ( sh pick2 - ; ) hb ;
-	
-:clip | x y	-- x y 
+
+:clip | x y	-- x y
 	swap wb over + clipw 'wi ! drop
 	negw
 	swap hb over + cliph 'hi ! drop
@@ -74,7 +75,7 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 		over a+
 		pick2 b+
 		1 - ) 3drop ;
-:d1 | adr -- ;8		
+:d1 | adr -- ;8
 :d2 | adr -- ;4
 :d3 | adr -- ;2
 :d4 | adr -- ;1
@@ -190,7 +191,4 @@ $. $ffff $ffff $ffff $ffff $ffff $. $.
 $. $. $. $. $. $. $. $.
 $. $. $. $. $. $. $. $.
 
-:
-cls
-10 10 'nav32 sprite
-;
+|: cls 10 10 'nav32 sprite ;

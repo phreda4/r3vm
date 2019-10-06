@@ -6,13 +6,13 @@
  vframe >a
  sh ( 1? 1 -
   sw ( 1? 1 -
-    2dup xor 16 <<
-	$ff or | opacity
+    2dup xor msec + 8 <<
 	a!+
     ) drop
-  ) drop ;
+  ) drop
+  key 27 =? ( exit ) drop
+  ;
 
 :
- patternxor
-| 'patternxor onshow
+ 'patternxor onshow
 ;

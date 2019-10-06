@@ -10,7 +10,7 @@
 	16 *>> ;
 
 ::*.	| a b -- c
-	16 *>> dup 31 >> - ;
+	16 *>> dup 63 >> - ;
 
 ::/.	| a b -- c
 	16 <</ ;
@@ -19,7 +19,7 @@
 	$ffff + 16 >> ;
 
 ::sign | v -- v s
-	dup 31 >> 1 or ;
+	dup 63 >> 1 or ;
 
 :sinp
 	$7fff and $4000 -
@@ -59,7 +59,7 @@
 :iatan2p
 	+? ( 2dup + >r swap - >r 0.125 ; )
 	2dup - >r + >r 0.375 ;
-	
+
 :iatan2 | |x| y -- bangle
 	iatan2p
 	0.125 r> r> 0? ( nip nip nip ; )
@@ -79,22 +79,22 @@
 	2dup xor 1 >> rot rot and + ;
 
 ::min	| a b -- m
-	over - dup 31 >> and + ;
+	over - dup 63 >> and + ;
 
 ::max	| a b -- m
-	over swap - dup 31 >> and -  ;
+	over swap - dup 63 >> and -  ;
 
 ::clampmax | v max -- v
-	swap over - dup 31 >> and + ;
+	swap over - dup 63 >> and + ;
 
 ::clampmin | v min -- v
-	dup rot - dup 31 >> and - ;
+	dup rot - dup 63 >> and - ;
 
 ::clamp0 | v -- v
-	dup neg 31 >> and ;
+	dup neg 63 >> and ;
 
 ::clamp0max | v max -- v
-	swap over - dup 31 >> and + dup neg 31 >> and ;
+	swap over - dup 63 >> and + dup neg 63 >> and ;
 
 ::between | v min max -- -(out)/+(in)
 	pick2 - rot rot - or ;
@@ -200,7 +200,7 @@
 	swap ln. swap /. exp. ;
 
 ::bswap
-	dup 8 >> $ff00ff and 
+	dup 8 >> $ff00ff and
 	swap 8 << $ff00ff00 and or
 	dup 16 >>>
 	swap 16 << or ;

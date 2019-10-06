@@ -2,15 +2,12 @@
 | PHREDA 2019
 |----------------
 
-::xymouse | -- xmouse ymouse
-	xypen dup $ffff and swap 16 >> ;
-
 #.exit 0
 
 ::onshow | 'word --
 	0 '.exit !
 	0 ( drop
-		10 update drop
+		update
 		dup ex
 		redraw
 		.exit 0? )
