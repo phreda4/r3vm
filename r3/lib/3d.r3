@@ -1,7 +1,7 @@
-| 3dmath - PHREDA 
+| 3dmath - PHREDA
 |-------------------------
 
-^lib/math.r3
+^r3/lib/math.r3
 
 ##xf ##yf
 ##ox ##oy

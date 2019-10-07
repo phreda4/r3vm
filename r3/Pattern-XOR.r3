@@ -1,6 +1,6 @@
 | Example 1
 
-^lib/gr.r3
+^r3/lib/gr.r3
 
 :patternxor
  vframe >a

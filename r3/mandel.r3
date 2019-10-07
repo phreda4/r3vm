@@ -3,10 +3,10 @@
 | Adaptacion de Galileo (2016)
 | Adaptacion a r3 PHREDA (2019)
 
-^lib/sys.r3
-^lib/math.r3
-^lib/str.r3
-^lib/print.r3
+^r3/lib/sys.r3
+^r3/lib/math.r3
+^r3/lib/str.r3
+^r3/lib/print.r3
 
 #bx 0 | Ubicacion
 #by 0
@@ -52,6 +52,6 @@
 	$ffffff 'color !
 	home
 	cr
-	"Se ha tardado " print .d " ms" print cr
+	"Se ha tardado " print .d print " ms" print cr
 
 	'waitkey onshow ;

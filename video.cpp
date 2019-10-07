@@ -259,14 +259,14 @@ void videoclose()
 {
 is.quit=1;
 if (is.hasAudioFrames>0) {
-SDL_CloseAudio();
-SDL_DetachThread(is.hVideoThread);
-SDL_DetachThread(is.hParseThread);
-SDL_DestroyMutex(is.audioq.cs);
-SDL_DestroyCond(is.audioq.cv);
-SDL_DestroyMutex(is.videoq.cs);
-SDL_DestroyCond(is.videoq.cv);
-}
+	SDL_CloseAudio();
+	SDL_DetachThread(is.hVideoThread);
+	SDL_DetachThread(is.hParseThread);
+	SDL_DestroyMutex(is.audioq.cs);
+	SDL_DestroyCond(is.audioq.cv);
+	SDL_DestroyMutex(is.videoq.cs);
+	SDL_DestroyCond(is.videoq.cv);
+	}
 if (is.pAudioFrame) av_frame_free(&is.pAudioFrame);
 if (is.pFrameRGB) av_frame_free(&is.pFrameRGB);
 if (is.pFrameBuffer) av_free(is.pFrameBuffer);

@@ -1,7 +1,7 @@
 | Example 5 DRAW in Canvas
 
-^lib/gr.r3
-^lib/rand.r3
+^r3/lib/gr.r3
+^r3/lib/rand.r3
 
 #last 0
 

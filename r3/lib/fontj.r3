@@ -1,4 +1,4 @@
-^lib/gr.r3
+^r3/lib/gr.r3
 |---------------
 | Fuente Consola Jupiter Ace
 | phreda

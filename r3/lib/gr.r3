@@ -1,4 +1,4 @@
-^lib/sys.r3
+^r3/lib/sys.r3
 
 | r3 lib VFRAME play
 | PHREDA 2018

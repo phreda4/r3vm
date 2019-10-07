@@ -1,6 +1,6 @@
 | Example 4
 
-^lib/gr.r3
+^r3/lib/gr.r3
 
 |--------------------
 #x 10 #vx 1

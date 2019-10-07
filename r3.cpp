@@ -5,14 +5,13 @@
 //  with cell size of 64 bits, 
 //	SDL graphics windows
 //
+//#define DEBUGWORD
+//#define VIDEOWORD
 
 #include <stdio.h>
 #include <time.h>
 
 #include "graf.h"
-
-#define DEBUGWORD
-#define VIDEOWORD
 
 #ifdef VIDEOWORD
 #include "video.h"
@@ -99,8 +98,8 @@ const char *r3bas[]={
 "MSEC","TIME","DATE",
 "LOAD","SAVE","APPEND",
 "FFIRST","FNEXT",
-
 "INK","OP","LINE","CURVE","CURVE3","PLINE","PCURVE","PCURVE3","POLI",
+"SYS",
 
 #ifdef VIDEOWORD
 "VIDEO","VIDEOSHOW",
@@ -110,8 +109,7 @@ const char *r3bas[]={
 "DEBUG","TDEBUG",	// DEBUG
 #endif
 
-"SYS","",// !!cut the dicc!!!
-
+"",// !!cut the dicc!!!
 "JMP","JMPR","LIT2","LIT3",	// internal only
 "AND_L","OR_L","XOR_L",		// OPTIMIZATION WORDS
 "+_L","-_L","*_L","/_L",
@@ -150,7 +148,7 @@ MSEC,TIME,IDATE,
 LOAD,SAVE,APPEND,
 FFIRST,FNEXT,
 INK,OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
-
+SYS,
 #ifdef VIDEOWORD
 VIDEO,VIDEOSHOW,
 #endif
@@ -159,8 +157,7 @@ VIDEO,VIDEOSHOW,
 DEBUG,TDEBUG,	// DEBUG
 #endif
 
-SYS,ENDWORD, // !! cut the dicc !!!
-
+ENDWORD, // !! cut the dicc !!!
 JMP,JMPR,LIT2,LIT3,	// internal
 AND1,OR1,XOR1,		// OPTIMIZATION WORDS
 ADD1,SUB1,MUL1,DIV1,
@@ -182,6 +179,10 @@ void printcode(int n)
 {
 if ((n&0xff)<5 && n!=0) {
 	printf(r3asm[n&0xff]);printf(" %d",n>>8);
+} else if (((n&0xff)>=IFL && (n&0xff)<=IFNAND) || (n&0xff)==JMPR) {	
+	printf(r3bas[n&0xff]);printf(" >> %d",n>>8);
+} else if ((n&0xff)>=IFL1 && (n&0xff)<=IFNAND1) {	
+	printf(r3bas[n&0xff]);printf(" %d",n>>16);printf(" >> %d",n<<16>>24);
 } else if ((n&0xff)>ENDWORD ) {
 	printf(r3bas[n&0xff]);printf(" %d",n>>8);	
 } else 
@@ -466,7 +467,7 @@ for (int i=from;i<to;i++) {
 	if (op>=ZIF && op<=IFBT && (memcode[i]>>8)==0) { // patch while 
 		memcode[i]|=(memc-i)<<8;	// full dir
 		whi=true;
-	} else if (op>=IFL1 && op<=IFNAND1 && memcode[i]&0xff00==0) { // patch while 
+	} else if (op>=IFL1 && op<=IFNAND1 && (memcode[i]&0xff00)==0) { // patch while 
 		memcode[i]|=((memc-i)<<8)&0xff00; // byte dir
 		whi=true;
 		}
@@ -482,7 +483,7 @@ int dist=memc-from;
 if (solvejmp(from,memc)) { // salta
 	codetok((-(dist+1)<<8)+JMPR); 	// jmpr
 } else { // patch if	
-	if (memcode[from-1]&0xff>=IFL1 && memcode[from-1]&0xff<=IFNAND1) { 
+	if ((memcode[from-1]&0xff)>=IFL1 && (memcode[from-1]&0xff)<=IFNAND1) { 
 		memcode[from-1]|=(dist<<8)&0xff00;	// byte dir
 	} else {
 		memcode[from-1]|=(dist<<8);		// full dir
@@ -515,7 +516,7 @@ if (n==1) modo=4; // (	bytes
 if (n==2) modo=2; // )
 if (n==3) modo=5; // [	qwords
 if (n==4) modo=2; // ]
-if (n==44) modo=3; // * reserva bytes Qword Dword Kbytes
+if (n==MUL) modo=3; // * reserva bytes Qword Dword Kbytes
 }
 
 // compile word from base diccionary
@@ -535,7 +536,7 @@ if (n==3) { anonIn();return; }		//[	salto:etiqueta
 if (n==4) { anonOut();return; }		//]	etiqueta;push
 
 if (n>=IFL && n<=IFNAND && (memcode[memc-1]&0xff)==LIT && 
-	(memcode[memc-1]&0xff000000==0 || memcode[memc-1]&0xff000000==0xff000000)) { 
+	((memcode[memc-1]&0xff000000)==0 || (memcode[memc-1]&0xff000000)==0xff000000)) { 
 	memcode[memc-1]=((memcode[memc-1]<<8)&0xffff0000)|(n-IFL+IFL1);
 	return; 
 	}
@@ -620,12 +621,17 @@ return -1;
 // open, alloc and load file to string in memory
 char *openfile(char *filename)
 {
-//printf("loading %s\n",filename);
 long len;
 char *buff;
-FILE *f=fopen(filename,"rb");if (!f) return 0;
+FILE *f=fopen(filename,"rb");
+if (!f) {
+	printf("FILE %s not found\n",filename);
+	cerror=(char*)1;
+	return 0;
+	}
 fseek(f,0,SEEK_END);len=ftell(f);fseek(f,0,SEEK_SET);
-buff=(char*)malloc(len+1);if (!buff) return 0;
+buff=(char*)malloc(len+1);
+if (!buff) return 0;
 fread(buff,1,len,f); 
 fclose(f);
 buff[len]=0;
@@ -672,6 +678,7 @@ for (int i=0;i<cntincludes;i++){
 // resolve includes, recursive definition
 void r3includes(char *str) 
 {
+if (str==0) return;
 int ninc;	
 while(*str!=0) {
 	str=trim(str);
@@ -706,19 +713,17 @@ int r3compile(char *name)
 printf("r3vm - PHREDA\n");
 printf("compile:%s\n\n",name);
 
-char filename[1024];
 char *sourcecode;
 
-strcpy(path,"r3/");
-sprintf(filename,"%s%s",path,name);
-sourcecode=openfile(filename);
-
+sourcecode=openfile(name);
+if (sourcecode==0) return 0;
 memcsize=0;
 meminidata=0;
 cntincludes=0;
 cntstacki=0;
 r3includes(sourcecode); // load includes
 
+if (cerror!=0) return 0;
 //dumpinc();
 
 cntdicc=0;
@@ -785,9 +790,14 @@ SDL_Event evt;
 
 WIN32_FIND_DATA ffd;
 HANDLE hFind=NULL;
+
 FILE *file;
+
 time_t sit;
 tm *sitime;
+
+PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+STARTUPINFO StartupInfo; //This is an [in] parameter
 
 int sw,sh;
 int xm=0;
@@ -796,8 +806,7 @@ int bm=0;
 int gx1=0;
 int gy1=0;
 
-int ke=0;
-int kc=0;
+int key=0;
 
 // Update event for OS interaction
 void r3update()
@@ -806,21 +815,15 @@ void r3update()
 SDL_PollEvent(&evt);
 switch (evt.type) {
 	case SDL_KEYDOWN:
-		ke=evt.key.keysym.sym;
-      	break;
+		key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
 	case SDL_KEYUP:
-		ke=evt.key.keysym.sym;
-      	break;
+		key=0x1000|(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
 	case SDL_MOUSEBUTTONDOWN:	      	
-		bm|=evt.button.button;
-		break;
+		bm|=evt.button.button;break;
 	case SDL_MOUSEBUTTONUP:	      	
-		bm&=~evt.button.button;
-		break;
+		bm&=~evt.button.button;break;
 	case SDL_MOUSEMOTION:
-	    xm=evt.motion.x;
-	    ym=evt.motion.y;		
-	    break;
+	    xm=evt.motion.x;ym=evt.motion.y;break;
 	}
 }
          
@@ -828,13 +831,13 @@ switch (evt.type) {
 void runr3(int boot) 
 {
 stack[255]=0;	
-register int ip=boot;
 register int64_t TOS=0;
 register int64_t *NOS=&stack[0];
 register int64_t *RTOS=&stack[255];
 register int64_t REGA=0;
 register int64_t REGB=0;
 register int64_t op=0;
+register int ip=boot;
 register int64_t W=0;
 
 while(ip!=0) { 
@@ -894,7 +897,7 @@ while(ip!=0) {
 	case SHR:TOS=*NOS>>TOS;NOS--;continue;				//SAR
 	case SHR0:TOS=((uint64_t)*NOS)>>TOS;NOS--;continue;	//SHR
 	case MOD:TOS=*NOS%TOS;NOS--;continue;					//MOD
-	case DIVMOD:W=*NOS%TOS;*NOS=(*NOS/TOS);TOS=W;continue;	//DIVMOD
+	case DIVMOD:W=*NOS;*NOS=W/TOS;TOS=W%TOS;continue;	//DIVMOD
 	case MULDIV:TOS=(*(NOS-1)*(*NOS)/TOS);NOS-=2;continue;	//MULDIV
 	case MULSHR:TOS=(*(NOS-1)*(*NOS))>>TOS;NOS-=2;continue;	//MULSHR
 	case CDIVSH:TOS=((*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
@@ -985,7 +988,7 @@ while(ip!=0) {
 	case BPEN://"BPEN"
 		NOS++;*NOS=TOS;TOS=bm;continue;
 	case KEY://"KEY"
-		NOS++;*NOS=TOS;TOS=ke;continue;	
+		NOS++;*NOS=TOS;TOS=key;continue;	
 	case MSEC://"MSEC"
 		NOS++;*NOS=TOS;TOS=SDL_GetTicks();continue;		
 	case TIME://"TIME"
@@ -1054,6 +1057,26 @@ while(ip!=0) {
 		NOS-=5;TOS=*NOS;NOS--;continue;
 	case POLI: 
 		gr_drawPoli();continue;
+
+	case SYS: 
+    	if (TOS==0) {	// 0 sys | end process
+            if (ProcessInfo.hProcess!=0) {
+               TerminateProcess(ProcessInfo.hProcess,0);
+               CloseHandle(ProcessInfo.hThread);
+               CloseHandle(ProcessInfo.hProcess);
+               ProcessInfo.hProcess=0;
+               }
+            TOS=-1;
+            continue; }
+        if (TOS==-1) {	// -1 sys | end process??
+            if (ProcessInfo.hProcess==0) continue;
+            W=WaitForSingleObject(ProcessInfo.hProcess,0);
+            if (W==WAIT_TIMEOUT) TOS=0; else TOS=-1;
+            continue; }
+        ZeroMemory(&StartupInfo, sizeof(StartupInfo));
+        StartupInfo.cb = sizeof StartupInfo ; //Only compulsory field
+        TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
+		continue;
 		
 #ifdef VIDEOWORD
 	case VIDEO:
@@ -1071,10 +1094,6 @@ while(ip!=0) {
 	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;
 	case TDEBUG:printf("%d ",TOS);continue;	
 #endif//----------------- DEBUG	
-
-	case SYS: continue;
-//	case 111:systemcall(TOS,stack[NOS]);TOS=stack[NOS-1];NOS-=2;continue; //SYSCALL | nro int -- 
-//	case 112:TOS=systemmem(TOS);continue;//SYSMEM | nro -- ini
 	
 	case ENDWORD: continue;
 //----------------- ONLY INTERNAL
@@ -1096,7 +1115,7 @@ while(ip!=0) {
 	case MOD1:TOS=TOS%(op>>8);continue;
 	case DIVMOD1:op>>=8;NOS++;*NOS=TOS/op;TOS=TOS%op;continue;	//DIVMOD
 	case MULDIV1:op>>=8;TOS=(*NOS)*TOS/op;NOS--;continue;		//MULDIV
-	case MULSHR1:op>>=8;TOS=((*NOS)*TOS)>>op;NOS--;continue;		//MULSHR
+	case MULSHR1:op>>=8;TOS=((*NOS)*TOS)>>op;NOS--;continue;	//MULSHR
 	case CDIVSH1:op>>=8;TOS=((*NOS)<<TOS)/op;NOS--;continue;	//CDIVSH
 	case IFL1:if ((op<<32>>48)<=TOS) ip+=(op<<48>>56);continue;	//IFL
 	case IFG1:if ((op<<32>>48)>=TOS) ip+=(op<<48>>56);continue;	//IFG
@@ -1116,9 +1135,15 @@ while(ip!=0) {
 ////////////////////////////////////////////////////////////////////////////
 int main(int argc, char* argv[])
 {
-if (!r3compile("main.r3")) return -1;
+char filename[1024];
+if (argc>1) 
+	strcpy(filename,argv[1]); 
+else 
+	strcpy(filename,"main.r3");
 
-gr_init("r3",800,600);
+if (!r3compile(filename)) return -1;
+
+gr_init(filename,800,600);
 runr3(boot);
 gr_fin();
 

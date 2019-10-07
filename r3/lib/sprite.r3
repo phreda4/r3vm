@@ -4,8 +4,8 @@
 | pal-type-w-h
 | 4-4-12-12
 
-^lib/gr.r3
-^lib/math.r3
+^r3/lib/gr.r3
+^r3/lib/math.r3
 
 #pal0
 $000000ff $808080ff $C0C0C0ff $FFFFFFff $800000ff $FF0000ff $808000ff $FFFF00ff
@@ -32,7 +32,7 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 |---- w/alpha
 :alp!+ | col --
 |	$ff na? ( drop 4 a+ ; )
-	dup $ff and 
+	dup $ff and
 	0? ( drop a!+ ; )
 	$ff =? ( 2drop 4 a+ ; )
 	swap
@@ -45,16 +45,22 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 	over - rot * 8 >> + $ff0000 and
 	r> or $ff or a!+ ;
 
+:pala!+ | pal --
+	2 << paleta + @ a!+ ;
+
 |----- 1:1
 
 :clipw
-	sw >? ( sw pick2 - ; ) wb ;
+	sw >? ( sw pick2 - ; )
+	wb ;
 
 :negw
-	-? ( dup 'wi +! neg 'addm ! 0 ; ) 0 'addm ! ;
+	-? ( dup 'wi +! neg 'addm ! 0 ; )
+	0 'addm ! ;
 
 :cliph
-	sh >? ( sh pick2 - ; ) hb ;
+	sh >? ( sh pick2 - ; )
+	hb ;
 
 :clip | x y	-- x y
 	swap wb over + clipw 'wi ! drop
@@ -62,25 +68,48 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 	swap hb over + cliph 'hi ! drop
 	-? ( dup 'hi +! neg wb * 'addm +! 0 )
 	;
-	
+
 |---- opaque
 :d0 | adr -- ;32 bit/pixel
 	addm 2 << + >b
 	wb wi - 2 <<
    	sw wi - 2 <<
 	hi ( 1?
-		wi ( 1? 
-			b@+ a!+ 
+		wi ( 1?
+			b@+ a!+
 			1 - ) drop
 		over a+
 		pick2 b+
 		1 - ) 3drop ;
 :d1 | adr -- ;8
-:d2 | adr -- ;4
+	drop ;
+
+:d2p
+	$f0000000 an? ( dup 28 >> $f and pala!+ ; )
+	4 a+ ;
+
+:d2l | wi val -- wi2
+	over 8 max
+	( 1? 1 - swap
+		d2p 4 <<
+		swap ) 2drop
+	8 - 0 max ;
+
+:d2 | adr -- ;
+	addm 3 >> + >b
+	wb wi - 3 >>
+	sw wi - 2 <<
+	hi ( 1?
+		wi ( 1? b@+ d2l ) drop
+		over a+
+		pick2 b+
+		1 - ) 3drop ;
+
 :d3 | adr -- ;2
 :d4 | adr -- ;1
+	drop
 	;
-	
+
 #odraw d0 d1 d2 d3 d4 0 0 0
 
 ::sprite | x y 'spr  --
@@ -191,4 +220,4 @@ $. $ffff $ffff $ffff $ffff $ffff $. $.
 $. $. $. $. $. $. $. $.
 $. $. $. $. $. $. $. $.
 
-|: cls 10 10 'nav32 sprite ;
+: cls 10 10 'nav32 sprite ;

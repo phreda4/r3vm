@@ -1,6 +1,6 @@
 [Project]
-FileName=r3.dev
-Name=r3
+FileName=r3v.dev
+Name=r3v
 Type=1
 Ver=2
 ObjFiles=
@@ -11,7 +11,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=-Dmain=SDL_main_@@_
 CppCompiler=
-Linker=-lmingw32  -lSDL2main -lSDL2_@@__@@_
+Linker=-lmingw32  -lSDL2main -lSDL2_@@_-lavcodec -lavformat -lavutil -lswresample -lswscale -lavdevice_@@_
 IsCpp=1
 Icon=
 ExeOutput=
@@ -19,7 +19,7 @@ ObjectOutput=
 LogOutput=
 LogOutputEnabled=0
 OverrideOutput=0
-OverrideOutputName=r3.exe
+OverrideOutputName=r3v.exe
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=000000c000000000000001000
-UnitCount=2
+UnitCount=3
 
 [VersionInfo]
 Major=1
@@ -62,6 +62,16 @@ BuildCmd=
 
 [Unit4]
 FileName=r3.cpp
+CompileCpp=1
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit3]
+FileName=video.cpp
 CompileCpp=1
 Folder=
 Compile=1

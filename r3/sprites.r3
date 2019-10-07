@@ -1,44 +1,47 @@
 | NAVES GAME
 | PHREDA 2018
 
-^lib/sprite.r3
+^r3/lib/sprite.r3
+^r3/lib/str.r3
+^r3/lib/print.r3
+^r3/lib/key.r3
 
-#nav4 $2008008 | pal-0 type-2 8x8
-$........
-$...1....
-$...1....
-$..111...
-$..121...
-$.11111..
-$...5....
-$....5...
 
 #nav32 $008008 | 8x8 32bits
-$. $. $. $ffff $. $. $. $.
-$. $. $. $ffff $. $. $. $.
-$. $. $ffff $ffff $ffff $. $. $.
-$. $. $ffff $ffff $ffff $. $. $.
-$. $ffff $ffff $ffff $ffff $ffff $. $.
-$. $ffff $ff00 $ff00 $ffff $ffff $. $.
+$. $. $. $ff $. $. $. $.
+$. $. $. $ff $. $. $. $.
+$. $. $ff $ff $ff0000 $. $. $.
+$. $. $ff $ff $ff0000 $. $. $.
+$. $ff $ff $ffff $ff0000 $ffff $. $.
+$. $ff $ff $ffff $ff0000 $ffff $. $.
 $. $. $. $. $. $. $. $.
-$. $. $. $. $. $. $. $.
+$ff00 $ff00 $ff00 $ff00 $. $. $. $.
 
-#lives
-#pnts
 #xn 100 #yn 100
-#xv #yv
 
 :player
 	xn yn 'nav32 sprite
-	xypen 'nav4 sprite
 	;
+
+#val
 
 :ongame
-	cls
-	player
-	key 27 =? ( exit ) drop
-	;
+	cls home
+	xypen .d print " " print .d print cr
+	val .h print cr
 
+	key
+	1? ( dup 'val ! )
+	<up> =? ( -1 'yn +! )
+	<dn> =? ( 1 'yn +! )
+	<lef> =? ( -1 'xn +! )
+	<rig> =? ( 1 'xn +! )
+
+	>esc< =? ( exit )
+	drop
+	player
+	;
 :
 'ongame onshow
 ;
+
