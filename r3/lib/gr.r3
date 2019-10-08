@@ -116,3 +116,11 @@
 		'xm !
 		) 4drop ;
 
+::col50% | c1 c2 -- c
+	$fefefe and swap $fefefe and + 1 >> ;
+
+::col25% | c1 c2 -- c
+	$fefefe and swap $fefefe and over + 1 >> + 1 >> ;
+
+::col33%  | c1 c2 -- c
+	$555555 and swap $aaaaaa and or ;

@@ -18,8 +18,9 @@ extern "C" {
 #endif
 
 extern SDL_Window *window;
-extern SDL_Renderer *renderer;
-extern SDL_Texture *texture;
+//extern SDL_Renderer *renderer;
+//extern SDL_Texture *texture;
+
 extern Uint32 *gr_buffer; // buffer de pantalla
 
 extern int gr_ancho,gr_alto;

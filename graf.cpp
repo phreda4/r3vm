@@ -6,7 +6,6 @@
 #include "graf.h"
 
 SDL_Window *window;
-
 //SDL_Renderer *renderer;
 //SDL_Texture *texture;
 
@@ -120,10 +119,9 @@ window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XR
 //renderer=SDL_CreateRenderer(window, -1, 0);if (!renderer) return -1;
 //texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STATIC,XRES,YRES);
 
-//SDL_WINDOW_FULLSCREEN .. real
 //SDL_WINDOW_FULLSCREEN_DESKTOP ..simulate
-//0
-SDL_SetWindowFullscreen(window,0);
+//SDL_SetWindowFullscreen(window,0);
+//SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 SDL_ShowCursor(SDL_DISABLE);
 
 screen = SDL_GetWindowSurface(window);
@@ -168,8 +166,7 @@ SDL_UpdateWindowSurface(window);
 void gr_cls(int color)
 {
 int *p=(int*)gr_buffer;
-int c=gr_sizescreen;
-for(;c>0;c--,p++) *p=color;
+for(int c=gr_sizescreen;c>0;c--) *p++=color;
 }
 #define MASK1 (RED_MASK|BLU_MASK)
 #define MASK2 (GRE_MASK)

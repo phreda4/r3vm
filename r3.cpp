@@ -28,13 +28,12 @@ char *werror;
 
 int boot=-1;
 
-int memcsize;
+int memcsize=0;
 int memc=0;
 int *memcode;
 
 int memdsize=0xfffff;
 int memd=0;
-int meminidata=0;
 char *memdata;
 
 char path[1024];
@@ -433,7 +432,13 @@ switch(modo){
 // Compile adress of var
 void compilaADDR(int n) 
 {
-if (modo>1) { datanro(dicc[n].mem);return; }
+if (modo>1) { 
+	if ((dicc[n].info&0x10)==0)
+		datanro(dicc[n].mem);
+	else
+		datanro((int64_t)&memdata[dicc[n].mem]);	
+	return; 
+	}
 codetok((dicc[n].mem<<8)+LIT+((dicc[n].info>>4)&1));  //1 code 2 data
 }
 
@@ -718,7 +723,6 @@ char *sourcecode;
 sourcecode=openfile(name);
 if (sourcecode==0) return 0;
 memcsize=0;
-meminidata=0;
 cntincludes=0;
 cntstacki=0;
 r3includes(sourcecode); // load includes
@@ -750,7 +754,7 @@ if (!r3token(sourcecode)) {
 	}
 
 //dumpdicc();
-dumpcode();
+//dumpcode();
 
 printf("ok.\n");
 printf("includes:%d - words:%d\n",cntincludes,cntdicc);
@@ -784,7 +788,8 @@ return g;
 //---------------------------//
 // TOS..DSTACK--> <--RSTACK  //
 //---------------------------//
-int64_t stack[256];
+#define STACKSIZE 256
+int64_t stack[STACKSIZE];
 
 SDL_Event evt;
 
@@ -830,10 +835,10 @@ switch (evt.type) {
 // run code, from adress "boot"
 void runr3(int boot) 
 {
-stack[255]=0;	
+stack[STACKSIZE-1]=0;	
 register int64_t TOS=0;
 register int64_t *NOS=&stack[0];
-register int64_t *RTOS=&stack[255];
+register int64_t *RTOS=&stack[STACKSIZE-1];
 register int64_t REGA=0;
 register int64_t REGB=0;
 register int64_t op=0;
@@ -858,12 +863,13 @@ while(ip!=0) {
 	case NIF:if (TOS>=0) {ip+=(op>>8);}; continue;//NIF
 	case IFL:if (TOS<=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFL
 	case IFG:if (TOS>=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFG
-	case IFE:if (TOS!=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFN
-	case IFGE:if (TOS<*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFGE
-	case IFLE:if (TOS>*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFLE
+	case IFE:if (TOS!=*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFN	
+	case IFGE:if (TOS>*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFGE
+	case IFLE:if (TOS<*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFLE
 	case IFNE:if (TOS==*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFNO
 	case IFAND:if (!(TOS&*NOS)) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFNA
 	case IFNAND:if (TOS&*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFAN
+	
 	case IFBT:if (TOS<=*NOS&&*NOS<=*(NOS+1)) {ip+=(op>>8);} 
 		TOS=*(NOS-1);NOS-=2;continue;//BTW (need bit trick)
 	case DUP:NOS++;*NOS=TOS;continue;				//DUP
@@ -976,7 +982,7 @@ while(ip!=0) {
 	case REDRAW://"REDRAW"
 		gr_redraw();continue;
 	case MEM://"MEM"
-		NOS++;*NOS=TOS;TOS=(int64_t)&memdata[meminidata];continue;
+		NOS++;*NOS=TOS;TOS=(int64_t)&memdata[memd];continue;
 	case SW://"SW"
 		NOS++;*NOS=TOS;TOS=gr_ancho;continue;
 	case SH://"SH"
@@ -1120,8 +1126,8 @@ while(ip!=0) {
 	case IFL1:if ((op<<32>>48)<=TOS) ip+=(op<<48>>56);continue;	//IFL
 	case IFG1:if ((op<<32>>48)>=TOS) ip+=(op<<48>>56);continue;	//IFG
 	case IFE1:if ((op<<32>>48)!=TOS) ip+=(op<<48>>56);continue;	//IFN
-	case IFGE1:if ((op<<32>>48)<TOS) ip+=(op<<48>>56);continue;	//IFGE
-	case IFLE1:if ((op<<32>>48)>TOS) ip+=(op<<48>>56);continue;	//IFLE
+	case IFGE1:if ((op<<32>>48)>TOS) ip+=(op<<48>>56);continue;	//IFGE
+	case IFLE1:if ((op<<32>>48)<TOS) ip+=(op<<48>>56);continue;	//IFLE
 	case IFNE1:if ((op<<32>>48)==TOS) ip+=(op<<48>>56);continue;//IFNO
 	case IFAND1:if (!((op<<32>>48)&TOS)) ip+=(op<<48>>56);continue;//IFNA
 	case IFNAND1:if ((op<<32>>48)&TOS) ip+=(op<<48>>56);continue;//IFAN

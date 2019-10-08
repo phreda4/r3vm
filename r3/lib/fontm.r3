@@ -6,13 +6,13 @@
 |
 |	::fontm | 'fontm --
 |-------------------------------
-^r3/lib/gr.txt
-^r3/lib/print.txt
+^r3/lib/gr.r3
+^r3/lib/print.r3
 
 :a00 4 a+ ;
-:a01 a@ ink@ color33% a!+ ;
-:a10 ink@ a@ color33% a!+ ;
-:a11 ink@ a!+ ;
+:a01 a@ color col33% a!+ ;
+:a10 color a@ col33% a!+ ;
+:a11 color a!+ ;
 
 #acc a00 a01 a10 a11
 #acn a11 a10 a01 a00
@@ -28,7 +28,7 @@
 
 :charm | c --
     charlin * charrom +
-	ccx ccy setxy
+	ccx ccy xy>v >a
 	sw ccw - 2 <<
 	cch ( 1? 1 -
 		rot @+ charline rot rot
@@ -44,7 +44,7 @@
 		) 3drop ;
 
 :charlinen | sx n bit --
-	0? ( drop ccw ( 1? 1 - ink@ a!+ ) drop ; )
+	0? ( drop ccw ( 1? 1 - color a!+ ) drop ; )
 	ccw ( 1? 1 -
 		swap dup $3 and 2 << 'acn + @ ex
 		2 >> swap ) 2drop ;
@@ -60,6 +60,6 @@
 
 ::fontm | 'fontm --
 	>a a@+ dup 2 << 'charlin !
-	a@+ swap fixsize
+	a@+ swap 'cch ! 'ccw !
 	a> 'charrom !
-	'charm 'charsizem setfont ;
+	'charm 'charsizem font! ;

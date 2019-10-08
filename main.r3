@@ -3,6 +3,12 @@
 ^r3/lib/key.r3
 ^r3/lib/mem.r3
 
+^r3/lib/fontr.r3
+^r3/rft/robotoregular.rft
+
+^r3/lib/fontm.r3
+^r3/fntm/droidsans13.fnt
+
 #path * 1024
 
 #nfiles
@@ -57,8 +63,8 @@
     nfiles .d print " " print linesv .d print cr
 	0 ( linesv <?
 		dup pagina +
+		nfiles  >? ( 2drop ; )
 		dup .d print " " print
-|		nfiles 	>=? ( 2drop ; )
 |		'clicktree onLineClick
     	drawl
 		cr 1 + ) drop ;
@@ -74,8 +80,13 @@
 	teclado
 	;
 
+
+
 :main
 	rebuild
+	robotoregular 48 fontr!
+|	'fontdroidsans13 fontm
+	cls home
 	'inicio onshow
 	;
 : main ;

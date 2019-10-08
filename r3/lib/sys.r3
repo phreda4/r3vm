@@ -17,3 +17,9 @@
 
 ::exit
 	1 '.exit ! ;
+	
+:wk
+	key 27 =? ( exit ) drop ;
+
+::waitesc
+	'wk onshow ;

@@ -7,6 +7,9 @@
 
 ##ccx 0 ##ccy 0
 ##cch 16 ##ccw 8
+##charrom
+##charsiz
+##charlin
 
 #_charemit 'char8pc
 #_charsize 'size8pc
@@ -15,7 +18,8 @@
   '_charsize ! '_charemit ! ;
 
 ::emit | c --
-  $ff and _charemit ex
+  $ff and dup
+  _charemit ex
   _charsize ex 'ccx +! ;
 
 ::home

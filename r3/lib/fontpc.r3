@@ -275,4 +275,4 @@
 	3drop ;
 
 ::size8pc
-  8 ;
+  8 nip ;
