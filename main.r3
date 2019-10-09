@@ -1,7 +1,8 @@
+^r3/lib/sys.r3
 ^r3/lib/print.r3
 ^r3/lib/str.r3
-^r3/lib/key.r3
 ^r3/lib/mem.r3
+^r3/lib/penner.r3
 
 ^r3/lib/fontr.r3
 ^r3/rft/robotoregular.rft
@@ -19,7 +20,8 @@
 
 #nivel
 #pagina
-#linesv 10
+#actual
+#linesv 15
 
 |--------------------------------
 | win
@@ -54,39 +56,106 @@
 	2 << 'files + @ ;
 
 |--------------------------------
-
 :drawl | nro --
+	actual =? ( ">" print )
 	getfilename print
 	;
 
 :drawtree
-    nfiles .d print " " print linesv .d print cr
+|    nfiles .d print " " print linesv .d print cr
 	0 ( linesv <?
 		dup pagina +
-		nfiles  >? ( 2drop ; )
-		dup .d print " " print
+		nfiles  >=? ( 2drop ; )
 |		'clicktree onLineClick
     	drawl
 		cr 1 + ) drop ;
 
+|--------------------------------
+:fdn
+	actual nfiles 1 - >=? ( drop ; )
+	1 + pagina linesv + 1 - >=? ( dup linesv - 1 + 'pagina ! )
+	'actual !
+	;
+
+:fup
+	actual 0? ( drop ; )
+	1 - pagina <? ( dup 'pagina ! )
+	'actual !
+	;
+
+:fpgdn
+	actual nfiles 1 - >=? ( drop ; )
+	20 + nfiles >? ( drop nfiles 1 - ) 'actual !
+	actual pagina linesv + 1 -
+	>=? ( dup linesv - 1 + 'pagina ! ) drop
+	;
+
+:fpgup
+	actual 0? ( drop ; )
+	20 - 0 <? ( drop 0 )
+	pagina <? ( dup 'pagina ! )
+	'actual !
+	;
+
+:fhome
+	actual 0? ( drop ; ) drop
+	0 'actual ! 0 'pagina !
+	;
+
+:fend
+	actual nfiles 1- >=? ( drop ; ) drop
+	nfiles 1 - 'actual !
+	actual 1 + pagina linesv + 1 -
+	>=? ( dup linesv - 1 + 'pagina ! ) drop
+	;
+
+
 :teclado
 	key
 	>esc< =? ( exit )
+	<up> =? ( fup )
+	<dn> =? ( fdn )
+	<pgup> =? ( fpgup )
+	<pgdn> =? ( fpgdn )
+	<home> =? ( fhome )
+	<end> =? ( fend )
+
 	drop ;
+
+#kk
+:coso
+	robotoregular 160 fontr!
+	key 1? ( dup 'kk ! ) drop
+	kk .h print
+	msec
+	dup 5 << $1ffff and
+	$10000 an? ( $1ffff xor )
+	Bac_In sw 1 >> *. sw 3 >> +
+	'ccx !
+	4 << $1ffff and
+	$10000 an? ( $1ffff xor )
+	Bac_InOut sh 1 >> *. sh 3 >> +
+	'ccy !
+	$ff0000 ink
+	"R3d4" print
+
+	;
 
 :inicio
 	cls home
+|	robotoregular 48 fontr!
+	'fontdroidsans13 fontm
+	$ff00 ink
 	drawtree
 	teclado
+	coso
 	;
-
 
 
 :main
 	rebuild
-	robotoregular 48 fontr!
-|	'fontdroidsans13 fontm
 	cls home
 	'inicio onshow
 	;
+	
 : main ;

@@ -816,20 +816,16 @@ int key=0;
 // Update event for OS interaction
 void r3update()
 {
-//SDL_WaitEvent(&evt);
-SDL_PollEvent(&evt);
-switch (evt.type) {
-	case SDL_KEYDOWN:
-		key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
-	case SDL_KEYUP:
-		key=0x1000|(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
-	case SDL_MOUSEBUTTONDOWN:	      	
-		bm|=evt.button.button;break;
-	case SDL_MOUSEBUTTONUP:	      	
-		bm&=~evt.button.button;break;
-	case SDL_MOUSEMOTION:
-	    xm=evt.motion.x;ym=evt.motion.y;break;
-	}
+key=0;
+if (SDL_PollEvent(&evt)) {
+	switch (evt.type) {
+	case SDL_KEYDOWN:key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
+	case SDL_KEYUP:	key=0x1000|(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
+	case SDL_MOUSEBUTTONDOWN:bm|=evt.button.button;break;
+	case SDL_MOUSEBUTTONUP:bm&=~evt.button.button;break;
+	case SDL_MOUSEMOTION:xm=evt.motion.x;ym=evt.motion.y;break;
+		}
+	}	
 }
          
 // run code, from adress "boot"

@@ -5,7 +5,7 @@
 ^r3/lib/show.txt
 
 |--- state
-#:hot	| activo actual
+##hot	| activo actual
 #hotnow	| activo anterior
 #foco	| activo teclado
 
