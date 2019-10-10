@@ -13,7 +13,7 @@
 	32 r> +! ;
 
 ::p! | list -- adr
-	dup >r @ 
+	dup >r @
 	32 r> +! ;
 
 :delp | list end now -- list end- now-
@@ -24,7 +24,7 @@
 
 ::p.exec | list --
 	dup @+ swap @
-	( over <? )(
+	( over <?
 		dup @+ exec 0? ( drop delp )
 		32 + ) 3drop ;
 
@@ -40,13 +40,13 @@
 
 ::p.mapv | 'vector list --
 	@+ swap @
-	( over <? )(
+	( over <?
 		pick2 exec
 		32 + ) 3drop ;
 
 ::p.mapd | 'vector list --
 	@+ swap @
-	( over <? )(
+	( over <?
 		pick2 exec 0? ( drop dup delp )
 		32 + ) 3drop ;
 
@@ -54,7 +54,7 @@
 :pmapmap | 'adr 'list 'vec --
 	>r
 	@+ swap @
-	( over <? )(
+	( over <?
 		pick2 over <>? ( r@ exec )( drop )
 		32 + )
 	2drop r> drop ;

@@ -56,8 +56,15 @@
 	2 << 'files + @ ;
 
 |--------------------------------
+:invert
+	$fff0 $0 fontmcolor ;
+
+:normal
+	$0 $ff00 fontmcolor ;
+
 :drawl | nro --
-	actual =? ( ">" print )
+	normal
+	actual =? ( invert )
 	getfilename print
 	;
 

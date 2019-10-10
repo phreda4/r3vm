@@ -195,7 +195,7 @@ printf("code\n");
 printf("boot:%d\n",boot);
 for(int i=1;i<memc;i++) {
 	printf("%d.",i);
-	printcode(memcode[i]); //printf("%d ",memcode[i]);
+	printcode(memcode[i]);
 	}
 printf("\n");
 }
@@ -540,12 +540,14 @@ if (n==2) { blockOut();return; }	//)	salto
 if (n==3) { anonIn();return; }		//[	salto:etiqueta
 if (n==4) { anonOut();return; }		//]	etiqueta;push
 
+// optimize conditional jump to short version
 if (n>=IFL && n<=IFNAND && (memcode[memc-1]&0xff)==LIT && 
 	((memcode[memc-1]&0xff000000)==0 || (memcode[memc-1]&0xff000000)==0xff000000)) { 
 	memcode[memc-1]=((memcode[memc-1]<<8)&0xffff0000)|(n-IFL+IFL1);
 	return; 
 	}
 
+// optimize operation with constant
 if (n>=AND && n<=CDIVSH && (memcode[memc-1]&0xff)==LIT) { 
 	memcode[memc-1]=(memcode[memc-1]^LIT)|(n-ADD+ADD1);
 	return; 
@@ -651,7 +653,6 @@ void *data=mmap(0,len,PROT_READ,MAP_PRIVATE,fd,0);
 // include logic, not load many times
 int isinclude(char *str)
 {
-//printf("inc\n");	
 char filename[1024];
 char *fn=filename;	
 char *ns=str;	
@@ -710,7 +711,6 @@ while(*str!=0) {
 	}
 return;
 }
-
 
 // Compile code in file
 int r3compile(char *name) 
@@ -1084,7 +1084,7 @@ while(ip!=0) {
 	case VIDEO:
         if (TOS==0) { NOS-=2;TOS=*NOS;NOS--;videoclose();continue; }
 		videoopen((char*)*(NOS-1),*NOS,TOS);
-		NOS--;TOS=*NOS;NOS--;
+		NOS-=2;TOS=*NOS;NOS--;
 		continue;
 	case VIDEOSHOW:
 		redrawframe(*NOS,TOS);		
@@ -1130,7 +1130,7 @@ while(ip!=0) {
 		
 	}
    }
-//videoclose();
+
 }
 	
 	
@@ -1147,6 +1147,11 @@ if (!r3compile(filename)) return -1;
 
 gr_init(filename,800,600);
 runr3(boot);
+
+#ifdef VIDEOWORD
+videoclose();
+#endif
+
 gr_fin();
 
 return 0;

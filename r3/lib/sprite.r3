@@ -208,16 +208,3 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 	xy>v >a
 	dup 28 >> 1? ( rot @+ 'paleta ! rot rot ) drop
 	24 >> $7 and 2 << 'rdraw + @ ex ;
-
-
-#nav32 $008008 | 8x8 32bits
-$. $. $. $ffff $. $. $. $.
-$. $. $. $ffff $. $. $. $.
-$. $. $ffff $ffff $ffff $. $. $.
-$. $. $ffff $ffff $ffff $. $. $.
-$. $ffff $ffff $ffff $ffff $ffff $. $.
-$. $ffff $ffff $ffff $ffff $ffff $. $.
-$. $. $. $. $. $. $. $.
-$. $. $. $. $. $. $. $.
-
-: cls 10 10 'nav32 sprite ;

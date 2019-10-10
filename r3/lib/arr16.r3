@@ -28,7 +28,7 @@
 
 ::p.draw | list --
 	dup @+ swap @
-	( over <? )(
+	( over <?
 		dup @+ exec 0? ( drop delp )
 		64 + ) 3drop ;
 
@@ -39,13 +39,13 @@
 
 ::p.mapv | 'vector list --
 	@+ swap @
-	( over <? )(
+	( over <?
 		pick2 exec
 		64 + ) 3drop ;
 
 ::p.mapd | 'vector list --
 	@+ swap @
-	( over <? )(
+	( over <?
 		pick2 exec 0? ( drop dup delp )
 		64 + ) 3drop ;
 

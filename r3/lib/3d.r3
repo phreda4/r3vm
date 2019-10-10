@@ -1,6 +1,5 @@
 | 3dmath - PHREDA
 |-------------------------
-
 ^r3/lib/math.r3
 
 ##xf ##yf
@@ -313,33 +312,7 @@
 	drop oy + swap ox + swap ;
 
 ::aspect | --
-	sw 16 << sh / ;
-
-|------------- divisionless
-::3dini
-	1024 sw - 1 >> neg 'ox !
-	1024 sh - 1 >> neg 'oy !
-	matini ;
-
-:c10 | x z -- x'
-	1 >> 0 swap over | x 0 z 0
-	pick3 >? ( over - rot )( over + rot 512 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 256 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 128 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 64 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 32 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 16 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 8 + ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 4+ ) rot 1 >> rot
-	pick3 >? ( over - rot )( over + rot 2 + ) rot 1 >> rot
-	pick3 >? ( 2drop )( 2drop 1 + )
-	nip ;
-
-::3dproject | x y z -- x y
-	rot over c10 ox + rot rot c10 oy + ;
-
-::3dproj | x y z -- x y
-	rot over c10 rot rot c10 ;
+	sw sh 16 <</ ;
 
 |------- vectores
 ::normInt2Fix | x y z -- xf yf zf

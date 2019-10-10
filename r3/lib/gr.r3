@@ -1,7 +1,7 @@
-^r3/lib/sys.r3
-
 | r3 lib VFRAME play
 | PHREDA 2018
+
+^r3/lib/sys.r3
 
 ##color $ff00
 ##paper 0
@@ -48,7 +48,7 @@
     r@ + swap
     r> r> ) 4drop ;
 
-::line | x y --
+::bline | x y --
   2dup iline
 
 ::op | x y --
@@ -68,7 +68,7 @@
 	xm pick2 - ym pick2 - xm pick4 + hlineo
 	xm pick2 - ym pick2 + xm pick4 + hlineo ;
 
-::ellipse | x y rx ry --
+::bellipse | x y rx ry --
 	'ym ! 'xm !
 	over dup * dup 1 <<		| a b c 2aa
 	swap dup >a 'dy ! 		| a b 2aa
@@ -86,10 +86,10 @@
 		)
 	4drop ;
 
-::circle | x y r --
-	dup ellipse ;
+::bcircle | x y r --
+	dup bellipse ;
 
-::circleb | x y r --
+::bcircleb | x y r --
 	dup 1 << 'ym ! 1 - 0
 	1 'dx ! 1 'dy !
 	1 ym - 'xm !
@@ -116,6 +116,8 @@
 		'xm !
 		) 4drop ;
 
+|-----------------------------------------
+
 ::col50% | c1 c2 -- c
 	$fefefe and swap $fefefe and + 1 >> ;
 
@@ -124,3 +126,13 @@
 
 ::col33%  | c1 c2 -- c
 	$555555 and swap $aaaaaa and or ;
+
+::colmix | c1 c2 m -- c
+	pick2 $ff00ff and
+	pick2 $ff00ff and
+	over - pick2 * 8 >> +
+	$ff00ff and >r
+	swap $ff00 and
+	swap $ff00 and
+	over - rot * 8 >> +
+	$ff00 and r> or ;

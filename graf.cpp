@@ -106,7 +106,8 @@ int *rl;
 #define GRE_MASK 0xFF00
 #define BLU_MASK 0xFF
 
-inline void swap(int &a,int &b) { a^=b;b^=a;a^=b; }
+//inline void swap(int &a,int &b) { a^=b;b^=a;a^=b; }
+#define swap( a, b ) (a)^=(b)^=(a)^=(b)
 inline int abs(int a) { return (a+(a>>31))^(a>>31); }
 
 //////////////////////////////////////////////////////////////
