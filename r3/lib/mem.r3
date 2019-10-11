@@ -29,3 +29,42 @@
 ::tolow | C -- c
 	$20 or ;
 
+
+::count | s1 -- s1 cnt	v3
+	dup >a
+	0 ( a@+ dup $01010101 - swap not and
+		$80808080 na? drop 4 + )
+	$80 an? ( drop ; )
+	$8000 an? ( drop 1 + ; )
+	$800000 an? ( drop 2 + ; )
+	drop 3 + ;
+
+::= | s1 s2 -- 1/0
+	( swap c@+ 1?
+		toupp rot c@+ toupp rot -
+		1? ( 3drop 0 ; ) drop
+		) 2drop
+	c@ $ff and 33 <? ( drop 1 ; )
+	drop 0 ;
+
+::=pre | s1 s2 -- 1/0
+	( c@+ 1?
+		toupp rot c@+ toupp rot -
+		1? ( 3drop 0 ; )
+		drop swap )
+	3drop 1 ;
+
+::=w | s1 s2 -- 1/0
+	( c@+ 32 >?
+		toupp rot c@+ toupp rot -
+		1? ( 3drop 0 ; )
+		drop swap ) 2drop
+	c@ $ff and 33 <? ( drop 1 ; )
+	drop 0 ;
+
+::=pos | s1 ".pos" -- s1 1/0
+	over count
+	rot count | s1 s1 cs1 "" c"
+	rot swap - | s1 s1 "" dc
+	rot + | s1 "" s1.
+	= ;

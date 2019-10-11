@@ -233,7 +233,7 @@ if (codecPar->codec_type == AVMEDIA_TYPE_AUDIO) {
 	is.pFrameRGB=av_frame_alloc();
 	rgbFrameSize=av_image_get_buffer_size(AV_PIX_FMT_RGB32,videow,videoh,8);
 	is.pFrameBuffer=(uint8_t*)av_malloc(rgbFrameSize);
-	rv=av_image_fill_arrays(&is.pFrameRGB->data[0],&is.pFrameRGB->linesize[0],is.pFrameBuffer,AV_PIX_FMT_RGB32,videow,videoh,8);
+	rv=av_image_fill_arrays(&is.pFrameRGB->data[0],&is.pFrameRGB->linesize[0],is.pFrameBuffer,AV_PIX_FMT_RGB32,videow,videoh,1);
 
 	PacketQueueInit(&is.videoq);
 	hVideoThread = SDL_CreateThread(VideoThread,NULL, &is);
@@ -243,6 +243,26 @@ if (codecPar->codec_type == AVMEDIA_TYPE_AUDIO) {
 	}
 	
 return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////
+void videoresize(int vw)
+{
+
+videow=vw;	
+videostride=gr_ancho-videow;
+videoh=is.videoCtx->height*videow/is.videoCtx->width;	// aspect ratio
+if (is.pFrameBuffer==NULL) return;
+av_frame_free(&is.pFrameRGB);
+av_free(is.pFrameBuffer);is.pFrameBuffer=NULL;
+sws_freeContext(is.pSwsCtx);
+is.pSwsCtx=sws_getContext(is.videoCtx->width,is.videoCtx->height,is.videoCtx->pix_fmt,
+	videow,videoh,AV_PIX_FMT_RGB32,SWS_BILINEAR,NULL,NULL,NULL);
+is.pFrameRGB=av_frame_alloc();
+int rgbFrameSize=av_image_get_buffer_size(AV_PIX_FMT_RGB32,videow,videoh,8);
+is.pFrameBuffer=(uint8_t*)av_malloc(rgbFrameSize);
+av_image_fill_arrays(&is.pFrameRGB->data[0],&is.pFrameRGB->linesize[0],
+	is.pFrameBuffer,AV_PIX_FMT_RGB32,videow,videoh,1);
 }
 
 int DecodeThread(void* pUserData)
@@ -267,8 +287,8 @@ int tv;
 if (videoa==0) return;
 SDL_CloseAudio();
 is.quit=1;
-SDL_WaitThread(hVideoThread, &tv); //SDL_DetachThread(hVideoThread);
-SDL_WaitThread(hParseThread, &tv);
+if (hVideoThread) SDL_WaitThread(hVideoThread, &tv);
+if (hParseThread) SDL_WaitThread(hParseThread, &tv);
 PacketQueueFree(&is.videoq);
 PacketQueueFree(&is.audioq);
 if (is.pAudioFrame) av_frame_free(&is.pAudioFrame);
@@ -280,16 +300,16 @@ if (is.pSwrCtx) swr_free(&is.pSwrCtx);
 if (is.pSwsCtx) sws_freeContext(is.pSwsCtx);
 if (is.pFormatCtx)	avformat_close_input(&is.pFormatCtx);
 avformat_network_deinit();
+is.pFrameBuffer=NULL;
 videoa=0;
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void videoopen(char *filename,int vw,int vh)
+void videoopen(char *filename,int vw)
 {
 if (videoa==1) videoclose();
-videow=vw;videoh=vh;	
+videow=vw;videoh=1;
 videostride=gr_ancho-videow;
-
 avformat_network_init();
 memset((void*)&is,0,sizeof(is));
 int rv=0,audioStream=-1,videoStream=-1;
@@ -304,7 +324,6 @@ is.audioStream = audioStream;
 is.videoStream = videoStream;
 if (audioStream >= 0) StreamComponentOpen(audioStream);
 if (videoStream >= 0) StreamComponentOpen(videoStream);
-
 AVRational fr = av_guess_frame_rate(is.pFormatCtx,is.videoSt, NULL);
 sleepfps=1000/(int)((double)(fr.num+(fr.den/2))/fr.den);
 hParseThread = SDL_CreateThread(DecodeThread,NULL,&is);
@@ -313,14 +332,18 @@ return;
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void redrawframe(int x,int y)
+int redrawframe(int x,int y)
 {
-if (videoa==0) return;
+if (is.pFrameBuffer==NULL) return 0;
+if (is.videoq.nb_packets==0 && is.audioq.nb_packets==0) {
+	hVideoThread=hParseThread=0;
+	videoclose();return -1; 
+	}
 int i,j;
-Uint32 *s=(Uint32*)is.pFrameBuffer;//is.pFrameRGB->data[0];
+Uint32 *s=(Uint32*)is.pFrameBuffer;
 Uint32 *d=gr_buffer+(y*gr_ancho+x);
 for (i=0;i<videoh;i++,d+=videostride) 
-	for(j=0;j<videow;j++) 
-		*d++=*s++;
+	for(j=0;j<videow;j++) *d++=*s++;
+return 0;
 }
 

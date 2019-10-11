@@ -20,8 +20,9 @@ extern "C"
 }
 #endif
 
-void videoopen(char *filename,int vw,int vh);
+void videoopen(char *filename,int vw);
 void videoclose();
-void redrawframe(int x,int y);
+void videoresize(int vw);
+int redrawframe(int x,int y);
 
 #endif

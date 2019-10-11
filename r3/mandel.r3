@@ -17,11 +17,11 @@
 #tw 2.0 | Escala
 #th 2.0
 
-:colorc | c --
+:color | c --
   dup dup 3 << $ff and
   rot 2 << $ff and
   rot 1 << $ff and
-  8 << or 8 << or 'color ! ;
+  8 << or 8 << or 'ink ! ;
 
 :calcula | x y gx gy -- zx zy c
   2dup 0  ( 256 <? 1 +
@@ -37,7 +37,7 @@
     	by - bh /. th *. sy + pick2 | gx
 		bx - bw /. tw *. sx + swap  | gy
 		calcula >r 4drop r>
-		colorc 2dup pset swap 1 + bw =? ( drop 1 + 0 ) swap
+		color 2dup pset swap 1 + bw =? ( drop 1 + 0 ) swap
 		) 2drop ;
 
 :waitkey

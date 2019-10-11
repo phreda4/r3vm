@@ -27,11 +27,11 @@
 :a2 rf>xy pline ; | linea
 :a3 swap >b rf>xy b@+ rf>xy pcurve b> ;  | curva
 :a4 swap >b rf>xy b@+ rf>xy b@+ rf>xy pcurve3 b> ; | curva3
+|---- accediendo a x e y
+:a5 rf>xy opx swap pline opy pline ;
+:a6 rf>xy opy pline opx swap pline ;
 
-| accediendo a x e y
-|:a5 rf>xy xp swap pline yp pline ;
-|:a6 rf>xy yp pline xp swap pline ;
-#gfont a0 a1 a2 a3 a4 0 0 0
+#gfont a0 a1 a2 a3 a4 a5 a6 0
 
 :drawrf | 'rf --
 	fxcc 'ccx +!

@@ -171,11 +171,11 @@
 	exec ;
 
 ::bordefoco
-	ink@
+	ink
 	blanco 1 dup 'w +! 'h +! gc.rod
 	negro
 	1 dup 'w +! 'h +! gc.rod
-	ink
+	'ink !
 	-3 dup 'w +! 'h +!
 	;
 

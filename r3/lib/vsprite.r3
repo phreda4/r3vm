@@ -11,7 +11,7 @@
 
 |--------??????
 :a0 drop ; 						| el valor no puede ser 0
-:a1 8 >> ink ; 					| color0
+:a1 8 >> 'ink ! ; 					| color0
 :a2 swap >b gc>xy b@+ gc>xy 	| xc yc xm ym ; centro y matriz
 	>r neg pick2 + r> neg pick2 +
 	1.0 pick2 dup * pick2 dup * +
@@ -31,9 +31,9 @@
 :aa swap >b gc>xy b@+ gc>xy curve b> ;  | curva
 :ab swap >b gc>xy b@+ gc>xy b@+ gc>xy curve3 b> ; | curva3
 |-------- pintado de poligonos
-:ac 8 >> ink sfill finpoli ; 			| solido
-:ad 8 >> ink@ fcol lfill finpoli ; 	| ldegrade
-:ae 8 >> ink@ fcol rfill finpoli ; 	| rdegrade
+:ac 8 >> 'ink ! sfill finpoli ; 			| solido
+:ad 8 >> ink fcol lfill finpoli ; 	| ldegrade
+:ae 8 >> ink fcol rfill finpoli ; 	| rdegrade
 :af 8 >> 2 << paltex + @ tfill finpoli ; 	| tdegrade
 
 #jves a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af

@@ -21,24 +21,27 @@
 	$10000 an? ( $1ffff xor )
 	Bac_InOut sh 1 >> *. sh 3 >> +
 	'ccy !
-	$ff0000 ink
+	$ff0000 'ink !
 	"R3d4" print
 	;
 
 :coso
 	cls home
 	xv 5 >> dup videoshow
+	1? ( "video.mp4" 500 video ) drop
 	xv 5 >> .d print cr
 	xv 1 + $7ff and 'xv !
+
 	coso1
 	;
 
 :teclado
 	key
 	>esc< =? ( exit )
-	<f1> =? ( "video.mp4" 500 100 video )
-	<f2> =? ( "salud.mp4" 500 100 video )
-	<f3> =? ( 0 0 0 video )
+	<f1> =? ( "video.mp4" 500 video )
+	<f2> =? ( "salud.mp4" 500 video )
+	<f3> =? ( 0 0 video )
+	<f4> =? ( xv 3 >> 64 + videosize )
 	drop ;
 
 :show
@@ -46,8 +49,8 @@
 	coso ;
 
 :
-|	"salud.mp4" 600 100 video
-	"video.mp4" 600 100 video
+|	"salud.mp4" 600 video
+	"video.mp4" 600 video
 	0 'paper !
 	'show onshow
 	|0 dup dup video

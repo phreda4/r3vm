@@ -3,7 +3,6 @@
 
 ^r3/lib/sys.r3
 
-##color $ff00
 ##paper 0
 
 ##xa 0 ##ya 0
@@ -15,7 +14,7 @@
   sw * + 2 << vframe + ;
 
 ::pset | x y --
-  xy>v color swap ! ;
+  xy>v ink swap ! ;
 
 ::pget | x y -- c
   xy>v @ ;
@@ -23,15 +22,15 @@
 :hline | xd yd xa --
   pick2 - 0? ( drop pset ; )
   -? ( rot over + rot rot neg )
-  >r xy>v color r> fill ;
+  >r xy>v ink r> fill ;
 
 :hlineo | xmin yd xmax --
   pick2 - 0? ( drop pset ; )
-  >r xy>v color r> fill ;
+  >r xy>v ink r> fill ;
 
 :vline | x1 y1 cnt
 	rot rot xy>v >a
-	( 1? 1 - color a! sw 2 << a+ ) drop ;
+	( 1? 1 - ink a! sw 2 << a+ ) drop ;
 
 :iline | xd yd --
   ya =? ( xa hline ; )
@@ -57,7 +56,7 @@
 ::rect  | w h x y --
   xy>v >a
   ( 1? 1 -
-    a> color pick3 fill
+    a> ink pick3 fill
 	sw 2 << a+
     ) 2drop ;
 

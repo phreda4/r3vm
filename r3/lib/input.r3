@@ -64,10 +64,10 @@
 
 |----- cursor
 :drcursor
-	ink@ >r
+	ink >r
 	modo 'lins =? ( verde )( rojo ) drop
 	printcur drop
-	r> ink ;
+	r> 'ink ! ;
 
 :cursori
 	blink 1? ( drop ; ) drop
@@ -279,7 +279,7 @@
 	;
 
 :proinputm | --
-|	ink@ gris gc.fbox ink
+|	ink gris gc.fbox 'nk !
 	ccy ccx cursorm 'ccx ! 'ccy !
 	[ key toasc modo exec ; ] <visible>
 	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>

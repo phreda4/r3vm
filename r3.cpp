@@ -97,11 +97,14 @@ const char *r3bas[]={
 "MSEC","TIME","DATE",
 "LOAD","SAVE","APPEND",
 "FFIRST","FNEXT",
-"INK","OP","LINE","CURVE","CURVE3","PLINE","PCURVE","PCURVE3","POLI",
+
+"INK","'INK","ALPHA","OPX","OPY", // 'INK allow compile replace
+"OP","LINE","CURVE","CURVE3","PLINE","PCURVE","PCURVE3","POLI",
+
 "SYS",
 
 #ifdef VIDEOWORD
-"VIDEO","VIDEOSHOW",
+"VIDEO","VIDEOSHOW","VIDEOSIZE",
 #endif
 
 #ifdef DEBUGWORD
@@ -146,10 +149,13 @@ XYPEN,BPEN,KEY,
 MSEC,TIME,IDATE,
 LOAD,SAVE,APPEND,
 FFIRST,FNEXT,
-INK,OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
+
+INK,INKA,ALPHA,OPX,OPY,
+OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
+
 SYS,
 #ifdef VIDEOWORD
-VIDEO,VIDEOSHOW,
+VIDEO,VIDEOSHOW,VIDEOSIZE,
 #endif
 
 #ifdef DEBUGWORD
@@ -606,7 +612,11 @@ while(*str!=0) {
 			compilaDATA(str);str=nextw(str);break;	
 		case 0x27:	// $27 ' Direccion	// 'ADR
 			nro=isWord(str+1);
-			if (nro<0) { seterror(str,"adr not found");return 0; }
+			if (nro<0) { 
+				if (isBas(str)) // 'ink allow compile replace
+					{ compilaMAC(nro);str=nextw(str);break; }
+				seterror(str,"adr not found");return 0; 
+				}
 			compilaADDR(nro);str=nextw(str);break;		
 		default:
 			if (isNro(str)||isNrof(str)) 
@@ -1033,10 +1043,17 @@ while(ip!=0) {
         NOS++;*NOS=TOS;
         if (FindNextFile(hFind, &ffd)==0) TOS=0; else TOS=(int64_t)&ffd;
         continue ;
-	case INK://"INK",
-		//gr_alpha((TOS>>24)^0xff);
-		gr_color1=TOS;
-		TOS=*NOS;NOS--;continue;
+        
+	case INK:	// INK
+		NOS++;*NOS=TOS;TOS=gr_color1;continue;
+	case INKA:	//'INK
+		NOS++;*NOS=TOS;TOS=(int64_t)&gr_color1;continue;
+	case ALPHA:	// ALPHA
+		gr_alpha(TOS);TOS=*NOS;NOS--;continue;
+	case OPX:	// OPX
+		NOS++;*NOS=TOS;TOS=gx1;continue;	
+	case OPY:	// OPY
+		NOS++;*NOS=TOS;TOS=gy1;continue;	
 	case OP://"OP",
 		gy1=TOS;gx1=*NOS;NOS--;TOS=*NOS;NOS--;continue;
 	case LINE:
@@ -1061,6 +1078,7 @@ while(ip!=0) {
 		gr_drawPoli();continue;
 
 	case SYS: 
+		printf("%s",TOS);
     	if (TOS==0) {	// 0 sys | end process
             if (ProcessInfo.hProcess!=0) {
                TerminateProcess(ProcessInfo.hProcess,0);
@@ -1076,20 +1094,26 @@ while(ip!=0) {
             if (W==WAIT_TIMEOUT) TOS=0; else TOS=-1;
             continue; }
         ZeroMemory(&StartupInfo, sizeof(StartupInfo));
-        StartupInfo.cb = sizeof StartupInfo ; //Only compulsory field
-        TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
+        StartupInfo.cb=sizeof StartupInfo ; //Only compulsory field
+        //TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
+		TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,NULL,NULL,NULL,&StartupInfo,&ProcessInfo);        
 		continue;
 		
 #ifdef VIDEOWORD
 	case VIDEO:
-        if (TOS==0) { NOS-=2;TOS=*NOS;NOS--;videoclose();continue; }
-		videoopen((char*)*(NOS-1),*NOS,TOS);
-		NOS-=2;TOS=*NOS;NOS--;
+        if (TOS==0) { NOS--;TOS=*NOS;NOS--;videoclose();continue; }
+		videoopen((char*)*(NOS),TOS);
+		NOS--;TOS=*NOS;NOS--;
 		continue;
 	case VIDEOSHOW:
-		redrawframe(*NOS,TOS);		
-		NOS--;TOS=*NOS;NOS--;
+		TOS=redrawframe(*NOS,TOS);		
+		NOS--;
 		continue;		
+	case VIDEOSIZE:
+		videoresize(TOS);
+		TOS=*NOS;NOS--;
+		continue;		
+		
 #endif
 
 #ifdef DEBUGWORD //----------------- DEBUG

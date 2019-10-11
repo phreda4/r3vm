@@ -1,3 +1,5 @@
+| main filesystem - PHREDA 2019
+|
 ^r3/lib/sys.r3
 ^r3/lib/print.r3
 ^r3/lib/str.r3
@@ -63,13 +65,12 @@
 	$0 $ff00 fontmcolor ;
 
 :drawl | nro --
-	normal
-	actual =? ( invert )
-	getfilename print
-	;
+	actual =? ( invert getfilename print normal ; )
+	getfilename print ;
 
 :drawtree
 |    nfiles .d print " " print linesv .d print cr
+	normal
 	0 ( linesv <?
 		dup pagina +
 		nfiles  >=? ( 2drop ; )
@@ -77,7 +78,26 @@
     	drawl
 		cr 1 + ) drop ;
 
+:runactual | "" --
+	drop
+	"r3 r3/  pattern-XOR.r3" sys
+	;
 |--------------------------------
+:fenter
+	"" runactual drop ;
+:a
+	actual
+	getfilename
+	".r3" =pos 1? ( drop runactual ; ) drop
+	drop
+
+|	0? ( drop expande ; )
+|	8 =? ( drop contrae ; )
+|	drop
+|	setactual savem
+|	runedit
+	;
+
 :fdn
 	actual nfiles 1 - >=? ( drop ; )
 	1 + pagina linesv + 1 - >=? ( dup linesv - 1 + 'pagina ! )
@@ -126,36 +146,17 @@
 	<pgdn> =? ( fpgdn )
 	<home> =? ( fhome )
 	<end> =? ( fend )
-
+	<ret> =? ( fenter )
 	drop ;
 
-#kk
-:coso
-	robotoregular 160 fontr!
-	key 1? ( dup 'kk ! ) drop
-	kk .h print
-	msec
-	dup 5 << $1ffff and
-	$10000 an? ( $1ffff xor )
-	Bac_In sw 1 >> *. sw 3 >> +
-	'ccx !
-	4 << $1ffff and
-	$10000 an? ( $1ffff xor )
-	Bac_InOut sh 1 >> *. sh 3 >> +
-	'ccy !
-	$ff0000 ink
-	"R3d4" print
-
-	;
 
 :inicio
 	cls home
 |	robotoregular 48 fontr!
 	'fontdroidsans13 fontm
-	$ff00 ink
+	$ff00 'ink !
 	drawtree
 	teclado
-	coso
 	;
 
 
@@ -164,5 +165,5 @@
 	cls home
 	'inicio onshow
 	;
-	
+
 : main ;

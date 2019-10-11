@@ -9,7 +9,7 @@
   key 27 =? ( exit ) drop
   bpen 0? ( 'last ! ; ) drop
   last 0? ( drop 1 'last ! xypen op
-  	rand 'color !
+  	rand 'ink !
   	; ) drop
   xypen line ;
 
