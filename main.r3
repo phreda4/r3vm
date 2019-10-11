@@ -79,13 +79,14 @@
 		cr 1 + ) drop ;
 
 :runactual | "" --
-	drop
-	"r3 r3/  pattern-XOR.r3" sys
+	mark
+	"r3 " ,s 'path ,s ,s ,eol
+	empty here
+	sys drop
 	;
+
 |--------------------------------
 :fenter
-	"" runactual drop ;
-:a
 	actual
 	getfilename
 	".r3" =pos 1? ( drop runactual ; ) drop
@@ -156,6 +157,7 @@
 	'fontdroidsans13 fontm
 	$ff00 'ink !
 	drawtree
+
 	teclado
 	;
 

@@ -9,17 +9,20 @@
 :hitx vx neg 'vx ! ;
 :hity vy neg 'vy ! ;
 
-:box
- xy>v >a $ff00ff a! ;
+:box | x y --
+ xy>v >a $ffffff a! ;
 
 :show
  cls
-
  x sw 4 - >=? ( hitx ) 4 <=? ( hitx )
  y sh 4 - >=? ( hity ) 4 <=? ( hity )
  box
  vx 'x +!
  vy 'y +!
+
+ key
+ >esc< =? ( exit )
+ drop
  ;
 
 |--------------------

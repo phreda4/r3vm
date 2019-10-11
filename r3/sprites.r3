@@ -6,7 +6,6 @@
 ^r3/lib/print.r3
 ^r3/lib/key.r3
 
-
 #nav32 $008008 | 8x8 32bits
 $. $. $. $ff $. $. $. $.
 $. $. $. $ff $. $. $. $.
@@ -34,8 +33,8 @@ $ff00 $ff00 $ff00 $ff00 $. $. $. $.
 	1? ( dup 'val ! )
 	<up> =? ( -1 'yn +! )
 	<dn> =? ( 1 'yn +! )
-	<lef> =? ( -1 'xn +! )
-	<rig> =? ( 1 'xn +! )
+	<le> =? ( -1 'xn +! )
+	<ri> =? ( 1 'xn +! )
 
 	>esc< =? ( exit )
 	drop

@@ -1,70 +1,41 @@
-| PHREDA
+| PHREDA - 2019
+| Memory words
 
-|--- Memoria
-::zcopy | destino fuente -- destino' con 0
-	( @+ 1? rot !+ swap ) rot !+ nip ;
-::strcat | src des --
-	( c@+ 1? drop ) drop 1 -
-::strcpy | src des --
-	( swap c@+ 1? rot c!+ ) nip swap c! ;
-::strcpyl | src des -- ndes
-	( swap c@+ 1? rot c!+ ) rot c!+ nip ;
-::strcpyln | src des --
-	( swap c@+ 1? 13 =? ( 2drop 0 swap c! ; )
-		rot c!+ ) rot c!+ drop ;
+|--- free memory
+##here 0
 
-::copynom | sc s1 --
-	( c@+ 32 >?
-		rot c!+ swap ) 2drop
-	0 swap c! ;
+#memmap * 512
+#memmap> 'memmap
 
-::copystr | sc s1 --
-	( c@+ 34 <>?
-		rot c!+ swap ) 2drop
-	0 swap c! ;
+::mark | --
+	here 0? ( mem dup 'here ! nip )
+	memmap> !+ 'memmap> ! ;
 
-::toupp | c -- C
-	$df and ;
+::empty | --
+	memmap> 'memmap =? ( drop mem 'here ! ; )
+	4 - dup 'memmap> ! @ 'here ! ;
 
-::tolow | C -- c
-	$20 or ;
+::savemem | "" --
+	memmap> 4 - @ here over - rot save ;
+
+::cpymem | 'destino --
+	memmap> 4 - @ here over -
+	cmove ; | de sr cnt --
+
+::appendmem | "" -- ; agregar a diccbase la
+	memmap> 4 - @ here over - rot append ;
+
+|---
+::, here !+ 'here ! ;
+::,c here c!+ 'here ! ;
+::,q here q!+ 'here ! ;
+::,s here swap ( c@+ 1? rot c!+ swap ) 2drop 'here ! ;
+::,w here swap ( c@+ $ff and 32 >? rot c!+ swap ) 2drop 'here ! ;
+
+::,ln ,s
+::,cr 13 ,c ;
+::,eol 0 ,c ;
+::,sp 32 ,c ;
+::,nl 13 ,c 10 ,c ;
 
 
-::count | s1 -- s1 cnt	v3
-	dup >a
-	0 ( a@+ dup $01010101 - swap not and
-		$80808080 na? drop 4 + )
-	$80 an? ( drop ; )
-	$8000 an? ( drop 1 + ; )
-	$800000 an? ( drop 2 + ; )
-	drop 3 + ;
-
-::= | s1 s2 -- 1/0
-	( swap c@+ 1?
-		toupp rot c@+ toupp rot -
-		1? ( 3drop 0 ; ) drop
-		) 2drop
-	c@ $ff and 33 <? ( drop 1 ; )
-	drop 0 ;
-
-::=pre | s1 s2 -- 1/0
-	( c@+ 1?
-		toupp rot c@+ toupp rot -
-		1? ( 3drop 0 ; )
-		drop swap )
-	3drop 1 ;
-
-::=w | s1 s2 -- 1/0
-	( c@+ 32 >?
-		toupp rot c@+ toupp rot -
-		1? ( 3drop 0 ; )
-		drop swap ) 2drop
-	c@ $ff and 33 <? ( drop 1 ; )
-	drop 0 ;
-
-::=pos | s1 ".pos" -- s1 1/0
-	over count
-	rot count | s1 s1 cs1 "" c"
-	rot swap - | s1 s1 "" dc
-	rot + | s1 "" s1.
-	= ;
