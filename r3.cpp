@@ -32,7 +32,8 @@ int memcsize=0;
 int memc=0;
 int *memcode;
 
-int memdsize=0xfffff;
+int memdsize=0x100000;			// 1MB data 
+int scrf=0,srcw=800,srch=600;
 int memd=0;
 char *memdata;
 
@@ -691,6 +692,30 @@ for (int i=0;i<cntincludes;i++){
 	}
 }
 
+//----------- comments / configuration
+// |FULL			set fullscreen mode
+// |SCR 640 480		set screen size
+// |MEM 640 		set data memory size (in kb) min 1kb
+char *syscom(char *str)
+{
+if (strnicmp(str,"|MEM ",5)==0) {	// memory in Kb
+	if (isNro(trim(str+5))) {
+		memdsize=nro<<10;
+		if (memdsize<1024)	memdsize=1<<10;
+		}
+	}	
+if (strnicmp(str,"|SCR ",5)==0) {	// screen size
+	char *n=trim(str+5);
+	if (isNro(n)) { srcw=nro;
+		if (isNro(trim(nextw(n)))) srch=nro;
+		}
+	}
+if (strnicmp(str,"|FULL",5)==0) {	// fullscreen mode
+	scrf=1;
+	}
+return nextcr(str);
+}
+
 // resolve includes, recursive definition
 void r3includes(char *str) 
 {
@@ -708,7 +733,7 @@ while(*str!=0) {
 			str=nextcr(str);
 			break;
 		case '|':	// comments	
-			str=nextcr(str);break; 
+			str=syscom(str);break;
 		case ':':	// code
 			modo=1;str=nextw(str);break;
 		case '#':	// data	
@@ -725,8 +750,8 @@ return;
 // Compile code in file
 int r3compile(char *name) 
 {
-printf("r3vm - PHREDA\n");
-printf("compile:%s\n\n",name);
+printf("\nr3vm - PHREDA\n");
+printf("compile:%s...",name);
 
 char *sourcecode;
 
@@ -766,9 +791,8 @@ if (!r3token(sourcecode)) {
 //dumpdicc();
 //dumpcode();
 
-printf("ok.\n");
-printf("includes:%d - words:%d\n",cntincludes,cntdicc);
-printf("mem code:%d - mem data:%d \n",memc,memd);
+printf(" ok.\n");
+printf("inc:%d - words:%d - code:%dKb - data:%dKb - free:%dKb\n\n",cntincludes,cntdicc,memc>>8,memd>>10,(memdsize-memd)>>10);
 freeinc();
 free(sourcecode);
 return -1;
@@ -1169,7 +1193,7 @@ else
 
 if (!r3compile(filename)) return -1;
 
-gr_init(filename,800,600);
+gr_init(filename,srcw,srch,scrf);
 runr3(boot);
 
 #ifdef VIDEOWORD
@@ -1177,6 +1201,5 @@ videoclose();
 #endif
 
 gr_fin();
-
 return 0;
 }

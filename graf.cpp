@@ -112,7 +112,7 @@ inline int abs(int a) { return (a+(a>>31))^(a>>31); }
 
 //////////////////////////////////////////////////////////////
 //---- inicio
-int gr_init(char *title,int XRES,int YRES)
+int gr_init(char *title,int XRES,int YRES,int f)
 {
 if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
 
@@ -120,15 +120,12 @@ window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XR
 //renderer=SDL_CreateRenderer(window, -1, 0);if (!renderer) return -1;
 //texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STATIC,XRES,YRES);
 
-//SDL_WINDOW_FULLSCREEN_DESKTOP ..simulate
-//SDL_SetWindowFullscreen(window,0);
-//SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 SDL_ShowCursor(SDL_DISABLE);
-
+//		SDL_WINDOW_FULLSCREEN_DESKTOP ..simulate
+if (f) SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 screen = SDL_GetWindowSurface(window);
 
 gr_sizescreen=XRES*YRES;// tamanio en Uint32 
-
 //gr_buffer=(Uint32 *)malloc(gr_sizescreen<<2);
 gr_buffer=(Uint32*)screen->pixels;
 gr_ancho=XRES;
@@ -155,8 +152,8 @@ SDL_Quit();
 
 void gr_redraw(void) 
 {
-//	SDL_RenderClear(renderer);
 /*
+//	SDL_RenderClear(renderer);
 SDL_UpdateTexture(texture,NULL,gr_buffer,gr_ypitchbytes);
 SDL_RenderCopy(renderer,texture,NULL,NULL);
 SDL_RenderPresent(renderer);
@@ -169,9 +166,9 @@ void gr_cls(int color)
 int *p=(int*)gr_buffer;
 for(int c=gr_sizescreen;c>0;c--) *p++=color;
 }
+
 #define MASK1 (RED_MASK|BLU_MASK)
 #define MASK2 (GRE_MASK)
-
 inline Uint32  gr_mix(Uint32  col,Uint8 alpha)
 {
 register Uint32  B=(col & MASK1);

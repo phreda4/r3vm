@@ -24,8 +24,7 @@
   8 << or 8 << or 'ink ! ;
 
 :calcula | x y gx gy -- zx zy c
-  2dup 0 ( 256 <? 1 +
-  	>r
+  2dup 0 ( 256 <? 1 + >r
     over dup *. over dup *. - pick4 + | zx
     rot 1 << rot *. pick2 +            | zy
     over dup *. over dup *. +

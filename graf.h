@@ -28,7 +28,7 @@ extern Uint32 gr_color1,gr_color2,col1,col2;
 extern int MA,MB,MTX,MTY; // matrix de transformacion
 extern int *mTex; // textura
 
-int gr_init(char *title,int XRES,int YRES);
+int gr_init(char *title,int XRES,int YRES,int f);
 void gr_fin(void);
 void gr_cls(int color);
 void gr_redraw(void);
