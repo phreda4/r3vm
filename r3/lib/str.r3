@@ -89,6 +89,11 @@
   ( dup $f and $30 + $39 >? ( 7 + ) pick2 c! swap 1 - swap 4 >>> 1? ) drop
   1 + ;
 
+::.o | oct -- str
+  mbuffi swap
+  ( dup $7 and $30 + pick2 c! swap 1 - swap 3 >>> 1? ) drop
+  1 + ;
+
 ::.f | fix --
   mbuffi over
   $ffff and 10000 16 *>> 10000 +

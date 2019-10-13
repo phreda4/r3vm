@@ -29,5 +29,9 @@
   ccx ccy xy>v >a
   ( c@+ 1? emit ) 2drop ;
 
-::cr
-  cch 'ccy +! 0 'ccx ! ;
+::lprint
+  ccx ccy xy>v >a
+  ( c@+ 1? $ff and 10 =? ( 2drop ; ) 13 =? ( 2drop ; ) emit ) 2drop ;
+
+::cr	cch 'ccy +! 0 'ccx ! ;
+::lf	0 'ccx ! ;

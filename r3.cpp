@@ -75,7 +75,7 @@ const char *r3bas[]={
 ";","(",")","[","]",
 "EX",
 "0?","1?","+?","-?", 								
-"<?",">?","=?",">=?","<=?","<>?","AN?","NA?","BTW?",
+"<?",">?","=?",">=?","<=?","<>?","AN?","NA?","BT?",
 "DUP","DROP","OVER","PICK2","PICK3","PICK4","SWAP","NIP",
 "ROT","2DUP","2DROP","3DROP","4DROP","2OVER","2SWAP",
 ">R","R>","R@",
@@ -899,9 +899,8 @@ while(ip!=0) {
 	case IFNE:if (TOS==*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFNO
 	case IFAND:if (!(TOS&*NOS)) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFNA
 	case IFNAND:if (TOS&*NOS) {ip+=(op>>8);} TOS=*NOS;NOS--;continue;//IFAN
-	
-	case IFBT:if (TOS<=*NOS&&*NOS<=*(NOS+1)) {ip+=(op>>8);} 
-		TOS=*(NOS-1);NOS-=2;continue;//BTW (need bit trick)
+	case IFBT:if (*(NOS-1)>TOS||*(NOS-1)<*NOS) {ip+=(op>>8);} 
+		TOS=*(NOS-1);NOS-=2;continue;//BTW (need bit trick) 	//(TOS-*(NOS-1))|(*(NOS-1)-*NOS)>0
 	case DUP:NOS++;*NOS=TOS;continue;				//DUP
 	case DROP:TOS=*NOS;NOS--;continue;				//DROP
 	case OVER:NOS++;*NOS=TOS;TOS=*(NOS-1);continue;	//OVER
