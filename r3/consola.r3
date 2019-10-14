@@ -4,22 +4,23 @@
 ^r3/lib/mem.r3
 ^r3/lib/rand.r3
 ^r3/lib/fontpc.r3
+^r3/lib/print.r3
 
 #c.x #c.y
 #c.w #c.h
 #c.scrn 0
 #c.cursor
-#c.atrib $ff00
+#c.atrib $f000
 
 #wsum
 #wcar
 #hcar
 
-#palc 0 0
+#palc $ff00 0
 
 :charline | byte --
 	8 ( 1? 1 - swap
-		dup $80 and 6 >> 'palc + @ a!+
+		dup 5 >> $4 and 'palc + @ a!+
 		1 << swap ) 2drop ;
 
 :2color | c1 -- c1 c2
@@ -27,13 +28,25 @@
 	swap $f0f0f and dup 4 << or ;
 
 :dchar | dchar -- ;
-	dup 8 >> 2color 'palc !+ !
+	dup 8 >>> 2color 'palc !+ !
 	$ff and 4 << 'font8x16 +
 	16 ( 1? 1 - swap
 		c@+ charline
 		wcar a+ swap ) 2drop ;
 
-:c.draw
+:drawcursor
+	c.y sw 4 << *
+	c.x 3 << +
+	2 << vframe + >a
+	blink 1? ( drop ; ) drop
+	16 ( 1? 1 -
+		8 ( 1? 1 -
+			a@ not a!+
+			) drop
+		wcar a+
+		) drop ;
+
+::c.draw
 	c.scrn >b
 	vframe >a
 	c.h ( 1? 1 -
@@ -42,15 +55,24 @@
 			hcar a+
 			) drop
     	wsum a+
-    	) drop ;
+    	) drop
+    drawcursor
+	;
 
-:c.ink | color --
-	8 << $fff00 and c.atrib $fff000ff and or 'c.atrib ! ;
+::c.ink | color --
+	$f0f0f0 and 8 <<
+	c.atrib $f0f0f00 and
+	or 'c.atrib ! ;
+
+::c.paper | color --
+	$f0f0f and 8 <<
+	c.atrib $f0f0f000 and
+	or 'c.atrib ! ;
 
 :c.rand
 	c.scrn >b c.w c.h * ( 1? 1 - random b!+ ) drop ;
 
-:c.full | w h --
+::c.full | w h --
 	4 >> 'c.h !
 	3 >> 'c.w !
 	here dup 'c.scrn ! 'c.cursor !
@@ -64,7 +86,7 @@
 
 :c.in
 	c.x c.y
-:c.at | x y --
+::c.at | x y --
 	c.w * + 2 <<
 	c.scrn + 'c.cursor ! ;
 
@@ -75,25 +97,25 @@
 	move
 	;
 
-:c.cr
+::c.cr
 	0 'c.x !
 	c.y 1 + c.h <? ( 'c.y ! c.in ; ) drop
 	c.uscroll c.in ;
 
-:c.emit | char --
+::c.emit | char --
 	$ff and c.atrib or c.cursor !
 	c.x 1 + c.w <? ( 'c.x ! c.in ; ) drop
 	0 'c.x !
 	c.y 1 + c.h <? ( 'c.y ! c.in ; ) drop
 	c.uscroll c.in ;
 
-:c.print | "" --
+::c.print | "" --
 	( c@+ 1? c.emit ) 2drop ;
 
-:c.cls
+::c.cls
 	c.scrn dup 'c.cursor !
 	0 'c.x ! 0 'c.y !
-	c.w c.h * ( 1? 1 - 0 rot !+ swap ) 2drop ;
+	c.w c.h * ( 1? 1 - c.atrib rot !+ swap ) 2drop ;
 
 :c.le
 	c.x 0 >? ( 1 - 'c.x ! c.in ; ) drop
@@ -130,14 +152,19 @@
 	;
 
 :test
-	cls
+	cls home
 	c.draw
 	teclado
 	;
 
 :
 mark
-sw sh c.full
-$00f00000 'c.atrib !
+sw 1 >> sh 1 >> c.full
+$0 c.paper c.cls
+|c.rand
+$ff0000 c.ink
+"r3 " c.print
+$ff00 c.ink
+"programing laguage" c.print c.cr
 'test onshow
 ;

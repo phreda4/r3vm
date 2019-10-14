@@ -455,11 +455,11 @@ void compilaLIT(int64_t n)
 if (modo>1) { datanro(n);return; }
 int token=n;
 codetok((token<<8)+LIT); 
+if ((token<<8>>8)==n) return;
 token=n>>24;
-if (token==0||token==-1) return;
 codetok((token<<8)+LIT2); 
+if ((token<<8>>8)==(n>>24)) return;
 token=n>>48;
-if (token==0||token==-1) return;
 codetok((token<<8)+LIT3); 
 }
 
@@ -851,6 +851,7 @@ int key=0;
 void r3update()
 {
 key=0;
+SDL_Delay(10); // cpu free time
 if (SDL_PollEvent(&evt)) {
 	switch (evt.type) {
 	case SDL_KEYDOWN:key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
@@ -1120,6 +1121,7 @@ while(ip!=0) {
         StartupInfo.cb=sizeof StartupInfo ; //Only compulsory field
         //TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
 		TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,NULL,NULL,NULL,&StartupInfo,&ProcessInfo);        
+		WaitForSingleObject(ProcessInfo.hProcess,INFINITE);// wait termination
 		continue;
 		
 #ifdef VIDEOWORD
