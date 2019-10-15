@@ -64,6 +64,34 @@
 	rot + | s1 "" s1.
 	= ;
 
+|----------- find str
+:=p | s1 s2 -- 1/0
+	( c@+ 1?
+		rot c@+ rot -
+		1? ( 3drop 0 ; )
+		drop swap )
+	3drop 1 ;
+
+::findstr | adr "texto" -- adr'
+	( 2dup =p 0?
+		drop swap c@+
+		0? ( nip nip ; )
+		drop swap )
+	2drop ;
+
+:=pi | s1 s2 -- 1/0
+	( c@+ 1?
+		toupp rot c@+ toupp rot -
+		1? ( 3drop 0 ; )
+		drop swap )
+	3drop 1 ;
+
+::findstri | adr "texto" -- adr'/0
+	( 2dup =pi 0?
+		drop swap c@+
+		0? ( nip nip ; )
+		drop swap )
+	2drop ;
 
 |---- convert to number
 #mbuff * 64

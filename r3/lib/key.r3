@@ -1,11 +1,12 @@
 | key code from sdl2
 | changes: $40000000 is in $4000, $1000 is upkey
-
 ##<del> $8		##>del< $1008
 ##<tab> $9		##>tab< $1009
 ##<ret> $d		##>ret< $100d
 ##<esc> $1b		##>esc< $101b
 ##<esp> $20		##>esp< $1020
+##<ins> $49		##>back< $10049
+##<back> $7f	##>back< $1007f
 
 ##<home> $404a	##>home< $504a
 ##<end> $404d	##>end< $504d
@@ -30,5 +31,13 @@
 ##<F11> $4044	##>F11< $5044
 ##<F12> $4045	##>F12< $5045
 
+##<ctrl> $40e0	##>ctrl< $50e0
+##<ctr2> $40e4	##>ctr2< $50e4
+##<shift> $40e1	##>shift< $50e1
+##<shif2> $40e5	##>shif2< $50e5
+##<alt> $40e2	##>alt< $50e2
+##<alt2> $40e6	##>alt2< $50e6
+
+|---     key <char char> bt? ( hit..key ) ..
 ##<char $20
 ##char> $7a

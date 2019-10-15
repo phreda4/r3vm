@@ -12,8 +12,6 @@
 
 |^r4/system/mem-ed.r3
 
-^r3/lib/fontm.r3
-^r3/fntm/droidsans13.fnt
 
 
 #ed.nombre
@@ -401,10 +399,11 @@
 	errorlin -? ( drop ; )
 	prilinea <? ( drop ; )
 	prilinea - cntlinea >=? ( drop ; )
-	3 swap gotoxy
-	">" rojo  fillp blanco print
-	'errormsg "< %s " rojo fillpr
-	blanco printr ;
+|	3 swap gotoxy
+|	">" $ff0000 'ink ! fillp $ffffff 'ink ! print
+
+|	'errormsg "< %s " $ff0000 'ink ! fillpr $ffffff 'ink ! printr
+	;
 
 
 |-------------- panel control
@@ -416,7 +415,8 @@
 :showclip
 	cr
  	clipboard> clipboard <>? (
-		cyan cr
+		$ffff 'ink !
+		cr
 		clipboard ( over <? c@+ emit ) drop
 		cr
 		) drop
@@ -427,14 +427,14 @@
 	rot c@+
 	13 =? ( 0 nip )
 	0? ( drop 1 - rot rot sw + ; )
-	9 =? ( drop swap $ffffffe0 and $20 + )( drop swap ccw + ) | x adr xa
-	rot swap ;
+	9 =? ( drop swap $ffffffe0 and $20 + rot swap ; )
+	drop swap ccw + rot swap ;
 
 :cursormouse
-	xymouse
+	xypen
 	pantaini>
 	swap cch 2*			| x adr y ya
-	( over <? 
+	( over <?
 		cch + rot >>13 2 + rot rot ) 2drop
 	swap ccw 2 << ccw +	| adr x xa
 	( over <? mmemit ) 2drop
@@ -455,11 +455,15 @@
 	'finsel ! 'inisel ! ;
 
 |----------------------------
-:directrun	savetxt 'ed.nombre run  ;
-:profiler	savetxt	"r4/IDE/profiler-code.txt" run ;
-:debugrun	savetxt	"r4/IDE/debug-code.txt" run ;
-
-:mkplain	savetxt	"r4/system/r4plain.txt" run ;
+:directrun	
+	|savetxt 'ed.nombre run  ;
+:profiler	
+|	savetxt	"r4/IDE/profiler-code.txt" run ;
+:debugrun	
+|	savetxt	"r4/IDE/debug-code.txt" run ;
+:mkplain	
+|	savetxt	"r4/system/r4plain.txt" run 
+;
 
 |----------------------------
 :nowcompile
@@ -467,11 +471,11 @@
 | fullscreen,ventana wxh
 | win
 | optimizacion 0
-	"r4/compiler/r4-com4.txt" run
+|	"r4/compiler/r4-com4.txt" run
 	;
 
 :testcompile
-	"r4/compiler/r4-com4o.txt" run
+|	"r4/compiler/r4-com4o.txt" run
 	;
 
 
@@ -481,58 +485,76 @@
 	0? ( drop ; ) 'fuente> ! ;
 
 :findmodekey
-	$0 'ink ! 1 linesfill
-	" > " $37b0000 fprint
-    'controlf dup <enter> >esc<
-	blanco
-	'buscapad 'findpad 31 inputexec
+	$0 'ink ! 
+	|1 linesfill
+	" > " print
+	
+	key
+    <ret> =? ( controlf )
+	>esc< =? ( controlf )
+    drop
+
+	$ffffff 'ink !
+|	'buscapad 'findpad 31 inputexec
 	;
 
 :controlkey
-	$337ab7 'ink ! 1 linesfill
-	blanco
-	'controle 18 ?key " E-Edit" print | ctrl-E dit
-|	'controlh 35 ?key " H-Help" print  | ctrl-H elp
-	'controlz 44 ?key " Z-Undo" print
+	$337ab7 'ink !
+	|1 linesfill
+	$ffffff 'ink !
+|	'controle 18 ?key " E-Edit" print | ctrl-E dit
+||	'controlh 35 ?key " H-Help" print  | ctrl-H elp
+|	'controlz 44 ?key " Z-Undo" print
 
-	'controlx 45 ?key " X-Cut" print
-	'controlc 46 ?key " C-Copy" print
-	'controlv 47 ?key " V-Paste" print
+|	'controlx 45 ?key " X-Cut" print
+|	'controlc 46 ?key " C-Copy" print
+|	'controlv 47 ?key " V-Paste" print
 
-|	'controld 32 ?key " D-Def" print
+||	'controld 32 ?key " D-Def" print
 
-|	'controln 49 ?key " N-New" print
-|	'controlm 50 ?key " M-Mode" print
-	'controlf 33 ?key " F-Find" print
+||	'controln 49 ?key " N-New" print
+||	'controlm 50 ?key " M-Mode" print
+|	'controlf 33 ?key " F-Find" print
 
-	'controla <up>
-	'controls <dn>
-	'controloff >ctrl<
+|	'controla <up>
+|	'controls <dn>
+|	'controloff >ctrl<
 
-	'findpad
-	dup c@ 0? ( 2drop ; ) drop
-	" (%s)" print
+|	'findpad
+|	dup c@ 0? ( 2drop ; ) drop
+|	" (%s)" print
 	;
 
 :teclado
-	[ key toasc modo exec ; ] <visible>
-	'kback	<back>		'kdel	<del>
-	'karriba <up>		'kabajo	<dn>
-	'kder	<ri>		'kizq	<le>
-	'khome	<home>		'kend	<end>
-	'kpgup	<pgup>		'kpgdn	<pgdn>
-	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>
-	[ 13 modo exec ; ] <enter>
-	[ 9 modo exec ; ] <tab>
-	'exit >esc<
-	'controlon <ctrl>
+	key
+	<char char> bt? ( toasc modo ex ; )
+	<back> =? ( kback )
+	<del> =? ( kdel )
+	<up> =? ( karriba )
+	<dn> =? ( kabajo )
+	<ri> =? ( kder )
+	<le> =? ( kizq )
+	<home> =? ( khome )
+	<end> =? ( kend )
+	<pgup> =? ( kpgup )
+	<pgdn> =? ( kpgdn )
+	<ins> =? (  modo 
+				'lins =? ( drop 'lover 'modo ! ; )
+				drop 'lins 'modo ! )
+	<ret> =? (  13 modo ex )
+	<tab> =? (  9 modo ex )
+	>esc< =? ( exit )
+	<ctrl> =? ( controlon )
+	drop
 	;
 
 :barraestado
 	panelcontrol 1? ( drop controlkey ; ) drop
 	findmode 1? ( drop findmodekey ; ) drop
-	$666666 'ink ! 1 linesfill
-	blanco 'ed.nombre sp printx sp
+	$666666 'ink !
+	|1 linesfill
+	$ffffff 'ink !
+	'ed.nombre sp print sp
 	teclado
 	;
 
@@ -541,38 +563,44 @@
 	0 0 op 0 sh pline ccw 2 << 0 op ccw 2 << sh pline
 	poli ;
 
+:editando
+	cls
+|	'dns 'mos 'ups guiMap |------ mouse
+
+	barv
+
+	0 rows 1 - gotoxy
+	barraestado
+
+	0 0 gotoxy
+	$666666 'ink ! 
+	|1 linesfill
+	$ff00 'ink !
+	":R3" print
+	$ffffff 'ink !
+	"eDIT " print
+
+|------------------------------
+|	'directrun dup <f1> "1Run" $fff37b flink sp
+|	'debugrun dup <f2> "2Debug" $fff37b flink sp
+|	'profiler dup <f3> "3Profile" $fff37b flink sp
+|	'mkplain dup <f4> "4Plain" $fff37b flink sp
+|	'nowcompile dup <f5> "5Compile" $fff37b flink sp
+
+|	'testcompile <f10>
+|------------------------------
+	cr
+	drawcode
+
+|	cminiflecha
+	;
+
 :editor
 	$111111 'paper !
-	'fontdroidsans13 fontm
-|	fonti
-	clrscr
+	cls
 	rows 2 - 'cntlinea !
-	show clrscr
-		'dns 'mos 'ups guiMap |------ mouse
-
-		barv
-
-		0 rows 1 - gotoxy
-		barraestado
-
-		0 0 gotoxy
-		$666666 'ink ! 1 linesfill
-		verde dup ":R%d" print
-		blanco "eDIT " printx
-
-|------------------------------
-		'directrun dup <f1> "1Run" $fff37b flink sp
-		'debugrun dup <f2> "2Debug" $fff37b flink sp
-		'profiler dup <f3> "3Profile" $fff37b flink sp
-		'mkplain dup <f4> "4Plain" $fff37b flink sp
-		'nowcompile dup <f5> "5Compile" $fff37b flink sp
-
-		'testcompile <f10> 
-|------------------------------
-		cr chome!
-		drawcode
-
-		cminiflecha ;
+	'editando onshow
+	;
 
 |---- Mantiene estado del editor
 :ram
@@ -591,9 +619,6 @@
 	mark
 	;
 
-:cpy|
-    swap ( c@+ $7c <>? 
-		rot c!+ swap ) drop 0 rot c! ;
 
 :cargaestado
 	mark
@@ -603,11 +628,11 @@
 
 	here dup "debug.err" load
 	empty
-	over 4 + <? ( 2drop ed.load ; )
+|	over 4 + <? ( 2drop ed.load ; )
 	0 swap !
-	'ed.nombre cpy|
-	?sint 'errorlin !
-	?sint 'ed.ncar !
+|	'ed.nombre cpy|
+|	?sint 'errorlin !
+|	?sint 'ed.ncar !
 	'errormsg strcpy
 
 |	here dup "info.err" load
@@ -618,10 +643,11 @@
 |----------- principal
 :main
 	ram
-	cargaestado
-	loadtxt
+|	cargaestado
+|	loadtxt
 	editor
 
-	savetxt ;
+|	savetxt
+	;
 
 : mark 4 main ;

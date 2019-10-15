@@ -35,10 +35,10 @@
 		wcar a+ swap ) 2drop ;
 
 :drawcursor
-	c.y sw 4 << *
-	c.x 3 << +
-	2 << vframe + >a
 	blink 1? ( drop ; ) drop
+|	c.y sw 4 << * c.x 3 << + 2 <<
+	c.y sw 1 << * c.x + 5 <<
+	vframe + >a
 	16 ( 1? 1 -
 		8 ( 1? 1 -
 			a@ not a!+
@@ -138,12 +138,15 @@
 
 |--------------------------
 :teclado
+	char
+	1? ( c.emit ; )
+	drop
 	key
-	<char char> bt? ( c.emit ; )
 	>esc< =? ( exit )
 	<f2> =? ( c.cls )
 	<f3> =? ( c.uscroll )
 	<ret> =? ( c.cr )
+
 	<le> =? ( c.le )
 	<ri> =? ( c.ri )
 	<up> =? ( c.up )
@@ -160,8 +163,9 @@
 :
 mark
 sw 1 >> sh 1 >> c.full
-$0 c.paper c.cls
+$111111 c.paper c.cls
 |c.rand
+$444444 c.paper
 $ff0000 c.ink
 "r3 " c.print
 $ff00 c.ink

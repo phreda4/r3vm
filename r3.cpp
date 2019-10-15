@@ -94,7 +94,7 @@ const char *r3bas[]={
 "QMOVE","QMOVE>","QFILL",
 "UPDATE","REDRAW",
 "MEM","SW","SH","VFRAME",
-"XYPEN","BPEN","KEY",
+"XYPEN","BPEN","KEY","CHAR",
 "MSEC","TIME","DATE",
 "LOAD","SAVE","APPEND",
 "FFIRST","FNEXT",
@@ -146,7 +146,7 @@ CMOVED,CMOVEA,CFILL,
 QMOVED,QMOVEA,QFILL,
 UPDATE,REDRAW,
 MEM,SW,SH,FRAMEV,
-XYPEN,BPEN,KEY,
+XYPEN,BPEN,KEY,KCHAR,
 MSEC,TIME,IDATE,
 LOAD,SAVE,APPEND,
 FFIRST,FNEXT,
@@ -846,11 +846,13 @@ int gx1=0;
 int gy1=0;
 
 int key=0;
+char keychar;
 
 // Update event for OS interaction
 void r3update()
 {
 key=0;
+keychar=0;
 SDL_Delay(10); // cpu free time
 if (SDL_PollEvent(&evt)) {
 	switch (evt.type) {
@@ -859,6 +861,7 @@ if (SDL_PollEvent(&evt)) {
 	case SDL_MOUSEBUTTONDOWN:bm|=evt.button.button;break;
 	case SDL_MOUSEBUTTONUP:bm&=~evt.button.button;break;
 	case SDL_MOUSEMOTION:xm=evt.motion.x;ym=evt.motion.y;break;
+	case SDL_TEXTINPUT: keychar=*evt.text.text;break;
 		}
 	}	
 }
@@ -1025,6 +1028,8 @@ while(ip!=0) {
 		NOS++;*NOS=TOS;TOS=bm;continue;
 	case KEY://"KEY"
 		NOS++;*NOS=TOS;TOS=key;continue;	
+	case KCHAR://"CHAR"
+		NOS++;*NOS=TOS;TOS=keychar;continue;	
 	case MSEC://"MSEC"
 		NOS++;*NOS=TOS;TOS=SDL_GetTicks();continue;		
 	case TIME://"TIME"
@@ -1195,6 +1200,7 @@ else
 if (!r3compile(filename)) return -1;
 
 gr_init(filename,srcw,srch,scrf);
+SDL_StartTextInput();
 runr3(boot);
 
 #ifdef VIDEOWORD

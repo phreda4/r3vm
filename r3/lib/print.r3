@@ -5,6 +5,9 @@
 ^r3/lib/sys.r3
 ^r3/lib/fontpc.r3
 
+##rows 40
+##cols 80		| filas/columnas texto
+
 ##ccx 0 ##ccy 0
 ##cch 16 ##ccw 8
 ##charrom
@@ -33,5 +36,16 @@
   ccx ccy xy>v >a
   ( c@+ 1? $ff and 10 =? ( 2drop ; ) 13 =? ( 2drop ; ) emit ) 2drop ;
 
-::cr	cch 'ccy +! 0 'ccx ! ;
-::lf	0 'ccx ! ;
+::sp 
+	32 emit ;
+::cr
+	cch 'ccy +! 0 'ccx ! ;
+::lf
+	0 'ccx ! ;
+
+::gotoxy | x y --
+	ccw * 'ccy !
+	cch * 'ccx ! ;
+
+::atxy | x y --
+	'ccy ! 'ccx ! ;
