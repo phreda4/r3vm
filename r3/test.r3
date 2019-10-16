@@ -4,22 +4,23 @@
 ^r3/lib/print.r3
 
 #k
+#c
 
 :teclado
 	key
 	>esc< =? ( exit )
 	1? ( 'k ! ; )
-	drop ;
+	drop
+	char
+	1? ( 'c ! ; )
+	drop
+	;
 
 :main
 	cls home
+	cr
 	k .h print cr
-	over .d print cr
-	10
-	8 11 bt? ( "ok " print )
-	11 23 bt? ( "no" print )
-	-4 9 bt? ( "no" print )
-	drop
+	c .h print cr
 	teclado
 	;
 

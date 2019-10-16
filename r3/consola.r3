@@ -136,10 +136,15 @@
 	0 'c.y !
 	c.in ;
 
+:uni2ascii
+	$80 <? ( ; )
+	dup $1f and 6 <<
+	swap 8 >> $3f and or ;
+
 |--------------------------
 :teclado
 	char
-	1? ( c.emit ; )
+	1? ( uni2ascii c.emit ; )
 	drop
 	key
 	>esc< =? ( exit )

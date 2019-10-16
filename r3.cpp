@@ -861,7 +861,7 @@ if (SDL_PollEvent(&evt)) {
 	case SDL_MOUSEBUTTONDOWN:bm|=evt.button.button;break;
 	case SDL_MOUSEBUTTONUP:bm&=~evt.button.button;break;
 	case SDL_MOUSEMOTION:xm=evt.motion.x;ym=evt.motion.y;break;
-	case SDL_TEXTINPUT: keychar=*evt.text.text;break;
+	case SDL_TEXTINPUT: keychar=*(int*)evt.text.text;break;
 		}
 	}	
 }
@@ -1202,7 +1202,7 @@ if (!r3compile(filename)) return -1;
 gr_init(filename,srcw,srch,scrf);
 SDL_StartTextInput();
 runr3(boot);
-
+SDL_StopTextInput();
 #ifdef VIDEOWORD
 videoclose();
 #endif
