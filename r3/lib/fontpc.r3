@@ -1,3 +1,4 @@
+| font pc
 ^r3/lib/gr.r3
 
 ##font8x16 (
@@ -266,6 +267,7 @@
 ::char8pc | c --
 	4 << 'font8x16 +
 	sw 8 - 2 << swap
+	ccx ccy xy>v >a
 	16 ( 1? 1 -
 		swap c@+
 		$80 ( 1? over setpix 1 >> ) 2drop

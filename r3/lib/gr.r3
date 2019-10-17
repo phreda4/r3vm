@@ -4,6 +4,7 @@
 ^r3/lib/sys.r3
 
 ##paper 0
+##ccx 0 ##ccy 0
 
 ##xa 0 ##ya 0
 

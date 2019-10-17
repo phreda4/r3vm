@@ -33,7 +33,8 @@
 	>a a@+ dup 2 << 'charlin !
 	a@+ swap 'cch ! 'ccw !
 	a> 'charrom !
-	'charm 'charsizem font! ;
+	'charm 'charsizem font!
+	calcrowcol ;
 
 ::fontmcolor | c1 c2 --
 	'palcol >a

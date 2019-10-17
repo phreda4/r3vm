@@ -53,11 +53,13 @@
 
 
 #auxf * 1024
+#x2 #y2
 
 :optyy | adr+1 val -- adr+1
-	
+	a!+
 	;
 :optxx | adr+1 val -- adr+1
+	a!+
 	;
 
 :optpp | adr+1 val -- adr+1 ; es punto punto
@@ -65,42 +67,42 @@
 	dup g>xy
 	y2 =? ( 2drop optyy ; ) drop
 	x2 =? ( drop optxx ; ) drop
-	a!+  
+	a!+
 	;
 
 :optp | adr+1 val -- adr+1| es punto
 	over @ $f and
 	2 =? ( drop optpp ; )
 	drop
-	a!+  
+	a!+
 	;
 
 :punto | adr+1 val -- adr+1
-	dup $f and 
+	dup $f and
 	2 =? ( drop optp ; )
-	drop	
+	drop
 	a!+ ;
 
-:convert 
+:convert
 	'auxf >a
 	( @+ 1? punto ) a!+ drop ;
-	 	
+
 
 :coso
 	cls home
 	robotoregular 28 fontr!
 	$ff0000 'ink !
-	"R3d4 " print 
+	"R3d4 " print
 	car .d print cr
 	$ff00 'ink !
 
 	car 2 << tablelist + @
-	( @+ 1? ptok ) 2drop cr 
+	( @+ 1? ptok ) 2drop cr
 
 	car 2 << tablelist + @ convert
 	'auxf
 	( @+ 1? ptok ) 2drop cr
-	
+
 
 	sw 2/ 'ccx ! sh 2/ 'ccy !
 	200 'ccw ! 200 'cch !
