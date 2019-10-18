@@ -6,20 +6,25 @@
 ^r3/lib/print.r3
 ^r3/lib/key.r3
 
-#nav32 $008008 | 8x8 32bits
-$. $. $. $ff $. $. $. $.
-$. $. $. $ff $. $. $. $.
-$. $. $ff $ff $ff0000 $. $. $.
-$. $. $ff $ff $ff0000 $. $. $.
-$. $ff $ff $ffff $ff0000 $ffff $. $.
-$. $ff $ff $ffff $ff0000 $ffff $. $.
-$. $. $. $. $. $. $. $.
-$ff00 $ff00 $ff00 $ff00 $. $. $. $.
+#nav32 $08008 | 8x8 32bits
+$ffffff $ffffff $ffffff $ffff $ffff $ffff $ffff $ffff
+$ffffff $ffffff $ffffff $ffff $ffff $ffff $ffff $ffff
+$ffffff $ffffff $ffffff $ffff $ffff $ffff $ffff $ffff
+$ffffff $ffffff $ffffff $ffff $ffff $ffff $ffff $ffff
+$ffff $ffff $ffff $ffff $ffff $ffff $ffff $ffff
+$ffff $ffff $ffff $ffff $ffff $ffff $ffff $ffff
+$ff00 $ff00 $ff00 $ff00 $ff00 $ff00 $ff00 $ff00
+$ff00 $ff00 $ff00 $ff00 $ff00 $ff00 $ff00 $ff00
+
 
 #xn 100 #yn 100
 
 :player
 	xn yn 'nav32 sprite
+	xn 8 + yn 8 + 'nav32 sprite
+	xn yn 8 + 'nav32 sprite
+	xn 8 + yn 'nav32 sprite	
+	acursor
 	;
 
 #val

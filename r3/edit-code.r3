@@ -526,8 +526,10 @@
 	;
 
 :teclado
+	char
+	1? ( modo ex ; )
+	drop
 	key
-	<char char> bt? ( toasc modo ex ; )
 	<back> =? ( kback )
 	<del> =? ( kdel )
 	<up> =? ( karriba )
@@ -538,7 +540,7 @@
 	<end> =? ( kend )
 	<pgup> =? ( kpgup )
 	<pgdn> =? ( kpgdn )
-	<ins> =? (  modo 
+	<ins> =? (  modo
 				'lins =? ( drop 'lover 'modo ! ; )
 				drop 'lins 'modo ! )
 	<ret> =? (  13 modo ex )
@@ -573,7 +575,7 @@
 	barraestado
 
 	0 0 gotoxy
-	$666666 'ink ! 
+	$666666 'ink !
 	|1 linesfill
 	$ff00 'ink !
 	":R3" print

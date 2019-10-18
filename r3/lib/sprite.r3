@@ -32,18 +32,18 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 |---- w/alpha
 :alp!+ | col --
 |	$ff na? ( drop 4 a+ ; )
-	dup $ff and
-	0? ( drop a!+ ; )
-	$ff =? ( 2drop 4 a+ ; )
+	dup 24 >> $ff and
+	0? ( 2drop 4 a+ ; )
+	$ff =? ( drop a!+ ; )
 	swap
-	dup $ff00ff00 and				| alpha color colorand
-	a@ dup $ff00ff00 and 		| alpha color colorand inkc inkcand
+	dup $ff00ff and				| alpha color colorand
+	a@ dup $ff00ff and 		| alpha color colorand inkc inkcand
 	pick2 - pick4 * 8 >> rot +	| alpha color inkc inkcandl
-	$ff00ff00 and >r				| alpha color inkc
-	swap $ff0000 and 				| alpha px colorand
-	swap $ff0000 and 				| alpha colorand pxa
-	over - rot * 8 >> + $ff0000 and
-	r> or $ff or a!+ ;
+	$ff00ff and >r				| alpha color inkc
+	swap $ff00 and 				| alpha px colorand
+	swap $ff00 and 				| alpha colorand pxa
+	over - rot * 8 >> + $ff00 and
+	r> or a!+ ;
 
 :pala!+ | pal --
 	2 << paleta + @ a!+ ;
@@ -81,8 +81,18 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 		over a+
 		pick2 b+
 		1 - ) 3drop ;
-:d1 | adr -- ;8
-	drop ;
+
+:d1 | adr -- ; alpha
+	addm 2 << + >b
+	wb wi - 2 <<
+   	sw wi - 2 <<
+	hi ( 1?
+		wi ( 1?
+			b@+ alp!+
+			1 - ) drop
+		over a+
+		pick2 b+
+		1 - ) 3drop ;
 
 :d2p
 	$f0000000 an? ( dup 28 >> $f and pala!+ ; )
@@ -158,9 +168,9 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 
 :point0
 	-? ( drop 4 a+ ; ) 2 << b> + @ a!+ ;
-	
+
 :r0
-	>b 
+	>b
 	inirot
 	wi hi or -? ( 3drop ; ) drop
 	xy>v >a
@@ -178,9 +188,9 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 
 :point1
 	-? ( drop 4 a+ ; ) 2 << b> + @ alp!+ ;
-	
+
 :r1 | x y r adr --
-	>b 
+	>b
 	inirot
 	wi hi or -? ( 3drop ; ) drop
 	xy>v >a
@@ -201,10 +211,31 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 ::rsprite | x y r 'bmr --
 	0? ( 3drop ; )
 	@+ dup
-	dup $fff and 'wb ! 
+	dup $fff and 'wb !
 	12 >> $fff and 'hb !
 	2swap clip | adr h x y
 	wi hi or -? ( drop 4drop ; ) drop
 	xy>v >a
 	dup 28 >> 1? ( rot @+ 'paleta ! rot rot ) drop
 	24 >> $7 and 2 << 'rdraw + @ ex ;
+
+##arrow $1010009 | 16x16 32bits ALPHA
+$ff000000 $ff000000 $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000 $00000000
+$ff000000 $ffffffff $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000 $00000000
+$ff000000 $ffffffff $ffffffff $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ff000000 $00000000 $00000000 $00000000 $00000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ff000000 $00000000 $00000000 $00000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ff000000 $00000000 $00000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ff000000 $00000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ff000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ff000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ff000000 $ff000000 $ff000000
+$ff000000 $ffffffff $ffffffff $ffffffff $ffffffff $ffffffff $ff000000 $00000000 $00000000
+$ff000000 $ffffffff $ffffffff $ff000000 $ffffffff $ffffffff $ff000000 $00000000 $00000000
+$ff000000 $ffffffff $ff000000 $ff000000 $ffffffff $ffffffff $ff000000 $ff000000 $00000000
+$ff000000 $ff000000 $00000000 $ff000000 $ff000000 $ffffffff $ffffffff $ff000000 $00000000
+$00000000 $00000000 $00000000 $00000000 $ff000000 $ffffffff $ffffffff $ff000000 $00000000
+$00000000 $00000000 $00000000 $00000000 $ff000000 $ff000000 $ff000000 $ff000000 $00000000
+
+::acursor
+	xypen 'arrow sprite ;
