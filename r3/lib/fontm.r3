@@ -39,6 +39,10 @@
 ::fontmcolor | c1 c2 --
 	'palcol >a
 	over a!+
-	2dup $55 colmix a!+
-	2dup $aa colmix a!+
+	2dup $66 colmix a!+
+	2dup $cc colmix a!+
 	nip a!+ ;
+
+::fontminv
+	'palcol @+ swap 8 + @ swap
+	fontmcolor ;

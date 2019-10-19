@@ -22,7 +22,7 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 |-- internas para clip
 #addm
 #wi #hi
-
+#xi #yi
 |-- internas para scale
 #wr #hr
 #sx #sy
@@ -133,6 +133,79 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 	dup 28 >> 1? ( rot @+ 'paleta ! rot rot ) drop
 	24 >> $f and 2 << 'odraw + @ ex ;
 
+|----- N:N
+:clipscw
+	sw >? ( sw pick2 - ; ) wr ;
+:negsw
+	-? ( dup 'wi +! neg 'xi ! 0 ; ) 0 'xi ! ;
+:clipsch
+	sh >? ( sh pick2 - ; ) hr ;
+:negsh
+    -? ( dup 'hi +! neg 'yi ! 0 ; ) 0 'yi ! ;
+
+:clipsc | x y adr -- adr x y
+	rot | y adr x
+	wr over + clipscw 'wi ! drop
+	negsw
+	rot | adr x y
+	hr over + clipsch 'hi ! drop
+    negsh
+	wb wr 16 <</ dup 'sx ! xi * 'xi !
+	hb hr 16 <</ dup 'sy ! yi * 'yi !
+	;
+
+:sd0 | x y adr --
+	yi 'ya !
+	sw wi - 2 << | columna
+	hi ( 1?
+		xi 'xa !
+	 	pick2 ya 16 >> wb * 2 << +
+		wi ( 1?
+			over xa 16 >> 2 << + @ a!+
+			sx 'xa +!
+			1 - ) 2drop
+		over a+
+		sy 'ya +!
+		1 - ) 3drop ;
+
+:sd1 | x y adr --
+	yi 'ya !
+	sw wi - 2 << | columna
+	hi ( 1?
+		xi 'xa !
+	 	pick2 ya 16 >> wb * 2 << +
+		wi ( 1?
+			over xa 16 >> 2 << + @ alp!+
+			sx 'xa +!
+			1 - ) 2drop
+		over a+
+		sy 'ya +!
+		1 - ) 3drop ;
+
+#sdraw sd0 sd1 0 0 0 0 0 0
+
+::spritesize | x y w h 'img --
+	0? ( 4drop drop ; ) >b
+	b@+ dup $ffff and 'wb ! 16 >> $ffff and 'hb !
+	0? ( 4drop ; ) 'hr !
+	0? ( 3drop ; ) 'wr !
+	b> clipsc
+	wi hi or -? ( 4drop ; ) drop
+	xy>v >a
+	dup 28 >> 1? ( rot @+ 'paleta ! rot rot ) drop
+	24 >> $f and 2 << 'sdraw + @ ex ;
+
+::spritescale | x y scale 'img --
+	0? ( 4drop ; ) >b
+	b@+ dup $ffff and 'wb ! 16 >> $ffff and 'hb !
+	dup hb *. 0? ( 4drop ; ) 'hr !
+	wb *. 0? ( 3drop ; ) 'wr !
+	b> clipsc
+	wi hi or -? ( 4drop ; ) drop
+	xy>v >a
+	dup 28 >> 1? ( rot @+ 'paleta ! rot rot ) drop
+	24 >> $f and 2 << 'sdraw + @ ex ;
+
 |----- DRAW ROT 1:1
 :rotlim
 	rot -? ( min ; ) rot max swap ;
@@ -206,7 +279,7 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 		rot 1 - )
 	3drop ;
 
-#rdraw r0 r1 0 0 0 0 0 0 
+#rdraw r0 r1 0 0 0 0 0 0
 
 ::rsprite | x y r 'bmr --
 	0? ( 3drop ; )
@@ -217,10 +290,10 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 	wi hi or -? ( drop 4drop ; ) drop
 	xy>v >a
 	dup 28 >> 1? ( rot @+ 'paleta ! rot rot ) drop
-	24 >> $7 and 2 << 'rdraw + @ ex ;
+	22 >> $3c and 'rdraw + @ ex ;
 
-##arrow $1010009 | 16x16 32bits ALPHA
-$ff000000 $ff000000 $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000 $00000000
+##arrow $1010009 | 9x16 32bits ALPHA
+$ff000000 $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000 $00000000 $00000000
 $ff000000 $ffffffff $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000 $00000000
 $ff000000 $ffffffff $ffffffff $ff000000 $00000000 $00000000 $00000000 $00000000 $00000000
 $ff000000 $ffffffff $ffffffff $ffffffff $ff000000 $00000000 $00000000 $00000000 $00000000

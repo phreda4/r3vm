@@ -1,9 +1,7 @@
 | main filesystem - PHREDA 2019
 |
-^r3/lib/sys.r3
 ^r3/lib/print.r3
 ^r3/lib/sprite.r3
-^r3/lib/str.r3
 ^r3/lib/mem.r3
 
 ^r3/lib/fontm.r3
@@ -24,58 +22,15 @@
 #linesv 15
 
 |--------------------------------
-| win
 :FNAME | adr -- adrname
 	44 + ;
 
 :FDIR? | adr -- 1/0
-	@ $10 ;
+	@ 4 >> 1 and ;
 
-:files.clear
-	0 'nfiles !
-	'filen 'filen> !
-	'files 'files> !
-	;
+:FINFO | adr -- adr info
+	dup FDIR? 0? ( 2 + ; ) drop 0 ;
 
-:fileadd
-
-	FNAME
-|   	".r3" =pos 0? ( 2drop ; ) drop
-	filen>
-
-	files> !+ 'files> !
-	filen> strcpyl 'filen> !
-	;
-
-:reload
-	'path ffirst drop | quita .
-	fnext drop
-	( fnext 1? fileadd ) drop
-	files> 'files - 2 >> 'nfiles !
-	;
-
-:files.free
-	0 'files ( files> <?
-		@+ pick2 >? ( swap rot )
-		drop ) drop
-	8 >> 'filen +
-	( c@+ 1? drop ) drop
-	'filen> !
-	;
-
-:rebuild
-	"r3/" 'path strcpy
-	files.clear
-	0 'pagina !
-	0 'nivel !
-	reload
-	;
-
-:getfilename | nro --
-	2 << 'files + @ ;
-
-:getinfo | nro --
-	2 << 'files + @ ;
 
 :getname | nro -- ""
 	2 << 'files + @ 8 >> 'filen + ;
@@ -87,23 +42,71 @@
 	2 << 'files + @ 4 >> $f and ;
 
 :chginfo | nro --
-	2 << 'files + dup @ $8 xor swap ! ;
+	2 << 'files + dup @ $1 xor swap ! ;
+
+|--------------------------------
+:files.clear
+	0 'nfiles !
+	'filen 'filen> !
+	'files dup 'files> ! 'files< !
+	;
+
+:files!+
+	files> ( files< >?
+		4 - dup @+ swap !
+		) drop
+	files< !+ 'files< !
+	4 'files> +!
+	;
+
+:files.free
+	0 'files ( files> <?
+		@+ pick2 >? ( swap rot )
+		drop ) drop
+	8 >> 'filen +
+	( c@+ 1? drop ) drop
+	'filen> !
+	;
+
+:fileadd
+	FINFO nivel 4 << or filen> 'filen - 8 << or
+	files!+
+	FNAME filen> strcpyl 'filen> !
+	;
+
+:reload
+	'path 
+	ffirst drop | quita .
+	fnext drop	| quita ..
+	( fnext 1? fileadd ) drop
+	files> 'files - 2 >> 'nfiles !
+	;
+
+:rebuild
+	"r3" 'path strcpy
+	files.clear
+	0 'pagina !
+	0 'nivel !
+	reload
+	;
 
 |-----------------------------
 :makepath | actual nivel --
-|	0? ( drop getname "r4/%s" mprint 'path strcpy ; )
+	0? ( drop 
+		"r3/" 'path strcpy
+		getname 'path strcat
+		; )
 	over 1 -
-|	( dup getlvl pick2 >=? )( drop 1- ) drop
+	( dup getlvl pick2 >=?
+		drop 1 - ) drop
 	over 1 - makepath drop
 	"/" 'path strcat
 	getname 'path strcat
 	;
 
 :expande
-|	0 'name !
 	actual
 	dup getlvl makepath
-
    	actual chginfo
 	actual getlvl 1 + 'nivel !
     actual 1 + 2 << 'files + 'files< !
@@ -128,7 +131,6 @@
 	;
 
 :contrae
-|	0 'name !
 	'path ( c@+ 1? drop ) drop 1-
 	( 'path >?
 		dup c@ $2f =? ( drop 0 swap c! remfiles ; )
@@ -136,22 +138,27 @@
 	remfiles ;
 
 |--------------------------------
-:invert
-	$fff0 $0 fontmcolor ;
+:printfn | n
+	dup getlvl 1 << nsp
+	dup getinfo
+	0? (  "+" print )
+	1 =? ( "-" print )
+	drop
+	sp getname print sp
+	;
 
-:normal
-	$0 $ff00 fontmcolor ;
+#filecolor $af00 $ff00 $afaf00 $3f00  $7f7f  $7f007f $7f7f00 $7f0000 $7f00  $ff $ff
 
-:printfn
-	sp getfilename print sp ;
+:colorfile
+    dup getinfo $f and 2 << 'filecolor + @
+	0 swap fontmcolor ;
 
 :drawl | nro --
-	actual =? ( invert printfn normal ; )
+	colorfile
+	actual =? ( fontminv printfn fontminv ; )
 	printfn ;
 
 :drawtree
-|    nfiles .d print " " print linesv .d print cr
-	normal
 	0 ( linesv <?
 		dup pagina +
 		nfiles  >=? ( 2drop ; )
@@ -159,23 +166,27 @@
     	drawl
 		cr 1 + ) drop ;
 
+|--------------------------
+:remlastpath
+	'path ( c@+ 1? drop ) drop 1 -
+	( dup c@ $2f <>? drop 1- ) drop
+	0 swap c! ;
+
 |--------------------------------
-
-:runactual | "" --
-	mark
-	"r3 " ,s 'path ,s ,s ,eol
-	empty here
-	sys drop
-	;
-
 :runfile
 	actual -? ( drop ; )
 	getinfo $7 and
-	0? ( drop ; )
-|	setactual savem
-|	1 >? ( nrun ; )
+	2 <? ( drop ; )
 	drop
-|	'name 'path "%s/%s" mprint run
+
+	actual dup getlvl makepath
+	actual getinfo $7 and 1? ( remlastpath ) drop
+
+	mark
+|	"r3 " ,s 'path ,s "/" ,s ,s ,eol
+	"r3v " ,s 'path ,s "/" ,s ,s ,eol
+	empty here
+	sys drop
 	;
 
 :runedit
@@ -190,8 +201,6 @@
 	actual -? ( drop ; )
 	getinfo $7 and
 	0? ( drop ; )
-|	setactual savem
-|	1 >? ( nrun ; )
 	drop
 	runedit
 	;
@@ -201,7 +210,6 @@
 	0? ( drop expande ; )
 	8 =? ( drop contrae ; )
 	drop
-|	setactual savem
 	runedit
 	;
 
@@ -214,9 +222,7 @@
 #nfile
 
 :newfile
-|	setactual
 	1 'nfile !
-|	0 'name !
 	;
 
 :remaddtxt | --
@@ -243,16 +249,16 @@
 
 |--------------------------------
 :fenter
-	actual
-	getfilename
-	".r3" =pos 1? ( drop runactual ; ) drop
+	actual 
+	getinfo $f and
+	0? ( drop expande ; )
+	1 =? ( drop contrae ; )
 	drop
 
-|	0? ( drop expande ; )
-|	8 =? ( drop contrae ; )
-|	drop
-|	setactual savem
-|	runedit
+	actual
+	getname
+	".r3" =pos 1? ( drop runfile ; ) drop
+	drop
 	;
 
 :fdn

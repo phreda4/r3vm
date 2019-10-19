@@ -25,6 +25,9 @@
 	sh cch / 'rows !
 	;
 
+::noemit | c --
+	$ff and _charsize ex 'ccx +! ;
+
 ::emit | c --
 	$ff and dup
 	_charemit ex
@@ -60,7 +63,7 @@
 	print ;
 
 ::cntprint | "" cnt --
-	( 1? 1 - swap c@+ 
+	( 1? 1 - swap c@+
 		0? ( drop 1 - 32 )
 		emit swap ) 2drop ;
 

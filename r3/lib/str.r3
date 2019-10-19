@@ -131,3 +131,8 @@
   ( 10 /mod $30 + pick2 c! swap 1 - swap 1? ) drop
   swap sign ;
 
+::.r. | b nro -- b
+	'mbuff 62 + swap -
+	swap ( over >?
+		1 - $20 over c!
+		) drop ;

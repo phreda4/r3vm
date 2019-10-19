@@ -82,18 +82,18 @@
 
 ::mrotxi |x -- ; premultiplica
 	0? ( drop ; )
-	mat> 4+ >a
+	mat> 4 + >a
 	dup sin swap cos
-	a@ a> 4+ @ | s c b c
+	a@ a> 4 + @ | s c b c
 	pick2 pick2 *. pick4 neg pick2 *. + a!+ | s c b c
 	pick2 *. >r pick2 *. r> + a!+ 8 a+
-	a@ a> 4+ @ | s c f g
+	a@ a> 4 + @ | s c f g
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	pick2 *. >r pick2 *. r> + a!+ 8 a+
-	a@ a> 4+ @ | s c j k
+	a@ a> 4 + @ | s c j k
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	pick2 *. >r pick2 *. r> + a!+ 8 a+
-	a@ a> 4+ @ | s c m o
+	a@ a> 4 + @ | s c m o
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	rot *. >r *. r> + a! ;
 
@@ -117,16 +117,16 @@
 	dup sin swap cos
 	a@ a> 8 + @ | s c a c
 	pick2 pick2 *. pick4 pick2 *. + a!+
-	pick2 *. >r pick2 neg *. r> + a> 4+ ! 12 a+
+	pick2 *. >r pick2 neg *. r> + a> 4 + ! 12 a+
 	a@ a> 8 + @ | s c a c
 	pick2 pick2 *. pick4 pick2 *. + a!+
-	pick2 *. >r pick2 neg *. r> + a> 4+ ! 12 a+
+	pick2 *. >r pick2 neg *. r> + a> 4 + ! 12 a+
 	a@ a> 8 + @ | s c a c
 	pick2 pick2 *. pick4 pick2 *. + a!+
-	pick2 *. >r pick2 neg *. r> + a> 4+ ! 12 a+
+	pick2 *. >r pick2 neg *. r> + a> 4 + ! 12 a+
 	a@ a> 8 + @ | s c a c
 	pick2 pick2 *. pick4 pick2 *. + a!+
-	rot *. >r swap neg *. r> + a> 4+ ! ;
+	rot *. >r swap neg *. r> + a> 4 + ! ;
 
 |-----------------------------
 ::mrotz | z --
@@ -150,16 +150,16 @@
 	0? ( drop ; )
 	mat> >a
 	dup sin swap cos
-	a@ a> 4+ @ | s c a b
+	a@ a> 4 + @ | s c a b
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	pick2 *. >r pick2 *. r> + a!+ 8 a+
-	a@ a> 4+ @ | s c a b
+	a@ a> 4 + @ | s c a b
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	pick2 *. >r pick2 *. r> + a!+ 8 a+
-	a@ a> 4+ @ | s c a b
+	a@ a> 4 + @ | s c a b
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	pick2 *. >r pick2 *. r> + a!+ 8 a+
-	a@ a> 4+ @ | s c a b
+	a@ a> 4 + @ | s c a b
 	pick2 pick2 *. pick4 neg pick2 *. + a!+
 	rot *. >r *. r> + a! ;
 
@@ -171,8 +171,8 @@
 ::matinv
 	mat> >a
 	a> 12 + @  neg a> 28 + @  neg a> 44 + @ neg | tx ty tz
-	a> 4+ dup 12 + invierte a> 8 + dup 24 + invierte a> 24 + dup 12 + invierte
-	pick2 a@  *. pick2 a> 4+ @ *. + over a> 8 + @  *. + a> 12 + !
+	a> 4 + dup 12 + invierte a> 8 + dup 24 + invierte a> 24 + dup 12 + invierte
+	pick2 a@  *. pick2 a> 4 + @ *. + over a> 8 + @  *. + a> 12 + !
 	pick2 a> 16 + @  *. pick2 a> 20 + @  *. + over a> 24 + @  *. + a> 28 + !
 	rot a> 32 + @  *. rot a> 36 + @  *. + swap a> 40 + @  *. + a> 44 + !
 	;
@@ -335,9 +335,9 @@
 	>a @+ a@+ *. swap @+ a@+ *. swap @ a@ *. + +  ;
 
 ::v3vec | v1 v2 -- ; v1=v1 x v2
-	>a dup @ a> 4+ @ *. over 4+ @ a@ *. -
+	>a dup @ a> 4 + @ *. over 4 + @ a@ *. -
 	over 8 + @ a@ *. pick2 @ a> 8 + @ *. -
-	pick2 4+ @ a> 8 + @ *. pick3 8 + @ a> 4+ @ *. -
+	pick2 4 + @ a> 8 + @ *. pick3 8 + @ a> 4 + @ *. -
 	>r rot r> swap !+ !+ ! ;
 
 ::v3- | v1 v2 -- ; v1=v1-v2

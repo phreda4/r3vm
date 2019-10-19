@@ -4,6 +4,11 @@
 ^r3/lib/math.r3
 ^r3/lib/mem.r3
 ^r3/lib/print.r3
+^r3/lib/sprite.r3
+
+^r3/lib/fontm.r3
+^r3/fntm/droidsans13.fnt
+
 |^r3/lib/btn.r3
 |^r3/lib/input.r3
 |^r3/lib/parse.r3
@@ -183,27 +188,21 @@
 
 :loadtxt | -- cargar texto
 	mark
-	here 'ed.nombre
+	here "r3/test.r3"
 	getpath
 	load 0 swap c!
 
 	|-- queda solo cr al fin de linea
 	fuente dup 'pantaini> !
 	here ( c@+ 1?
-		13 =? ( over c@ 
+		13 =? ( over c@
 				10 =? ( rot 1 + rot rot ) drop )
 		10 =? ( drop c@+ 13 <>? ( drop 1 - 13 ) )
 		rot c!+ swap ) 2drop '$fuente !
 	0lin
 
-	|-- ubicar el cursor
-	errorlin
-	-? ( drop ed.ncar 'fuente> +! ed.ipan 'pantaini> +! ajpri empty ; )
-	fuente ( swap 1?
-		1 - swap >>13 2 + )
-	drop 'fuente> !
-	ed.ncar +? ( dup 'fuente> +! ) drop
-	empty ;
+	empty
+	;
 
 :ed.save
 	;
@@ -375,21 +374,83 @@
 |	drop sel<<
 	;
 
-:drawcode
-	pantaini>
-|	sw 'tx2 !
-	0 ( cntlinea <?
-		$888888 'ink !
-		dup prilinea + "%d" print
-       	ccw 2 << 'ccx !
-		swap
-		drawsel lf drawcur lf
-|		>>lineacolor0
-		lprint
+|---------------------------------------
+:lineacom | adr c -- adr++
+	( 13 =? ( drop 1 - ; ) emit c@+ 1? )
+	drop 1 - ;
 
-|		0 'tx1 !
-|		0? ( 2drop cntlinea $fuente )( cr )
-		swap 1 + ) drop
+:palstr | adr c -- adr++
+	( emit c@+ 34 =? ( emit ; ) $ff and 31 >? )
+	drop 1 - ;
+
+:npal
+	( $ff and 32 >? emit c@+ )
+	drop 1 - ;
+
+:color_inc $0 $ffff00 fontmcolor ;
+:color_com $0 $555555 fontmcolor ;
+:color_cod $0 $ff0000 fontmcolor ;
+:color_dat $0 $ff00ff fontmcolor ;
+:color_str $0 $ffffff fontmcolor ;
+:color_adr $0 $ffff fontmcolor ;
+:color_nor $0 $ff00 fontmcolor ;
+
+:wordcolor | adr c -- ar..
+	32 =? ( drop sp ; )
+	9 =? ( drop tab ; )
+	$5e =? ( color_inc npal ; )	| $5e ^  Include
+	$7c =? ( color_com lineacom ; )	| $7c |	 Comentario
+	$3A =? ( color_cod npal ; )		| $3a :  Definicion
+	$23 =? ( color_dat npal ; )	| $23 #  Variable
+	$22 =? ( color_dat palstr ; )	| $22 "	 Cadena
+	$27 =? ( color_adr npal ; )		| $27 ' Direccion
+|	over 1- isNro 1? ( drop amarillo npal ; ) drop
+|	over 1- ?macro 1? ( drop verde npal ; ) drop		| macro
+	color_nor npal ;
+
+:codelinecolor | adr -- adr++/0
+	( c@+ 1?
+		13 =? ( drop ; )
+		wordcolor
+		) nip ;
+
+:linenro | lin -- lin
+	$888888 $ffffff fontmcolor
+	dup prilinea + .d 3 .r. print sp ;
+
+:emitcur
+	13 =? ( drop cr ; )
+	9 =? ( drop tab ; )
+	noemit ;
+
+:drawcursor
+	blink 1? ( drop ; ) drop
+	0 1 gotoxy
+	pantaini>
+	( fuente> <? c@+ emitcur ) drop
+	32 noemit 32 noemit 32 noemit 32 noemit 32 noemit
+	ccx ccy xy>v >a
+	cch ( 1? 1 -
+		ccw ( 1? 1 -
+			a@ not a!+
+			) drop
+		sw ccw - 2 << a+
+		) drop ;
+
+:drawcode
+	0 1 gotoxy
+	pantaini>
+	0 ( cntlinea <?
+		linenro
+		swap
+|		drawsel lf
+		codelinecolor 0? ( 2drop ; )
+		cr
+		swap 1 + ) 2drop
+	drawcursor
+	;
+
+:a
 	$fuente <? ( 1 - ) 'pantafin> !
 	fuente>
 	( pantafin> >? scrolldw )
@@ -457,7 +518,7 @@
 |----------------------------
 :directrun	
 	|savetxt 'ed.nombre run  ;
-:profiler	
+:profiler
 |	savetxt	"r4/IDE/profiler-code.txt" run ;
 :debugrun	
 |	savetxt	"r4/IDE/debug-code.txt" run ;
@@ -485,7 +546,7 @@
 	0? ( drop ; ) 'fuente> ! ;
 
 :findmodekey
-	$0 'ink ! 
+	$0 'ink !
 	|1 linesfill
 	" > " print
 	
@@ -553,33 +614,26 @@
 :barraestado
 	panelcontrol 1? ( drop controlkey ; ) drop
 	findmode 1? ( drop findmodekey ; ) drop
-	$666666 'ink !
-	|1 linesfill
-	$ffffff 'ink !
+|	$666666 'ink !
+	backline
+||	$ffffff 'ink !
 	'ed.nombre sp print sp
 	teclado
 	;
 
-:barv
-	$333333 'ink !
-	0 0 op 0 sh pline ccw 2 << 0 op ccw 2 << sh pline
-	poli ;
-
 :editando
 	cls
 |	'dns 'mos 'ups guiMap |------ mouse
-
-	barv
 
 	0 rows 1 - gotoxy
 	barraestado
 
 	0 0 gotoxy
 	$666666 'ink !
-	|1 linesfill
+	backline
 	$ff00 'ink !
-	":R3" print
-	$ffffff 'ink !
+	"R3" print
+	$7f0000 'ink !
 	"eDIT " print
 
 |------------------------------
@@ -593,14 +647,13 @@
 |------------------------------
 	cr
 	drawcode
-
-|	cminiflecha
+	acursor
 	;
 
 :editor
 	$111111 'paper !
 	cls
-	rows 2 - 'cntlinea !
+	rows 4 - 'cntlinea !
 	'editando onshow
 	;
 
@@ -644,9 +697,10 @@
 
 |----------- principal
 :main
+	'fontdroidsans13 fontm
 	ram
 |	cargaestado
-|	loadtxt
+	loadtxt
 	editor
 
 |	savetxt
