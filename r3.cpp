@@ -547,16 +547,17 @@ if (n==2) { blockOut();return; }	//)	salto
 if (n==3) { anonIn();return; }		//[	salto:etiqueta
 if (n==4) { anonOut();return; }		//]	etiqueta;push
 
+int token=memcode[memc-1];
+
 // optimize conditional jump to short version
-if (n>=IFL && n<=IFNAND && (memcode[memc-1]&0xff)==LIT && 
-	((memcode[memc-1]&0xff000000)==0 || (memcode[memc-1]&0xff000000)==0xff000000)) { 
-	memcode[memc-1]=((memcode[memc-1]<<8)&0xffff0000)|(n-IFL+IFL1);
+if (n>=IFL && n<=IFNAND && (token&0xff)==LIT && (token<<8>>16)==(token>>8)) { 
+	memcode[memc-1]=((token<<8)&0xffff0000)|(n-IFL+IFL1);
 	return; 
 	}
 
 // optimize operation with constant
-if (n>=AND && n<=CDIVSH && (memcode[memc-1]&0xff)==LIT) { 
-	memcode[memc-1]=(memcode[memc-1]^LIT)|(n-ADD+ADD1);
+if (n>=AND && n<=CDIVSH && (token&0xff)==LIT) { 
+	memcode[memc-1]=(token^LIT)|(n-ADD+ADD1);
 	return; 
 	}
 

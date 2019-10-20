@@ -20,14 +20,14 @@
 		a@+ $ff000000 or b!+ -1 a+
 		) drop
 	tgahead 'here !
-	tgaw tgah 16 << or , 0 ,
+	tgaw tgah 12 << or ,
 	here tgaimage tgaw tgah * dup 'here +! move
 	tgahead ;
 
 
 :ReadTGA32bits | adr -- new
 	tgahead 'here !
-   	tgaw tgah 16 << or , 0 ,
+   	tgaw tgah 12 << or ,
 	here swap tgaw tgah * dup 'here +! move
 	tgahead
 	;
@@ -47,13 +47,17 @@
 		@+ $ff000000 or b!+ 1 -
 		swap ) drop ;
 
+:trun
+	$80 an? ( runlen24 ; )
+	norun24 ;
+
 :ReadTGA24bitsRLE
 	here dup 'tgaimage ! >b
-	( tgaend <? 
-		c@+ $80 and? ( runlen24 )( norun24 )
+	( tgaend <?
+		c@+ trun
 		) drop
 	tgahead 'here !
-	tgaw tgah 16 << or , 0 ,
+	tgaw tgah 12 << or ,
 	here tgaimage tgaw tgah * dup 'here +! move
 	tgahead
 	;
@@ -67,13 +71,17 @@
 		@+ b!+
 		swap ) drop ;
 
+:trun
+	$80 an? ( runlen32 ; )
+	norun32 ;
+
 :ReadTGA32bitsRLE
 	here dup 'tgaimage ! >b
 	( tgaend <?
-		c@+ $80 and? ( runlen32 )( norun32 )
+		c@+ trun
 		) drop
 	tgahead 'here !
-	tgaw tgah 16 << or , 0 ,
+	tgaw tgah 12 << or ,
 	here tgaimage tgaw tgah * dup 'here +! move
 	tgahead
 	;
@@ -130,8 +138,9 @@
 |  16 pixel_depth;  /* bits per pixel: 8, 16, 24 or 32
 |  17 image_descriptor; /* 24 bits = 0x00; 32 bits = 0x80
 :tgaheader | adr -- adr'
-	dup 12 + w@ 'tgaw !
-	dup 14 + w@ 'tgah !
+	dup 12 + @
+	dup $ffff and 'tgaw !
+	16 >> $ffff and 'tgah !
 |	dup 1 + c@ 1? ( ) drop	| colormap
 	18 + | heder size
 	;
@@ -144,17 +153,3 @@
 	tgaimage
 	;
 
-|----------------------------------------
-#ima
-
-:main
-	"media/obj/dragon.tga"
-	"media/obj/Texture/body.tga"
-	loadtga 'ima !
-	show clrscr
-		ima "%d" print
-		0 0 ima img.adraw
-		'exit >esc<
-		cminiflecha ;
-
-: mark main ;

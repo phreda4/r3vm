@@ -6,6 +6,8 @@
 #k
 #c
 
+#test 1 2 3 4 5 6 7 8 9 0
+
 :teclado
 	key
 	>esc< =? ( exit )
@@ -21,8 +23,12 @@
 	cr
 	k .h print cr
 	c .h print cr
+	
+	'test 10 ( 1? 1 - swap @+ .d print sp swap ) 2drop
+
 	teclado
 	;
 
 :
+	'test 33 5 fill
 	33 'main onshow ;

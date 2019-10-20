@@ -1,6 +1,7 @@
 | LoadPng
 | PHREDA 2015
 |------------
+^r3/lib/trace.r3
 
 #len_bits 0 0 0 0 0 0 0  0  1  1  1  1  2  2  2  2  3  3  3  3  4  4  4   4   5   5   5   5   0   6
 #len_base 3 4 5 6 7 8 9 10 11 13 15 17 19 23 27 31 35 43 51 59 67 83 99 115 131 163 195 227 258 323
@@ -30,7 +31,7 @@
 ::read1bit | adr -- adr bit
 	bitl 0? ( drop c@+ 'bbit ! 8 )
 	1 - 'bitl !
-	bbit dup 2/ 'bbit !
+	bbit dup 1 >> 'bbit !
 	1 and ;
 
 ::readnbit | adr n -- adr nro
@@ -40,7 +41,7 @@
     	0? ( drop nip swap c@+ rot 8 )
 		1 - pick2 1 and
 		pick2 << a+
-		rot 2/ swap rot 1 + ) drop
+		rot 1 >> swap rot 1 + ) drop
 	'bitl ! 'bbit !
 	nip a> ;
 
@@ -55,11 +56,19 @@
 		rot + rot a@+		| dt a cur sum l
 		rot over -			| dt a sum l cur-l
 		rot rot + swap
-		-? ) 
+		+? ) | **
 	+ 2 << rot 64 + + @ ;
 
+:len1
+	0? ( drop ; )
+	2 << 'off + dup @  | cnt n len  off valo
+	1 rot +!			| cnt n len  valo
+	2 << 64 + a> +
+	pick2 swap !
+	;
+
 :buildtree | cnt len table --
-	0 over 16 fill
+	dup 0 16 fill
 	>a 2dup swap	| cnt len len cnt
 	( 1? 1 - swap
 		c@+ $ff and 2 << a> + 1 swap +! swap ) 2drop
@@ -69,13 +78,15 @@
 		>r @+ rot + swap r>
 		) 3drop
 	0 ( pick2 <? swap c@+	| cnt n len  length
-		$ff and
-		1? ( 2 << 'off + dup @  | cnt n len  off valo
-			1 rot +!			| cnt n len  valo
-			2 << 64 + a> +
-			pick2 swap !
-			)( drop )
+		$ff and len1
 		swap 1 + ) 3drop ;
+
+:decodel
+	rot swap | lenf a len n
+	( 1? 1 -
+		0 rot c!+ swap
+		) drop
+	rot swap ;
 
 :decodeloop | lenf len a sym -- a lenf len
 	16 <? ( rot c!+ rot swap ; )
@@ -85,12 +96,8 @@
 				pick2 swap c!+	| lenf prev a len+
 				r> ) drop
 			rot drop rot swap ; )
-	17 =? ( drop 3 readnbit 3 + )( drop 7 readnbit 11 + )
-	rot swap | lenf a len n
-	( 1? 1 -
-		0 rot c!+ swap
-		) drop
-	rot swap ;
+	17 =? ( drop 3 readnbit 3 + decodel ; ) drop
+	7 readnbit 11 + decodel ;
 
 :decodetree | a -- a
 	5 readnbit 257 + 'hlit !
@@ -100,10 +107,11 @@
 	'clcidx >b
 	hclen ( 1? 1 - swap
 		3 readnbit b@+	| cnt a 3b inx
-		'lens + c! swap ) drop 
+		'lens + c! swap ) drop
 	19 'lens 'codetr  buildtree
 	'lens dup hlit hdist + + swap	| a lenf len
-	( over <? 
+		trace
+	( over <?
 		rot 'codetr decodesym	| lenf len a sym
 		decodeloop
 		) 2drop
@@ -145,18 +153,23 @@
 	swap 2 + swap
 	( 1? 1 - swap c@+ ,c swap ) drop ;
 
+:infla
+	( 'dynsta decodesym 256 <>?
+		inflatesym ) drop ;
+
 :typeinflate | adr -- adr
 	2 readnbit
 	0? ( drop nocompress ; )
-	1 - 0? ( drop fixtree )( drop decodetree )
-	( 'dynsta decodesym 256 <>? 
-		inflatesym ) drop ;
+	1 =? ( drop fixtree infla ; ) drop
+	decodetree
+	infla ;
 
 |-----------
-::inflate | in --
+:inflate | in --
 	0 'bitl !
 	( read1bit 0? drop
-		typeinflate ) drop
+		typeinflate
+		) drop
 	typeinflate drop ;
 
 #wpng
@@ -253,12 +266,12 @@
 	swap 1 - swap
 	c@+ | x y data filte
 	pick3 swap
-	$7 and 2 << 'linefilter0 + @ exec | x y data
+	$7 and 2 << 'linefilter0 + @ ex | x y data
 	swap
 	( 1? 1 - swap
 		c@+   | x y data filter
 		pick3 swap
-		$7 and 2 << 'linefilter + @ exec | x y data
+		$7 and 2 << 'linefilter + @ ex | x y data
 		swap ) drop nip ;
 
 #adambox $33 $33 $23 $22 $12 $11 $01 -1
@@ -266,7 +279,7 @@
 :unfilteradam | --
 	databyte
 	'adambox >b
-	( b@+ +? 
+	( b@+ +?
 		wpng over 4 >> >> pxsize *
 		hpng rot $f and >>
 		rot unfilter
@@ -280,7 +293,7 @@
 	;
 :mode08 | b -- b pixel ; modo 0 8bits
 	c@+ $ff and
-	key.rgb =? ( 0 )( $ff000000 )
+	key.rgb <>? ( drop $ff000000 ; )
 	over 8 << dup 8 << or or or ;
 
 |//RGB color
@@ -334,7 +347,7 @@ $1201
 	( hpng <? 
 		1 a+
 		over ( wpng <?
-			a> modec exec swap >a
+			a> modec ex swap >a
 			ppixel!
 			pick4 + ) drop
 		 pick2 + ) 4drop
@@ -349,7 +362,7 @@ $1201
 	hpng ( 1? 
 		swap 1 + swap
 		wpng ( 1? 
-			rot modec exec a!+
+			rot modec ex a!+
 			rot rot 1 - ) drop
 		1 - ) 2drop
 	;
@@ -395,7 +408,8 @@ $1201
 	read32 'hpng !
 	c@+ 'dpng !
 	c@+
-	3 =? ( $3ff )( 0 ) 'palsize !
+	0 'palsize !
+	3 =? ( $3ff 'palsize ! )
 	dup 'colchan + c@ dpng * 7 + 3 >> 'pxsize !
 	dup 2 << 'colmode + @ 'modec !
 	'cpng !
@@ -414,9 +428,9 @@ $1201
 
 :exitok
 	emem 'here !
-	0					| type
-	wpng hpng 16 << or	| size
-	imem !+ !
+	wpng hpng 12 << or	| size
+	| transparente******
+	imem !
 	imem
 	;
 

@@ -92,7 +92,7 @@
 
 |-----------------------------
 :makepath | actual nivel --
-	0? ( drop 
+	0? ( drop
 		"r3/" 'path strcpy
 		getname 'path strcat
 		; )
@@ -183,8 +183,8 @@
 	actual getinfo $7 and 1? ( remlastpath ) drop
 
 	mark
-|	"r3 " ,s 'path ,s "/" ,s ,s ,eol
-	"r3v " ,s 'path ,s "/" ,s ,s ,eol
+	"r3 " ,s 'path ,s "/" ,s ,s ,eol
+|	"r3v " ,s 'path ,s "/" ,s ,s ,eol
 	empty here
 	sys drop
 	;

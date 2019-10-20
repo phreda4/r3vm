@@ -59,19 +59,19 @@
 
     1 'pad !
 	dup 10 + @
-	54 =? ( 'linea24 3 'pad ! )( 118 =? ( 'linea4 )( 'linea8 ) )
-	'modolin !
+	'linea8 'modolin !
+	54 =? ( 'linea24 'modolin ! 3 'pad ! )
+	118 =? ( 'linea4 'modolin ! )
 	+ wbmp hbmp 1 - * 2 << finimg +
     4 wbmp pad * $3 and - $3 and 'pad !
 	swap
 	hbmp ( 1? 1 - >r
-		modolin exec
+		modolin ex
 		swap wbmp 3 <<  -
 		swap pad +
 		r> ) 3drop
 	here
-	wbmp hbmp 16 << or ,
-	0 ,
+	wbmp hbmp 12 << or ,
 	here finimg wbmp hbmp * moveor
 	wbmp hbmp * 2 + 2 << over + 'here !
 	;

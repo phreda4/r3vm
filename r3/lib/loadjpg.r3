@@ -1,6 +1,9 @@
 | JPG decoder
 | PHREDA 2015
 |-----------------------
+^r3/lib/mem.r3
+
+^r3/lib/trace.r3
 
 #emem
 #restart
@@ -64,6 +67,7 @@
 	c@+ $ff and ;
 :get16 | adr -- adr+ 16b
 	c@+ $ff and 8 << swap c@+ $ff and rot or ;
+
 :readNumber | adr -- adr+ 16b
 	2 + get16 ;
 :readComm | adr -- adr+
@@ -74,8 +78,8 @@
 	bitl 0? ( drop c@+
 		-1 =? ( swap 1 + swap )
 		'bbit ! 8 )
-	1- 'bitl !
-	bbit dup 2* 'bbit !
+	1 - 'bitl !
+	bbit dup 1 << 'bbit !
 	7 >> 1 and ;
 
 | index(16)-code(8)-length(8)
@@ -84,7 +88,7 @@
 	readbit 1 | bitfiel cnt
 	( a@+ 1?	| bitfield cnt code
 		dup $ff and
-		( pick2 >? 
+		( pick2 >?
 			>r >r >r 2* swap readbit rot or r> 1 + r> r> )
 		drop 	| bitfield cnt code
 		16 >> $ffff and pick2 =? ( 3drop a> 4 - @ 8 >> $ff and ; )
@@ -94,11 +98,11 @@
 
 :recbits | a n -- a v
 	0 rot pick2 | n 0 a n
-	( 1? 1- rot 2* rot readbit rot or swap rot )
+	( 1? 1 - rot 1 << rot readbit rot or swap rot )
 	drop | n nro a
 	rot 1 swap << | nro a cat
-	pick2 2* <=? ( drop swap ; )
-	1- neg rot + ;
+	pick2 1 << <=? ( drop swap ; )
+	1 - neg rot + ;
 
 |--------------------------
 :getcase1
@@ -113,6 +117,10 @@
 	get8 'QuantTableCbCr !
 	swap ;
 
+:getcasen
+	0? ( getcase1 ; )
+	getcase2 ;
+
 :JPGGetImageAttr | adr -- adr+
 	3 +	| Length of segment
 	get16 'imgrows !
@@ -120,7 +128,7 @@
 	get8	| Number of components
 	( 1? swap
 		get8
-		1 - 0? ( getcase1 )( getcase2 )
+		1 - getcasen
 		drop swap 1 - ) drop ;
 
 |----------------------------------
@@ -181,7 +189,7 @@
 
 |-----------------
 :cleartempa
-	0 'tempa 64 fill ;
+	'tempa 0 64 fill ;
 
 :]inarray | n n -- d
 	swap 3 << + 2 << 'tempa + ;
@@ -281,21 +289,23 @@
 	0 ( 8 <? pass2 1 + ) 2drop ;
 
 |---------------
+:block0
+	0? ( drop 15 <>? ( 63 + ) b+ ; )
+	swap b+			| a bit
+	recbits			| a bitVal
+	b> 'jpgzz + c@ 2 << 'tempa + !
+	1 b+ ;
+
 :JPGGetBlock | a out -- a
-	swap
-	cleartempa
+	swap cleartempa
 	huffDC decodehuf -? ( ; )
 	recbits
 	dcCoef + dup 'dcCoef ! 'tempa !
 	1 ( >b 	| out a i
 		huffAC decodehuf		| a v
 		dup 4 >> swap 15 and	| a zeros bit
-		0? ( drop 15 <>? ( 63 + ) b+
-			swap b+			| a bit
-			recbits			| a bitVal
-			b> 'jpgzz + c@ 2 << 'tempa + !
-			1 b+ )
-		b> 63 >? ) drop
+		block0
+		b> 64 <? ) drop
 	swap JPGidct
 	;
 
@@ -308,12 +318,12 @@
 	1 and 8 << 'QuantTable + 'QuantNum ! ;
 
 :huffAC! | nro --
-	0? ( 'HuffmanAC0 )( 'HuffmanAC1 ) nip
-	'huffAC ! ;
+	0? ( drop 'HuffmanAC0 'huffAC ! ; ) drop
+	'HuffmanAC1 'huffAC ! ;
 
 :huffDC! | nro --
-	0? ( 'HuffmanDC0 )( 'HuffmanDC1 ) nip
-	'huffDC ! ;
+	0? ( drop 'HuffmanDC0 'huffDC ! ; ) drop
+	'HuffmanDC1 'huffDC ! ;
 
 | Do color space conversion from YCbCr to RGB
 :2rgb | y cb cr -- rgb32
@@ -365,11 +375,14 @@
 	n2cbcr 2rgb r> ! ;
 
 :modo34 | x y a -- x y a ;3 components (Y-Cb-Cr) 4 samplesY
+
 	dcY 'dcCoef !
 	QuantTableY QuantNum!
 	HuffACTableY huffAC!
 	HuffDCTableY huffDC!
+
 	'YVector1 JPGGetBlock -? ( drop ; ) | $ffd9
+
 	'YVector2 JPGGetBlock -? ( drop ; )
 	'YVector3 JPGGetBlock -? ( drop ; )
 	'YVector4 JPGGetBlock -? ( drop ; )
@@ -384,19 +397,23 @@
 	QuantTableCbCr QuantNum!
 	'CrVector JPGGetBlock -? ( drop ; )
 	dcCoef 'dcCr !
+
 	0 ( 8 <? 0 ( 8 <? q134 1 + ) drop 1 + ) drop
 	0 ( 8 <? 0 ( 8 <? q234 1 + ) drop 1 + ) drop
 	0 ( 8 <? 0 ( 8 <? q334 1 + ) drop 1 + ) drop
 	0 ( 8 <? 0 ( 8 <? q434 1 + ) drop 1 + ) drop ;
 
+:bb
+	imgcols <? ( rot ; ) drop
+	restart 1? ( drop dorest 0 ) | y a xx
+	rot 16 +
+	;
+
 :build34 | a -- a
 	0 'dcY ! 0 'dcCb ! 0 'dcCr !
 	0 0 ( imgrows <?		| a x y
 		rot modo34 rot			| y a x
-		16 + imgcols >=? ( drop
-			restart 1? ( drop dorest 0 ) | y a xx
-			rot 16 +
-			)( rot )
+		16 + bb
 		) 2drop ;
 
 |----------------------
@@ -437,13 +454,16 @@
 	0 ( 8 <? 0 ( 8 <? q132 1 + ) drop 1 + ) drop
 	0 ( 8 <? 0 ( 8 <? q232 1 + ) drop 1 + ) drop ;
 
+:bb
+	imgcols <? ( rot ; ) drop
+	restart 1? ( drop dorest 0 ) | y a xx
+	rot 8 + ;
+
 :build32  | a -- a
 	0 'dcY ! 0 'dcCb ! 0 'dcCr !
 	0 0 ( imgrows <?		| a x y
 		rot modo32 rot			| y a x
-		16 + imgcols >=? ( drop
-			restart 1? ( drop dorest 0 ) | y a xx
-			rot 8 + )( rot )
+		16 + bb
 		) 2drop ;
 
 |----------------------
@@ -474,13 +494,16 @@
 	dcCoef 'dcCr !
 	0 ( 8 <? 0 ( 8 <? q131 1 + ) drop 1 + ) drop ;
 
+:bb
+	imgcols <? ( rot ; ) drop
+	restart 1? ( drop dorest 0 ) | y a xx
+	rot 8 + ;
+
 :build31  | a -- a
 	0 'dcY ! 0 'dcCb ! 0 'dcCr !
 	0 0 ( imgrows <? 		| a x y
 		rot modo31 rot		| y a x
-		8 + imgcols >=? ( drop
-			restart 1? ( drop dorest 0 ) | y a xx
-			rot 8 + )( rot )
+		8 + bb
 		) 2drop ;
 
 |----------------------
@@ -499,15 +522,18 @@
 	HuffDCTableY huffDC!
 	'YVector1 JPGGetBlock -? ( drop ; ) | $ffd9
 	dcCoef 'dcY !
-	0 ( 8 <? )( 0 ( 8 <? )( q110 1 + ) drop 1 + ) drop ;
+	0 ( 8 <? 0 ( 8 <? q110 1 + ) drop 1 + ) drop ;
+
+:bb
+	imgcols <? ( rot ; ) drop
+	restart 1? ( drop dorest 0 ) | y a xx
+	rot 8 + ;
 
 :build10  | a -- a
 	0 'dcY ! 0 'dcCb ! 0 'dcCr !
 	0 0 ( imgrows <?		| a x y
 		rot modo10 rot		| y a x
-		8 + imgcols >=? ( drop
-			restart 1? ( drop dorest 0 ) | y a xx
-			rot 8 + )( rot )
+		8 + bb
 		) 2drop ;
 
 |----------------------
@@ -535,7 +561,7 @@
 |---------------------------------
 :moveor | de sr cnt --
 	rot >a
-	( 1? )( 1- swap
+	( 1? 1 - swap
 		@+ $ff000000 or a!+
 		swap ) 2drop ;
 
@@ -544,12 +570,12 @@
 	here =? ( drop 0 ; ) 'emem !
 	here
 	get16 $ffd8 <>? ( 2drop 0 ; ) drop
-	( get16 decodetype 0? ) drop
+
+	( get16 decodetype 1? ) drop
 	0? ( ; )
 	buildimg drop
 	here >a
-	imgcols imgrows 16 << or a!+	| size
-	0 a!+ | type
+	imgcols imgrows 12 << or a!+	| size
 	a> emem imgcols imgrows * 2 << dup >r moveor
 	here r> 8 + 'here +! ;
 
