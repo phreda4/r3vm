@@ -3,13 +3,11 @@
 
 :screen
 	home
-	pick4 .d print sp
-	pick3 .d print sp
-	pick2 .d print sp
-	over .d print sp
-	key
-	>esc< =? ( exit )
-	drop
+	over .d print cr
+	pick2 .d print cr
+	pick3 .d print cr
+	pick4 .d print cr
+	key >esc< =? ( exit ) drop
 	;
 
 ::trace | --

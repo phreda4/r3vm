@@ -2,7 +2,7 @@
 | gui.e3 - PHREDA
 | Immediate mode gui for r3
 |------------------------------
-^r3/lib/show.txt
+^r3/lib/sys.r3
 
 |--- state
 ##hot	| activo actual
@@ -21,65 +21,61 @@
 	hotnow hot "hot:%d now:%d" print cr
 	;
 
-::guistart
+::gui
 	idf 'idl ! hot 'hotnow !
 	0 dup dup 'id ! 'idf ! 'hot !
 	;
-
-|----- esto
-::clrscr
-	cls scr home guistart ;
 
 |-- boton
 ::guiBtn | 'click --
 	1 'id +!
 	xypen whin 0? ( 2drop ; ) drop
-	bmouse 0? ( id hotnow =? ( 2drop exec ; ) 3drop ; ) 2drop
+	bpen 0? ( id hotnow =? ( 2drop ex ; ) 3drop ; ) 2drop
 	id 'hot ! ;
 
 |-- move
 ::guiMove | 'move --
 	1 'id +!
-	bmouse 0? ( 2drop ; ) drop
+	bpen 0? ( 2drop ; ) drop
 	xypen whin 0? ( 2drop ; ) drop
 	id 'hot !
-	exec ;
+	ex ;
 
 |-- dnmove
 ::guiDnMove | 'dn 'move --
 	1 'id +!
-	bmouse 0? ( 3drop ; ) drop
+	bpen 0? ( 3drop ; ) drop
 	xypen whin 0? ( 3drop ; ) drop
 	id dup 'hot !
-	hotnow <>? ( 2drop exec ; )
-	drop nip exec ;
+	hotnow <>? ( 2drop ex ; )
+	drop nip ex ;
 
 ::guiDnMoveA | 'dn 'move -- | si apreto adentro.. mueve siempre
 	1 'id +!
-	bmouse 0? ( 3drop ; ) drop
+	bpen 0? ( 3drop ; ) drop
 	hotnow 1? ( id <>? ( 3drop ; ) ) drop | solo 1
-	xypen whin 0? ( id hotnow =? ( 'hot ! drop nip exec ; ) 4drop ; ) drop
+	xypen whin 0? ( id hotnow =? ( 'hot ! drop nip ex ; ) 4drop ; ) drop
 	id dup 'hot !
-	hotnow <>? ( 2drop exec ; )
-	drop nip exec ;
+	hotnow <>? ( 2drop ex ; )
+	drop nip ex ;
 
 
 |-- mapa
 ::guiMap | 'dn 'move 'up --
 	1 'id +!
 	xypen whin 0? ( 4drop ; ) drop
-	bmouse 0? ( id hotnow =? ( 2drop nip nip exec ; ) 4drop drop ; ) drop
+	bpen 0? ( id hotnow =? ( 2drop nip nip ex ; ) 4drop drop ; ) drop
 	id dup 'hot !
-	hotnow <>? ( 3drop exec ; )
-	2drop nip exec ;
+	hotnow <>? ( 3drop ex ; )
+	2drop nip ex ;
 
 ::guiDraw | 'move 'up --
 	1 'id +!
 	xypen whin 0? ( 3drop ; ) drop
-	bmouse 0? ( id hotnow =? ( 2drop nip exec ; ) 4drop ; ) drop
+	bpen 0? ( id hotnow =? ( 2drop nip ex ; ) 4drop ; ) drop
 	id dup 'hot !
 	hotnow <>? ( 3drop ; )
-	2drop exec ;
+	2drop ex ;
 
 ::guiEmpty | --		; si toca esta zona no hay interaccion
 	1 'id +!
@@ -88,30 +84,30 @@
 
 |----- test adentro/afuera
 ::guiI | 'vector --
-	xypen whin 0? ( 2drop ; ) drop exec ;
+	xypen whin 0? ( 2drop ; ) drop ex ;
 
 ::guiO | 'vector --
-	xypen whin 1? ( 2drop ; ) drop exec ;
+	xypen whin 1? ( 2drop ; ) drop ex ;
 
 ::guiIO | 'vi 'vo --
-	xypen whin 1? ( 2drop exec ; ) drop nip exec ;
+	xypen whin 1? ( 2drop ex ; ) drop nip ex ;
 
 |---------------------------
 ::onLineMove | 'vec --
-	bmouse 0? ( 2drop ; ) drop
+	bpen 0? ( 2drop ; ) drop
 	xypen
 	swap tx1 <? ( 3drop ; ) tx2 >? ( 3drop ; ) drop
 	ccy <? ( 2drop ; ) ccy cch + >? ( 2drop ; ) drop
-	exec ;
+	ex ;
 
 ::onLineClick | 'vec --
 	1 'id +!
 	xypen
 	swap tx1 <? ( 3drop ; ) tx2 >? ( 3drop ; ) drop
 	ccy <? ( 2drop ; ) ccy cch + >? ( 2drop ; ) drop
-	bmouse 1? ( 2drop id 'hot ! ; ) drop
+	bpen 1? ( 2drop id 'hot ! ; ) drop
 	id hotnow <>? ( 2drop ; ) drop
-	exec ;
+	ex ;
 
 
 |---------------------------------------------------
@@ -149,9 +145,9 @@
 	idf 1+
 	foco 0? ( drop dup dup 'foco ! ) | quitar?
 	<>? ( 'idf ! 2drop ; )
-	foconow <>? ( dup 'foconow ! swap exec )( nip )
+	foconow <>? ( dup 'foconow ! swap ex )( nip )
 	'idf !
-	exec ;
+	ex ;
 
 ::focovoid | --
 	idf 1+
@@ -168,7 +164,7 @@
 	foco 0? ( drop dup dup 'foco ! )
 	<>? ( 'idf ! drop ; )
 	'idf !
-	exec ;
+	ex ;
 
 ::bordefoco
 	ink
@@ -182,6 +178,6 @@
  | no puedo retroceder!
 ::lostfoco | 'acc --
 	idf 1+ foco <>? ( 'idf ! drop ; ) 'idf !
-	exec
+	ex
 	nextfoco
 	;

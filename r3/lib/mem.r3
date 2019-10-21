@@ -46,6 +46,7 @@
 ::,sp 32 ,c ;
 ::,nl 13 ,c 10 ,c ;
 
+|--------------------------------------
 :c0	| 'p
 	;
 :c1	| a,q
@@ -62,21 +63,21 @@
 	swap .f ,s ;
 :c7	| ..w		(%w) palabra
 	swap 0? ( drop ; ) ,w ;
-:c8	| h..			(%h) hexa
+:c8	| h..		(%h) hexa
 	swap .h ,s ;
-:c9	| i,y			(%i) parte entera fixed
+:c9	| i,y		(%i) parte entera fixed
 	swap 16 >> .d ,s ;
-:ca	| j,z			(%j) parte decimal fixel
+:ca	| j,z		(%j) parte decimal fixel
 	swap $ffff and .d ,s  ; | <--- NO ES
-:cb	| k,			(%k) caracter
+:cb	| k,		(%k) caracter
 	swap ,c ;
-:cc	| l,			(%l) linea
+:cc	| l,		(%l) linea
 	swap 0? ( drop ; ) ,l ;
 :cd	| m,}
 	;
-:ce	| .	| cr		(%.) finlinea
+:ce	| .	| cr	(%.) finlinea
 	13 ,c ;
-:cf	| o,			(%o) octal
+:cf	| o,		(%o) octal
 	swap .o ,s ;
 
 #control c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 ca cb cc cd ce cf
@@ -85,5 +86,5 @@
 	$25 <>? ( ,c ; ) drop
 	c@+ $f and 2 << 'control + @ ex ;
 
-::,print | p p .. adr --
+::,format | p p .. adr --
 	( c@+ 1? ,emit ) 2drop ;

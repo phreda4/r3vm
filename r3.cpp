@@ -385,6 +385,7 @@ int ex=0;
 closevar();
 if (*(str+1)=='#') { ex=1;str++; } // exported
 dicc[cntdicc].nombre=str+1;
+memd+=memd&3; // align data!!! (FILL break error)
 dicc[cntdicc].mem=memd;
 dicc[cntdicc].info=ex+0x10;	// 0x10 es dato
 cntdicc++;
@@ -430,7 +431,7 @@ void datanro(int64_t n) {
 char *p=&memdata[memd];	
 switch(modo){
 	case 2:*(int*)p=(int)n;memd+=4;break;
-	case 3:for(int i=0;i<n;i++) { *p++=0; };memd+=n;break;
+	case 3:	for(int i=0;i<n;i++) { *p++=0; };memd+=n;break;
 	case 4:*p=(char)n;memd+=1;break;
 	case 5:*(int64_t*)p=(int64_t)n;memd+=8;break;
 	}
@@ -940,7 +941,7 @@ while(ip!=0) {
 	case DIVMOD:W=*NOS;*NOS=W/TOS;TOS=W%TOS;continue;	//DIVMOD
 	case MULDIV:TOS=(*(NOS-1)*(*NOS)/TOS);NOS-=2;continue;	//MULDIV
 	case MULSHR:TOS=(*(NOS-1)*(*NOS))>>TOS;NOS-=2;continue;	//MULSHR
-	case CDIVSH:TOS=((*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
+	case CDIVSH:TOS=(*(NOS-1)<<TOS)/(*NOS);NOS-=2;continue;//CDIVSH
 	case NOT:TOS=~TOS;continue;							//NOT
 	case NEG:TOS=-TOS;continue;							//NEG
 	case ABS:W=(TOS>>63);TOS=(TOS+W)^W;continue;		//ABS
@@ -984,7 +985,7 @@ while(ip!=0) {
 		while (TOS--) { W-=4;op-=4;*(int*)W=*(int*)op; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case FILL://FILL
-		W=(int64_t)*(NOS-1);op=*NOS;
+		W=*(NOS-1);op=*NOS;
 		while (TOS--) { *(int*)W=op;W+=4; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CMOVED://CMOVE 
@@ -1108,7 +1109,7 @@ while(ip!=0) {
 		gr_drawPoli();continue;
 
 	case SYS: 
-		printf("%s",TOS);
+//		printf("%s",TOS);
     	if (TOS==0) {	// 0 sys | end process
             if (ProcessInfo.hProcess!=0) {
                TerminateProcess(ProcessInfo.hProcess,0);
@@ -1173,7 +1174,7 @@ while(ip!=0) {
 	case DIVMOD1:op>>=8;NOS++;*NOS=TOS/op;TOS=TOS%op;continue;	//DIVMOD
 	case MULDIV1:op>>=8;TOS=(*NOS)*TOS/op;NOS--;continue;		//MULDIV
 	case MULSHR1:op>>=8;TOS=((*NOS)*TOS)>>op;NOS--;continue;	//MULSHR
-	case CDIVSH1:op>>=8;TOS=((*NOS)<<TOS)/op;NOS--;continue;	//CDIVSH
+	case CDIVSH1:op>>=8;TOS=((*NOS)<<op)/TOS;NOS--;continue;	//CDIVSH
 	case IFL1:if ((op<<32>>48)<=TOS) ip+=(op<<48>>56);continue;	//IFL
 	case IFG1:if ((op<<32>>48)>=TOS) ip+=(op<<48>>56);continue;	//IFG
 	case IFE1:if ((op<<32>>48)!=TOS) ip+=(op<<48>>56);continue;	//IFN

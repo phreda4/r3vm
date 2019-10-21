@@ -267,6 +267,7 @@
 	ink a!+ ;
 
 ::char8i | c --
+	ccx ccy xy>v >a
 	3 << dup 1 >> + 'rom8x12 +
 	sw 8 - 2 << swap
 	12 ( 1? 1 -
@@ -276,3 +277,4 @@
 		swap )
 	sw 2 << dup 1 << + 2 << 32 - neg a+
 	3drop ;
+

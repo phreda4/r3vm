@@ -1,13 +1,12 @@
 | LoadPng
 | PHREDA 2015
 |------------
-^r3/lib/trace.r3
 
-#len_bits 0 0 0 0 0 0 0  0  1  1  1  1  2  2  2  2  3  3  3  3  4  4  4   4   5   5   5   5   0   6
+#len_bits 0 0 0 0 0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 4 4 4 4 5 5 5 5 0 6
 #len_base 3 4 5 6 7 8 9 10 11 13 15 17 19 23 27 31 35 43 51 59 67 83 99 115 131 163 195 227 258 323
-#dist_bits 0 0 0 0 1 1 2  2  3  3  4  4  5  5   6   6   7   7   8   8    9    9   10   10   11   11   12    12    13    13
+#dist_bits 0 0 0 0 1 1 2 2 3 3 4 4 5 5 6 6 7 7 8 8 9 9 10 10 11 11 12 12 13 13
 #dist_base 1 2 3 4 5 7 9 13 17 25 33 49 65 97 129 193 257 385 513 769 1025 1537 2049 3073 4097 6145 8193 12289 16385 24577
-#clcidx 16  17  18  0  8  7  9  6  10  5  11  4  12  3  13  2  14  1  15
+#clcidx 16 17 18 0 8 7 9 6 10 5 11 4 12 3 13 2 14 1 15
 
 #dynsta * 1216 | (16+288)x4
 #dyndta * 1216
@@ -108,9 +107,8 @@
 	hclen ( 1? 1 - swap
 		3 readnbit b@+	| cnt a 3b inx
 		'lens + c! swap ) drop
-	19 'lens 'codetr  buildtree
+	19 'lens 'codetr buildtree
 	'lens dup hlit hdist + + swap	| a lenf len
-		trace
 	( over <?
 		rot 'codetr decodesym	| lenf len a sym
 		decodeloop
@@ -344,7 +342,7 @@ $1201
 	rot dup 4 >> $f and
 	swap $f and
     databyte >a
-	( hpng <? 
+	( hpng <?
 		1 a+
 		over ( wpng <?
 			a> modec ex swap >a
@@ -359,9 +357,9 @@ $1201
 :convert
 	img >a
 	databyte
-	hpng ( 1? 
+	hpng ( 1?
 		swap 1 + swap
-		wpng ( 1? 
+		wpng ( 1?
 			rot modec ex a!+
 			rot rot 1 - ) drop
 		1 - ) 2drop
@@ -436,6 +434,7 @@ $1201
 
 |-----------------------------------------
 ::loadPNG | "" -- 'img/0
+	'codetr 0 2 fill
 	here swap load
 	here =? ( drop 0 ; ) drop
 	here dup 'imem !
