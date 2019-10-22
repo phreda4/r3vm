@@ -147,7 +147,7 @@
 	sp getname print sp
 	;
 
-#filecolor $af00 $ff00 $afaf00 $3f00  $7f7f  $7f007f $7f7f00 $7f0000 $7f00  $ff $ff
+#filecolor $ff00 $bf00 $bfbfbf $3f00  $7f7f  $7f007f $7f7f00 $7f0000 $7f00  $ff $ff
 
 :colorfile
     dup getinfo $f and 2 << 'filecolor + @
@@ -300,6 +300,7 @@
 	;
 
 
+|---------------------------------
 :teclado
 	key
 	>esc< =? ( exit )
@@ -340,7 +341,7 @@
 	acursor
 	;
 
-
+|---------------------------------
 :main
 	rebuild
 	'fontdroidsans13 fontm

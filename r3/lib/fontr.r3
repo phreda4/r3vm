@@ -43,10 +43,9 @@
 	xp yp pline
 	fxcc neg 'ccx +!
 	fycc neg 'ccy +!
-	poli
-	;
+	poli ;
 
-:wsizerf | c -- wsize
+::fontrw | c -- wsize
 	2 << fontsize + @ ccw 14 *>> ;
 
 :emitrf | c --
@@ -59,5 +58,44 @@
 	v>rfw neg 'fxcc !
 	cch dup 2 >> - 'cch !
 	cch 1 >> 'fycc !
-	'emitrf 'wsizerf font!
+	'emitrf 'fontrw font!
 	;
+
+::fontremit | 'rf --
+	@+ rf>xy 2dup 'yp !+ ! op
+	( @+ 1?
+		dup $7 and 2 << 'gfont + @ ex
+		) 2drop
+	xp yp pline
+	poli ;
+
+|--------------------------
+#cosa #sina | para rotar
+
+:r>xy
+	dup 18 >> swap 46 << 50 >>
+	over sina * over cosa * + 16 >> cch * 14 >> ccy + >r
+	swap cosa * swap sina * - 16 >> ccw * 14 >> ccx + r> ;
+
+:a0 drop ; 									| el valor no puede ser 0
+:a1 xp yp pline r>xy 2dup 'yp !+ ! op ;  | punto
+:a2 r>xy pline ; | linea
+:a3 swap >b r>xy b@+ r>xy pcurve b> ;  | curva
+:a4 swap >b r>xy b@+ r>xy b@+ r>xy pcurve3 b> ; | curva3
+|---- accediendo a x e y
+:a5 r>xy opx swap pline opy pline ;
+:a6 r>xy opy pline opx swap pline ;
+
+#gfontr a0 a1 a2 a3 a4 a5 a6 0
+
+::fontremitr | adr ang --
+	dup cos 'cosa ! sin 'sina !
+	@+ r>xy 2dup 'yp !+ ! op
+	( @+ 1?
+		dup $7 and 2 << 'gfontr + @ ex
+		) 2drop
+	xp yp pline
+	poli ;
+
+::fontradr | c -- 'rf
+	2 << fontrom + @ ;
