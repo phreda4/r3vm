@@ -4,7 +4,8 @@
 ^r3/lib/sys.r3
 ^r3/lib/rand.r3
 ^r3/lib/print.r3
-^r3/lib/arr8.r3
+
+^r3/util/arr8.r3
 
 #fx 0 0
 

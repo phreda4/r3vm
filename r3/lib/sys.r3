@@ -37,3 +37,18 @@
 
 ::blink | -- 0/1
 	msec $100 and ;
+
+|--- Vector 2d
+| vector2d de 14 bits c/control
+| x=14 bits	y=14 bits  control=4bits
+| 0000 0000 0000 00 | 00 0000 0000 0000 | 0000
+| x					y			      control
+
+::xy>d | x y -- v
+	4 << $3fff0 and swap 18 << $fffc0000 and or ;
+::d>xy | v -- x y
+	dup 18 >> swap
+::d>y | v -- y
+	46 << 50 >> ;
+::d>x | v -- x
+	18 >> ;

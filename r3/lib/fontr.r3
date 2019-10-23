@@ -6,6 +6,7 @@
 |
 |   ...fuente size fontr!
 |--------------------------------------
+^r3/lib/math.r3
 ^r3/lib/print.r3
 
 |---------- rfont
@@ -69,6 +70,7 @@
 	xp yp pline
 	poli ;
 
+
 |--------------------------
 #cosa #sina | para rotar
 
@@ -99,3 +101,14 @@
 
 ::fontradr | c -- 'rf
 	2 << fontrom + @ ;
+
+::fontrprint | 'ev "" --
+	fxcc 'ccx +!
+	fycc 'ccy +!
+	( c@+ 1?
+		dup fontradr pick3 ex
+		fontrw 'ccx +!
+		) 3drop
+	fxcc neg 'ccx +!
+	fycc neg 'ccy +!
+	;

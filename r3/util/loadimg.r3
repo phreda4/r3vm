@@ -1,10 +1,10 @@
 | load image from diferent sources
 | PHREDA 2017
 |----------------------------------------
-^r3/lib/loadjpg.r3
-^r3/lib/loadpng.r3
-^r3/lib/loadbmp.r3
-^r3/lib/loadtga.r3
+^r3/util/loadjpg.r3
+^r3/util/loadpng.r3
+^r3/util/loadbmp.r3
+^r3/util/loadtga.r3
 
 ::loadimg | filename -- img
 	".jpg" =pos 1? ( drop loadjpg ; ) drop

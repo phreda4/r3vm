@@ -3,7 +3,8 @@
 ^r3/lib/mem.r3
 ^r3/lib/print.r3
 ^r3/lib/sprite.r3
-^r3/lib/loadimg.r3
+
+^r3/util/loadimg.r3
 
 #ima
 
