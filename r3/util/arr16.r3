@@ -49,3 +49,10 @@
 	( over <?
 		pick2 ex 0? ( drop dup delp )
 		64 + ) 3drop ;
+
+::p.nro | nro list -- adr
+	4 + @ swap 6 << + ;
+
+::p.cnt | list --
+	@+ swap @ | last fist
+	- 6 >> ;

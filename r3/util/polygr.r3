@@ -3,6 +3,7 @@
 | PHREDA
 |---------------------------------------
 ^r3/lib/math.r3
+^r3/lib/mem.r3
 
 |---- grosor GG1
 #gg1 0 #gg2 0

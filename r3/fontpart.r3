@@ -1,4 +1,5 @@
-| Sistema de Particulas
+|SCR 800 600
+| TV
 | PHREDA 2019
 
 ^r3/lib/sys.r3
@@ -7,6 +8,7 @@
 
 ^r3/util/arr16.r3
 ^r3/util/polygr.r3
+^r3/util/penner.r3
 
 ^r3/lib/fontr.r3
 ^r3/rft/robotobold.rft
@@ -20,12 +22,15 @@
 ^r3/rft/opensansregular.rft
 
 #screen 0 0
+#ltime 0 0	| tiempo
 
 :reset
 	'screen p.clear
 	;
 
 |---------------------------
+| caja
+| c x1 y1 x2 y2
 :caja
 	>b
 	b@+ 'ink !
@@ -40,6 +45,10 @@
 	swap 16 << b!+ 16 << b!+
 	;
 
+|---------------------------
+| letra
+| x y w h c r adr
+|4 8 12162024
 :letra | adr --
 	>b
 	b@+ 16 >> 'ccx ! b@+ 16 >> 'ccy !
@@ -64,8 +73,91 @@
 	>r swprint ccx ccy rot pick2 + over cch + r> +caja
     '+letra swap fontrprint ;
 
-|---------------------------
+|---------- tiempo
+#deltat
+#prevt
 
+:time.ini
+	msec 'prevt ! 0 'deltat ! ;
+
+:time.next
+	msec dup prevt - 'deltat ! 'prevt ! ;
+
+:t1 | adr --
+	>a
+	a@ deltat + dup a!+
+	a@+ *. 1.0 min	| t
+	a@+ over Ela_InOut
+	*. a@+ + a@ !
+	1.0 - 1? ( drop ; )
+	;
+
+:t2 | adr --
+	>a
+	a@ deltat + dup a!+
+	a@+ *. 1.0 min	| t
+	dup Ela_InOut
+	a@+ over *. a@+ +	| t tc x1
+	a@+ rot *. a@+ +	| t x1 y1
+	swap a@ !+ !
+	1.0 - 1? ( drop ; )
+	;
+
+|--- agrega a timeline
+:+rot2d  | fn obj time --
+	't1 'ltime p!+ >a
+	0 a!+ 1000 *. 1.0 swap /. a!+
+	20 +	| fn obj
+	dup @			| fn obj obja
+	rot over - a!+	| dB
+	a!+				| A
+	a! ;
+
+:+scale  | fn obj time --
+	't1 'ltime p!+ >a
+	0 a!+ 1000 *. 1.0 swap /. a!+
+	24 +	| escala
+	dup @			| fn obj obja
+	rot over - a!+	| dB
+	a!+				| A
+	a! ;
+
+:+move2d | x y obj time --
+	't2 'ltime p!+ >a
+	0 a!+ 1000 *. 1.0 swap /. a!+ | ti tiempo
+	| x y obj
+	4 + rot over @ swap over - a!+ a!+		| y obj
+	4 + swap over @ swap over - a!+ a!+	| obj
+	a!
+	;
+
+
+:randobj
+	rand 'screen p.cnt mod abs 'screen p.nro ;
+
+:randtime
+	rand 4.0 mod 8.0 + ;
+
+:movt
+	rand 1.0 mod rand 1.0 mod
+    randobj
+	randtime
+	+move2d ;
+
+:scat
+	rand 0.8 mod 1.0 +
+	randobj
+	randtime
+	+scale ;
+
+:rot2
+	rand 2.0 mod
+	randobj
+	randtime
+	+rot2d ;
+
+
+|---------------------------
 :xypos
 	rand sw mod abs 16 << rand sh mod abs 16 << ;
 :vxypos
@@ -86,26 +178,34 @@
 	;
 
 
-:
+
 |------- SHOW
 :show
 	cls home
 	$ff00 'ink !
-|	" r" print over .d print cr
+	" r" print over .d print cr
 
+	time.next
+	'ltime p.draw
 	'screen p.draw
 
 	key
 	>esc< =? ( exit )
 	<f1> =? ( "Esto es una prueba" add )
-	<f2> =? ( reset )
+	<f2> =? ( movt )
+	<f3> =? ( scat )
+	<f4> =? ( rot2 )
+
+	<f10> =? ( reset )
 	drop
 	;
 
 |------- RAM
 :ram
 	mark
-	5000 'screen p.ini
+	8192 'screen p.ini
+	8192 'ltime p.ini
+	time.ini
 	;
 
 |------- BOOT
