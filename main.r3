@@ -8,6 +8,7 @@
 ^r3/fntm/droidsans13.fnt
 
 #path * 1024
+#name * 1024
 
 #nfiles
 #files * 8192
@@ -140,17 +141,14 @@
 |--------------------------------
 :printfn | n
 	dup getlvl 1 << nsp
-	dup getinfo
-	0? (  "+" print )
-	1 =? ( "-" print )
-	drop
+	dup getinfo $3 and "+- ." + c@ emit
 	sp getname print sp
 	;
 
-#filecolor $ff00 $bf00 $bfbfbf $3f00  $7f7f  $7f007f $7f7f00 $7f0000 $7f00  $ff $ff
+#filecolor $ff00 $bf00 $bfbfbf $3f00
 
 :colorfile
-    dup getinfo $f and 2 << 'filecolor + @
+    dup getinfo $3 and 2 << 'filecolor + @
 	0 swap fontmcolor ;
 
 :drawl | nro --
@@ -189,34 +187,27 @@
 	sys drop
 	;
 
-:runedit
+
+:editfile
+	actual -? ( drop ; )
+	getinfo $3 and 2 <>? ( drop ; ) drop
+
+    'path 'name strcpy
+	"/" 'name strcat
+	actual getname 'name strcat
+
+	'name 1024 "r3/mem/main.mem" save
+
 |	ed.load
 |	'name 'path "%s/%s" mprint 'ed.nombre =
 |	0? ( 'name 'path "%s/%s" mprint 'ed.nombre strcpy 0 'ed.ncar ! 0 'ed.ipan ! ed.save )
 |	drop
-|	"r4/IDE/edit-code.txt" run
-	;
 
-:editfile
-	actual -? ( drop ; )
-	getinfo $7 and
-	0? ( drop ; )
-	drop
-	runedit
-	;
+	mark
+	"r3 r3/edit-code.r3" ,s ,eol
+	empty here
+	sys drop
 
-:enter
-	actual getinfo $f and
-	0? ( drop expande ; )
-	8 =? ( drop contrae ; )
-	drop
-	runedit
-	;
-
-:enter2
-|	'padin exer:
-|	0 'padin !
-|	refreshfoco
 	;
 
 #nfile
@@ -237,19 +228,19 @@
 	mark
 	"^r3/lib/gui.r3" ,ln ,cr
 	":main" ,ln
-	"	show clrscr" ,ln
-	"	""Hello Human!"" print " ,ln
-	"	'exit >esc<" ,ln
-	"	cminiflecha ;" ,ln ,cr
-	": main ;" ,ln
+	"	cls home" ,ln
+	"	""Hello Human!"" print" ,ln
+	"	key >esc< =? ( exit ) drop" ,ln
+	"	;" ,ln ,cr
+	": 'main onshow ;" ,ln
 |	'name 'path "%s/%s" mprint savemem
 	empty
-	runedit
+	editfile
 	;
 
 |--------------------------------
 :fenter
-	actual 
+	actual
 	getinfo $f and
 	0? ( drop expande ; )
 	1 =? ( drop contrae ; )
@@ -312,7 +303,7 @@
 	<end> =? ( fend )
 	<ret> =? ( fenter )
 
-	<f1> =? ( runfile )
+	<f1> =? ( fenter )
 	<f2> =? ( editfile )
 	<f3> =? ( newfile )
 

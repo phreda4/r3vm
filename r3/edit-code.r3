@@ -17,11 +17,7 @@
 
 |^r4/system/mem-ed.r3
 
-
-
-#ed.nombre
-#ed.ncar
-#ed.ipan
+#name * 1024
 
 #pantaini>	| comienzo de pantalla
 #pantafin>	| fin de pantalla
@@ -173,23 +169,10 @@
 		1 - kabajo ) drop
 	selecc ;
 
-|---------------   mover fuente
-:e.clear
-	fuente dup 'pantaini> ! dup 'fuente> ! '$fuente !
-	0lin ;
-
 |------------------------------------------------
-:ajpri
-	0
-	fuente ( pantaini> <?
-		c@+ 13 =? ( rot 1 + rot rot )
-		drop ) drop
-	'prilinea ! ;
-
 :loadtxt | -- cargar texto
 	mark
-	here "r3/test.r3"
-	getpath
+	here 'name getpath
 	load 0 swap c!
 
 	|-- queda solo cr al fin de linea
@@ -211,13 +194,8 @@
 	mark	| guarda texto
 	fuente ( c@+ 1?
 		13 =? ( ,c 10 ) ,c ) 2drop
-	'ed.nombre savemem
+	'name savemem
 	empty
-	0 dup "debug.err" save
-	0 dup "runtime.err" save
-	fuente> fuente - 'ed.ncar !
-	pantaini> fuente - 'ed.ipan !
-	ed.save
 	;
 
 |-------------------------------------------
@@ -261,6 +239,7 @@
     "spr" =pre
 	;
 
+#ncar
 :controle
 	ed.save
 	savetxt
@@ -268,7 +247,7 @@
 	dup c@
 	$5E <>? ( 2drop ; ) | no es ^
 	drop
-	dup fuente - 'ed.ncar !
+	dup fuente - 'ncar !
 	dup 2 + posfijo? 0? ( 2drop ; )
 	editvalid 0? ( 3drop ; ) drop
 	swap 1 + | ext name
@@ -446,26 +425,14 @@
 |		drawsel lf
 		codelinecolor 0? ( 2drop ; )
 		cr
-		swap 1 + ) 2drop
-	drawcursor
-	;
-
-:a
+		swap 1 + ) drop
 	$fuente <? ( 1 - ) 'pantafin> !
 	fuente>
 	( pantafin> >? scrolldw )
 	( pantaini> <? scrollup )
 	drop
-	|----------------- mensaje de error!!
-	errorlin -? ( drop ; )
-	prilinea <? ( drop ; )
-	prilinea - cntlinea >=? ( drop ; )
-|	3 swap gotoxy
-|	">" $ff0000 'ink ! fillp $ffffff 'ink ! print
-
-|	'errormsg "< %s " $ff0000 'ink ! fillpr $ffffff 'ink ! printr
+	drawcursor
 	;
-
 
 |-------------- panel control
 #panelcontrol
@@ -516,13 +483,11 @@
 	'finsel ! 'inisel ! ;
 
 |----------------------------
-:directrun	
-	|savetxt 'ed.nombre run  ;
 :profiler
 |	savetxt	"r4/IDE/profiler-code.txt" run ;
-:debugrun	
+:debugrun
 |	savetxt	"r4/IDE/debug-code.txt" run ;
-:mkplain	
+:mkplain
 |	savetxt	"r4/system/r4plain.txt" run 
 ;
 
@@ -615,9 +580,9 @@
 	panelcontrol 1? ( drop controlkey ; ) drop
 	findmode 1? ( drop findmodekey ; ) drop
 |	$666666 'ink !
-	backline
+|	backline
 ||	$ffffff 'ink !
-	'ed.nombre sp print sp
+
 	teclado
 	;
 
@@ -629,12 +594,13 @@
 	barraestado
 
 	0 0 gotoxy
-	$666666 'ink !
-	backline
-	$ff00 'ink !
+	$666666 'ink ! backline
+	$ff00 0 fontmcolor
 	"R3" print
-	$7f0000 'ink !
+	$7f0000 0 fontmcolor
 	"eDIT " print
+	$ffffff 0 fontmcolor
+	'name sp print sp
 
 |------------------------------
 |	'directrun dup <f1> "1Run" $fff37b flink sp
@@ -651,9 +617,8 @@
 	;
 
 :editor
-	$111111 'paper !
-	cls
-	rows 4 - 'cntlinea !
+	0 'paper !
+	rows 2 - 'cntlinea !
 	'editando onshow
 	;
 
@@ -675,34 +640,13 @@
 	;
 
 
-:cargaestado
-	mark
-	-1 'errorlin !
-	0 'ed.ncar !
-|	0 'errorinfo !
-
-	here dup "debug.err" load
-	empty
-|	over 4 + <? ( 2drop ed.load ; )
-	0 swap !
-|	'ed.nombre cpy|
-|	?sint 'errorlin !
-|	?sint 'ed.ncar !
-	'errormsg strcpy
-
-|	here dup "info.err" load
-|	over 4 + <? ( 2drop ; ) | ini end
-|	dup 'errorinfo !
-	;
-
 |----------- principal
 :main
+	'name "r3/mem/main.mem" load drop
 	'fontdroidsans13 fontm
 	ram
-|	cargaestado
 	loadtxt
 	editor
-
 |	savetxt
 	;
 
