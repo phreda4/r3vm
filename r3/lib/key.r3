@@ -1,17 +1,18 @@
 | key code from sdl2
 | changes: $40000000 is in $4000, $1000 is upkey
-##<del> $8		##>del< $1008
+
+##<back> $8 	##>back< $1008
 ##<tab> $9		##>tab< $1009
 ##<ret> $d		##>ret< $100d
 ##<esc> $1b		##>esc< $101b
 ##<esp> $20		##>esp< $1020
 ##<ins> $49		##>back< $10049
-##<back> $7f	##>back< $1007f
+##<del> $7f		##>del< $1007f
 
 ##<home> $404a	##>home< $504a
 ##<end> $404d	##>end< $504d
-##<pgdn> $404b	##>pgdn< $504b
-##<pgup> $404e	##>pgup< $504e
+##<pgup> $404b	##>pgup< $504b
+##<pgdn> $404e	##>pgdn< $504e
 
 ##<ri> $404f	##>ri< $504f
 ##<le> $4050	##>le< $5050

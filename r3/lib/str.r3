@@ -34,6 +34,16 @@
 	0 over ( c@+ 1?
 		drop swap 1 + swap ) 2drop  ;
 
+::count | s1 -- s1 cnt	v3
+	dup >a
+	0 ( a@+ dup $01010101 - 
+		swap not and
+		$80808080 na? drop 4 + )
+	$80 an? ( drop ; )
+	$8000 an? ( drop 1 + ; )
+	$800000 an? ( drop 2 + ; )
+	drop 3 + ;
+
 ::= | s1 s2 -- 1/0
 	( swap c@+ 1?
 		toupp rot c@+ toupp rot -

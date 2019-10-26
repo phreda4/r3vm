@@ -9,14 +9,6 @@
 ^r3/lib/fontm.r3
 ^r3/fntm/droidsans13.fnt
 
-|^r3/lib/btn.r3
-|^r3/lib/input.r3
-|^r3/lib/parse.r3
-|^r3/lib/system.r3
-|^r3/lib/codecolor.r3
-
-|^r4/system/mem-ed.r3
-
 #name * 1024
 
 #pantaini>	| comienzo de pantalla
@@ -40,11 +32,6 @@
 |----- find text
 #findpad * 64
 #findmode
-
-|---- arreglo de info
-|#errorinfo
-#errorlin
-#errormsg * 256
 
 
 |----- edicion
@@ -187,15 +174,17 @@
 	empty
 	;
 
-:ed.save
-	;
-
 :savetxt
 	mark	| guarda texto
 	fuente ( c@+ 1?
 		13 =? ( ,c 10 ) ,c ) 2drop
 	'name savemem
-	empty
+	empty ;
+
+:runfile
+	mark
+	"r3 " ,s 'name ,s ,eol
+	empty here sys drop
 	;
 
 |-------------------------------------------
@@ -241,7 +230,6 @@
 
 #ncar
 :controle
-	ed.save
 	savetxt
 	fuente> ( dup 1 - c@ $ff and 32 >? drop 1 - ) drop | busca comienzo
 	dup c@
@@ -336,13 +324,6 @@
 	;
 
 |------ Dibuja codigo
-:drawcur | com -- com
-	blink 1? ( drop ; ) drop
-|	fuente> >? ( ; )
-|	dup	( fuente> <?  c@+ 13 =? ( 2drop ; ) gemit )
-|	modo 'lins =? ( $ffffff )( $ffff00 ) 'ink ! drop
-|	printcur drop
-	;
 
 :drawsel | com -- com
 	inisel 0? ( drop ; ) drop
@@ -366,45 +347,51 @@
 	( $ff and 32 >? emit c@+ )
 	drop 1 - ;
 
-:color_inc $0 $ffff00 fontmcolor ;
-:color_com $0 $555555 fontmcolor ;
-:color_cod $0 $ff0000 fontmcolor ;
-:color_dat $0 $ff00ff fontmcolor ;
-:color_str $0 $ffffff fontmcolor ;
-:color_adr $0 $ffff fontmcolor ;
-:color_nor $0 $ff00 fontmcolor ;
+:col_inc $0 $ffff00 fontmcolor ;
+:col_com $0 $555555 fontmcolor ;
+:col_cod $0 $ff0000 fontmcolor ;
+:col_dat $0 $ff00ff fontmcolor ;
+:col_str $0 $ffffff fontmcolor ;
+:col_adr $0 $ffff fontmcolor ;
+:col_nor $0 $ff00 fontmcolor ;
 
 :wordcolor | adr c -- ar..
 	32 =? ( drop sp ; )
 	9 =? ( drop tab ; )
-	$5e =? ( color_inc npal ; )	| $5e ^  Include
-	$7c =? ( color_com lineacom ; )	| $7c |	 Comentario
-	$3A =? ( color_cod npal ; )		| $3a :  Definicion
-	$23 =? ( color_dat npal ; )	| $23 #  Variable
-	$22 =? ( color_dat palstr ; )	| $22 "	 Cadena
-	$27 =? ( color_adr npal ; )		| $27 ' Direccion
+	$5e =? ( col_inc npal ; )	| $5e ^  Include
+	$7c =? ( col_com lineacom ; )	| $7c |	 Comentario
+	$3A =? ( col_cod npal ; )		| $3a :  Definicion
+	$23 =? ( col_dat npal ; )	| $23 #  Variable
+	$22 =? ( col_dat palstr ; )	| $22 "	 Cadena
+	$27 =? ( col_adr npal ; )		| $27 ' Direccion
 |	over 1- isNro 1? ( drop amarillo npal ; ) drop
 |	over 1- ?macro 1? ( drop verde npal ; ) drop		| macro
-	color_nor npal ;
+	col_nor npal ;
 
 :codelinecolor | adr -- adr++/0
+	col_nor
 	( c@+ 1?
 		13 =? ( drop ; )
 		wordcolor
 		) nip ;
 
 :linenro | lin -- lin
-	$888888 $ffffff fontmcolor
+	$222222 $aaaaaa fontmcolor
 	dup prilinea + .d 3 .r. print sp ;
 
+#ycursor
+#xcursor
+
 :emitcur
-	13 =? ( drop cr ; )
-	9 =? ( drop tab ; )
+	13 =? ( drop cr 1 'ycursor +! 0 'xcursor ! ; )
+	9 =? ( drop gtab 4 'xcursor ! ; )
+	1 'xcursor +!
 	noemit ;
 
 :drawcursor
 	blink 1? ( drop ; ) drop
 	0 1 gotoxy
+	prilinea 'ycursor ! 0 'xcursor !
 	pantaini>
 	( fuente> <? c@+ emitcur ) drop
 	32 noemit 32 noemit 32 noemit 32 noemit 32 noemit
@@ -482,29 +469,6 @@
 	fuente> 1sel over <? ( swap )
 	'finsel ! 'inisel ! ;
 
-|----------------------------
-:profiler
-|	savetxt	"r4/IDE/profiler-code.txt" run ;
-:debugrun
-|	savetxt	"r4/IDE/debug-code.txt" run ;
-:mkplain
-|	savetxt	"r4/system/r4plain.txt" run 
-;
-
-|----------------------------
-:nowcompile
-| opciones de compilador
-| fullscreen,ventana wxh
-| win
-| optimizacion 0
-|	"r4/compiler/r4-com4.txt" run
-	;
-
-:testcompile
-|	"r4/compiler/r4-com4o.txt" run
-	;
-
-
 |---------- manejo de teclado
 :buscapad
 	fuente 'findpad findstri
@@ -573,47 +537,51 @@
 	<tab> =? (  9 modo ex )
 	>esc< =? ( exit )
 	<ctrl> =? ( controlon )
+	<f1> =? ( runfile )
 	drop
 	;
 
-:barraestado
-	panelcontrol 1? ( drop controlkey ; ) drop
-	findmode 1? ( drop findmodekey ; ) drop
-|	$666666 'ink !
-|	backline
-||	$ffffff 'ink !
-
-	teclado
-	;
-
-:editando
-	cls
-|	'dns 'mos 'ups guiMap |------ mouse
-
-	0 rows 1 - gotoxy
-	barraestado
-
-	0 0 gotoxy
-	$666666 'ink ! backline
-	$ff00 0 fontmcolor
-	"R3" print
-	$7f0000 0 fontmcolor
-	"eDIT " print
-	$ffffff 0 fontmcolor
-	'name sp print sp
+:barratop
+	home
+	$555555 'ink ! backline
+	$ff $ffffff fontmcolor
+	" r3 " print
+	$3f $ffffff fontmcolor
+	" F1.Run " print
 
 |------------------------------
-|	'directrun dup <f1> "1Run" $fff37b flink sp
 |	'debugrun dup <f2> "2Debug" $fff37b flink sp
 |	'profiler dup <f3> "3Profile" $fff37b flink sp
 |	'mkplain dup <f4> "4Plain" $fff37b flink sp
 |	'nowcompile dup <f5> "5Compile" $fff37b flink sp
-
 |	'testcompile <f10>
 |------------------------------
-	cr
+	;
+
+:barraestado
+	0 rows 1 - gotoxy
+	$555555 'ink ! backline
+	$7f $ffffff fontmcolor sp
+	'name print sp
+	$ff $ffffff fontmcolor sp
+	xcursor 1 + .d print sp
+	ycursor 1 + .d print sp
+
+	panelcontrol 1? ( drop controlkey ; ) drop
+	findmode 1? ( drop findmodekey ; ) drop
+	;
+
+
+:editando
+	cls
+	barratop
+	barraestado
+
+|	'dns 'mos 'ups guiMap |------ mouse
+
 	drawcode
 	acursor
+	teclado
 	;
 
 :editor
@@ -638,7 +606,6 @@
 	'here  ! | -- FREE
 	mark
 	;
-
 
 |----------- principal
 :main

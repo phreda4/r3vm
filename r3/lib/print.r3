@@ -42,7 +42,9 @@
 ::lf
 	0 'ccx ! ;
 ::tab
-	ccx -$1f and $20 + 'ccx ! ;
+	4 nsp ;
+::gtab
+	ccw 2 << 'ccx +! ;
 
 ::swprint | "" -- "" cnt
 	0 over ( c@+ 1?
