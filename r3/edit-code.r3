@@ -75,8 +75,6 @@
 
 #1sel #2sel
 
-#mshift	|******************
-
 :selecc	| agrega a la seleccion
 	mshift 0? ( dup 'inisel ! 'finsel ! ; ) drop
 	inisel 0? ( fuente> '1sel ! ) drop
@@ -478,7 +476,7 @@
 	$0 'ink !
 	|1 linesfill
 	" > " print
-	
+
 	key
     <ret> =? ( controlf )
 	>esc< =? ( controlf )
@@ -489,9 +487,8 @@
 	;
 
 :controlkey
-	$337ab7 'ink !
-	|1 linesfill
-	$ffffff 'ink !
+	" F-Find" print
+
 |	'controle 18 ?key " E-Edit" print | ctrl-E dit
 ||	'controlh 35 ?key " H-Help" print  | ctrl-H elp
 |	'controlz 44 ?key " Z-Undo" print
@@ -513,6 +510,7 @@
 |	'findpad
 |	dup c@ 0? ( 2drop ; ) drop
 |	" (%s)" print
+
 	;
 
 :teclado
@@ -536,7 +534,10 @@
 	<ret> =? (  13 modo ex )
 	<tab> =? (  9 modo ex )
 	>esc< =? ( exit )
+
 	<ctrl> =? ( controlon )
+	>ctrl< =? ( controloff )
+
 	<f1> =? ( runfile )
 	drop
 	;

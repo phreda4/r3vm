@@ -4,23 +4,32 @@
 |------------------------------
 ^r3/lib/sys.r3
 
+^r3/lib/trace.r3
+
 |--- state
 ##hot	| activo actual
 #hotnow	| activo anterior
 #foco	| activo teclado
+#foconow	| activo teclado
 
 |--- id
 #id		| id gui actual
 #idf	| id gui foco actual (teclado)
 #idl	| id foco ultimo
 
-|---------
-::gui.debug
-	idf id "ID:%d IDF:%d " print cr
-	foconow foco "foco:%d now:%d" print cr
-	hotnow hot "hot:%d now:%d" print cr
-	;
+|--- region
+##xr1 ##yr1
+##xr2 ##yr2
 
+::whin | x y -- -1/0
+	yr1 <? ( 2drop 0 ; )
+	yr2 >? ( 2drop 0 ; )
+	drop
+	xr1 <? ( drop 0 ; )
+	xr2 >? ( drop 0 ; )
+	drop -1 ;
+
+|---------
 ::gui
 	idf 'idl ! hot 'hotnow !
 	0 dup dup 'id ! 'idf ! 'hot !
@@ -96,14 +105,16 @@
 ::onLineMove | 'vec --
 	bpen 0? ( 2drop ; ) drop
 	xypen
-	swap tx1 <? ( 3drop ; ) tx2 >? ( 3drop ; ) drop
+|	swap 0 <? ( 3drop ; ) sw >=? ( 3drop ; ) drop
+	nip
 	ccy <? ( 2drop ; ) ccy cch + >? ( 2drop ; ) drop
 	ex ;
 
 ::onLineClick | 'vec --
 	1 'id +!
 	xypen
-	swap tx1 <? ( 3drop ; ) tx2 >? ( 3drop ; ) drop
+|	swap tx1 <? ( 3drop ; ) tx2 >? ( 3drop ; ) drop
+	nip
 	ccy <? ( 2drop ; ) ccy cch + >? ( 2drop ; ) drop
 	bpen 1? ( 2drop id 'hot ! ; ) drop
 	id hotnow <>? ( 2drop ; ) drop
@@ -114,14 +125,10 @@
 | manejo de foco (teclado)
 
 ::nextfoco
-	foco 1+ idl >? ( 0 nip ) 'foco !
-	0 key!
-	;
+	foco 1+ idl >? ( 0 nip ) 'foco ! ;
 
 ::prevfoco
-	foco 1- 0 <=? ( idl nip ) 'foco !
-	0 key!
-	;
+	foco 1- 0 <=? ( idl nip ) 'foco ! ;
 
 ::setfoco | nro --
 	'foco ! -1 'foconow ! ;
@@ -136,18 +143,17 @@
 ::clickfoco1
 	idf 1+ 'foco ! -1 'foconow ! ;
 
-::exit
-	-1 '.exit !
+|::exit
+|	-1 '.exit !
 ::refreshfoco
 	-1 'foconow ! 0 'foco ! ;
 
 ::w/foco | 'in 'start --
-	idf 1+
+	idf 1 +
 	foco 0? ( drop dup dup 'foco ! ) | quitar?
 	<>? ( 'idf ! 2drop ; )
-	foconow <>? ( dup 'foconow ! swap ex )( nip )
-	'idf !
-	ex ;
+	foconow <>? ( dup 'foconow ! swap ex 'idf ! ex ; )
+	nip 'idf ! ex ;
 
 ::focovoid | --
 	idf 1+
@@ -165,15 +171,6 @@
 	<>? ( 'idf ! drop ; )
 	'idf !
 	ex ;
-
-::bordefoco
-	ink
-	blanco 1 dup 'w +! 'h +! gc.rod
-	negro
-	1 dup 'w +! 'h +! gc.rod
-	'ink !
-	-3 dup 'w +! 'h +!
-	;
 
  | no puedo retroceder!
 ::lostfoco | 'acc --

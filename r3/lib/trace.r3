@@ -3,10 +3,13 @@
 
 :screen
 	home
-	over .d print cr
-	pick2 .d print cr
-	pick3 .d print cr
-	pick4 .d print cr
+	0 'ink !
+	backline
+	$ff00 'ink !
+	over .d print sp
+	pick2 .d print sp
+	pick3 .d print sp
+	pick4 .d print sp
 	key >esc< =? ( exit ) drop
 	;
 

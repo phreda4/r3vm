@@ -42,3 +42,6 @@
 |---     key <char char> bt? ( hit..key ) ..
 ##<char $20
 ##char> $7a
+
+##mshift
+##mnumlock

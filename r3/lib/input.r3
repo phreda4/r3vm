@@ -1,5 +1,8 @@
+^r3/lib/print.r3
 ^r3/lib/gui.r3
-^r3/lib/btn.r3
+
+^r3/lib/trace.r3
+
 
 |--- Edita linea
 #cmax
@@ -38,50 +41,37 @@
 
 #modo 'lins
 
-|----- tamaño de entrada
-:makesizew | w --
-	ccw * |dup 2/ +
-	2 + 'w ! ccx w 2/ + 'xc !
-	ccy cch dup 'h ! 2/ + 'yc !
-|	gc2win
-	;
+:colcursor
+	modo 'lins =? ( drop $ff00 'ink ! ; ) drop
+	$ff0000 'ink ! ;
 
-:makesizehw | h w --
-	ccw * |dup 2/ +
-	2 + 'w ! ccx w 2/ + 'xc !
-	cch * 'h ! ccy h 2/ + 'yc !
-|	gc2win
-	;
-
-:makesizel | 'list -- 'list
-	dup count makesizew ;
-
-::scrsizew | w -- w h
-	ccw * 2 + cch ;
-
-::scrsizehw | h w -- w h
-	ccw * 2 + swap cch * ;
+:cursor
+	ccx ccy xy>v >a
+	cch ( 1? 1 -
+		ccw ( 1? 1 -
+			a@ not a!+
+			) drop
+		sw ccw - 2 << a+
+		) drop ;
 
 |----- cursor
 :drcursor
-	ink >r
-	modo 'lins =? ( verde )( rojo ) drop
-	printcur drop
-	r> 'ink ! ;
+	ink >r cursor r> 'ink ! ;
 
 :cursori
 	blink 1? ( drop ; ) drop
 	padi> ( pad> =? ( drcursor ; ) c@+ 1?
-		gemit ) 2drop ;
+		noemit ) 2drop ;
 
 :cursorn
 	blink 1? ( drop ; ) drop
-	verde " " printcur drop ;
+	cursor ;
 
 :cursorm
 	blink 1? ( drop ; ) drop
 	padi> ( pad> =? ( drcursor ; ) c@+ 1?
-		allowcrx gemit ) 2drop ;
+		|allowcrx
+		noemit ) 2drop ;
 
 ::pcursor | adr -- adr
 	pad> <>? ( ; )
@@ -92,87 +82,110 @@
 	;
 
 |----- ALFANUMERICO
-:iniinput | 'var max 'dr IDF -- 'var max 'dr IDF
-	pick2 'cmax !
+:iniinput | 'var max IDF -- 'var max IDF
+	trace
+	over 'cmax !
+	trace
 	pick3 dup 'padi> !
-	( c@+ 1? drop ) drop 1 - dup
-	'pad> ! 'padf> !
-	'lins 'modo ! ;
+	trace
+	( c@+ 1? drop ) drop 1 -
+	dup 'pad> ! 'padf> !
+	'lins 'modo !
+	trace
+	;
+
+:chmode
+	modo 'lins =? ( drop 'lover 'modo ! ; )
+	drop 'lins 'modo ! ;
 
 :proinputa | --
 	ccx cursori 'ccx !
-	[ key toasc modo ex ; ] <visible>
-	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>
-	'kback <back>	'kdel <del>
-	'kder <ri>		'kizq <le>
-	[ padi> 'pad> ! ; ] <home>
-	[ padf> 'pad> ! ; ] <end>
-	'ktab dup <tab> <enter>
-	'nextfoco <dn> 'prevfoco <up>
+	char
+	1? ( modo ex ; )
+	drop
+
+	key
+	<ins> =? ( chmode )
+
+	<le> =? ( kizq )
+	<ri> =? ( kder )
+	<back> =? ( kback )
+	<del> =? ( kdel )
+	<home> =? ( padi> 'pad> ! )
+	<end> =? ( padf> 'pad> ! )
+|	<tab> =? ( ktab )
+|	'nextfoco <dn>
+|	'prevfoco <up>
+
+	drop
 	;
 
 |************************************
-::inputa | 'var max w --
-	gc.push makesizew
-	'proinputa 'iniinput w/foco
-	'clickfoco guiBtn
-	drop ccx w + >r
-	printx
-	gc.pop r> 'ccx !
+::inputa | 'var max --
+|	gc.push makesizew
+
+	'proinputa 'iniinput
+|	trace
+	w/foco
+
+|	'clickfoco guiBtn
+|	drop ccx w + >r
+	drop
+	print
+|	gc.pop r> 'ccx !
 	;
 
 |************************************
 ::input | 'var max  --
-	dup inputa ;
-
-
-|************************************
-:proinputc | --
-	ccx cursori 'ccx !
-	[ key toasc modo ex ; ] <visible>
-	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>
-	'kback <back>	'kdel <del>
-	'kder <ri>		'kizq <le>
-	[ padi> 'pad> ! ; ] <home>
-	[ padf> 'pad> ! ; ] <end>
-	'ktab <tab>
-	;
-
-::inputcell | 'var max --
-	dup gc.push makesizew
-	'proinputc 'iniinput w/foco
-	'clickfoco guiBtn
-	drop ccx w + >r
-	printx
-	gc.pop r> 'ccx !
-	;
-
-::inputcr | 'var max --
-	'proinputc 'iniinput w/foco
-	allowcr prin
-	;
-
-:proinputexe | --
-	ccx cursori 'ccx !
-	[ key toasc modo ex pick2 ex ; ] <visible>
-	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>
-	[ kback pick2 ex ; ] <back>
-	[ kdel pick2 ex ; ] <del>
-	'kder <ri>		'kizq <le>
-	[ padi> 'pad> ! ; ] <home>
-	[ padf> 'pad> ! ; ] <end>
-	'ktab dup <tab> <enter>
-	'nextfoco <dn> 'prevfoco <up>
-	;
+	inputa ;
 
 |************************************
-::inputexec | 'vector 'var max  --
-	gc.push dup makesizew
-	'proinputexe 'iniinput w/foco
-	'clickfoco guiBtn
-	drop ccx w + >r
-	printx
-	gc.pop r> 'ccx !
-	drop
-	;
+|:proinputc | --
+|	ccx cursori 'ccx !
+|	[ key toasc modo ex ; ] <visible>
+|	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>
+|	'kback <back>	'kdel <del>
+|	'kder <ri>		'kizq <le>
+|	[ padi> 'pad> ! ; ] <home>
+|	[ padf> 'pad> ! ; ] <end>
+|	'ktab <tab>
+|	;
+
+|::inputcell | 'var max --
+|	dup gc.push makesizew
+|	'proinputc 'iniinput w/foco
+|	'clickfoco guiBtn
+|	drop ccx w + >r
+|	printx
+|	gc.pop r> 'ccx !
+|	;
+
+|::inputcr | 'var max --
+|	'proinputc 'iniinput w/foco
+|	allowcr prin
+|	;
+
+|:proinputexe | --
+|	ccx cursori 'ccx !
+||	[ key toasc modo ex pick2 ex ; ] <visible>
+||	[ modo 'lins =? ( 'lover )( 'lins ) 'modo ! drop  ; ] <ins>
+|	[ kback pick2 ex ; ] <back>
+|	[ kdel pick2 ex ; ] <del>
+|	'kder <ri>		'kizq <le>
+|	[ padi> 'pad> ! ; ] <home>
+|	[ padf> 'pad> ! ; ] <end>
+|	'ktab dup <tab> <enter>
+|	'nextfoco <dn> 'prevfoco <up>
+|	;
+
+|************************************
+|::inputexec | 'vector 'var max  --
+|	gc.push dup makesizew
+|	'proinputexe 'iniinput w/foco
+|	'clickfoco guiBtn
+|	drop ccx w + >r
+|	printx
+|	gc.pop r> 'ccx !
+|	drop
+|	;
 

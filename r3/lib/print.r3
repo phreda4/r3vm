@@ -50,6 +50,9 @@
 	0 over ( c@+ 1?
 		$ff and _charsize ex rot + swap ) 2drop ;
 
+::emitsize | c -- size
+	$ff and _charsize ex ;
+
 ::home
 	0 'ccx ! 0 'ccy ! ;
 

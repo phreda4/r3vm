@@ -3,11 +3,12 @@
 ^r3/lib/str.r3
 ^r3/lib/mem.r3
 ^r3/lib/print.r3
+^r3/lib/input.r3
+^r3/lib/btn.r3
 
 #k
 #c
 
-#test 1 2 3 4 5 6 7 8 9 0
 
 :teclado
 	key
@@ -19,30 +20,19 @@
 	drop
 	;
 
-#sx -1.5 | Desplazamiento de la imagen
-#sy -1.0
-#tw 2.0 | Escala
-#th 2.0
+#pad "hola" * 128
 
 :main
-	cls home
+	cls home gui
 	cr
-	k .h print cr
-	c .h print cr
-	mark
-	sx tw *. sy " %f %f " ,format
-	empty here print cr
+	"key: " print k .h print cr
+	"char: " print c .h print cr
 
-	mark
-	tw th " %f %f " ,format
-	empty here print cr
-
-	15.0 2.0 16 <</	.f print cr
-	'test 10 ( 1? 1 - swap @+ .d print sp swap ) 2drop
+	'pad 127
+	trace
+	input
 
 	teclado
 	;
 
-:
-	'test 33 5 fill
-	33 'main onshow ;
+: 33 'main onshow ;
