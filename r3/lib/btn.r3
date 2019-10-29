@@ -1,7 +1,7 @@
 |--------------------
 | BTN.TXT PHREDA 2010
 |--------------------
-^r4/lib/gui.txt
+^r3/lib/gui.r3
 
 ::.btnt | acc "txt" --
 	ccw 'ccx +!

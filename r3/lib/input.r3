@@ -41,11 +41,7 @@
 
 #modo 'lins
 
-:colcursor
-	modo 'lins =? ( drop $ff00 'ink ! ; ) drop
-	$ff0000 'ink ! ;
-
-:cursor
+:drc
 	ccx ccy xy>v >a
 	cch ( 1? 1 -
 		ccw ( 1? 1 -
@@ -54,22 +50,26 @@
 		sw ccw - 2 << a+
 		) drop ;
 
-|----- cursor
-:drcursor
-	ink >r cursor r> 'ink ! ;
+:drci
+	ccx ccy cch dup 2 >> - + xy>v >a
+	cch 2 >> ( 1? 1 -
+		ccw ( 1? 1 -
+			a@ not a!+
+			) drop
+		sw ccw - 2 << a+
+		) drop ;
+
+:cursor
+	modo 'lins =? ( drop drci ; ) drop drc ;
 
 :cursori
 	blink 1? ( drop ; ) drop
-	padi> ( pad> =? ( drcursor ; ) c@+ 1?
+	padi> ( pad> =? ( drop cursor ; ) c@+ 1?
 		noemit ) 2drop ;
-
-:cursorn
-	blink 1? ( drop ; ) drop
-	cursor ;
 
 :cursorm
 	blink 1? ( drop ; ) drop
-	padi> ( pad> =? ( drcursor ; ) c@+ 1?
+	padi> ( pad> =? ( drop cursor ; ) c@+ 1?
 		|allowcrx
 		noemit ) 2drop ;
 
@@ -83,15 +83,11 @@
 
 |----- ALFANUMERICO
 :iniinput | 'var max IDF -- 'var max IDF
-	trace
 	over 'cmax !
-	trace
 	pick3 dup 'padi> !
-	trace
 	( c@+ 1? drop ) drop 1 -
 	dup 'pad> ! 'padf> !
 	'lins 'modo !
-	trace
 	;
 
 :chmode
@@ -100,9 +96,7 @@
 
 :proinputa | --
 	ccx cursori 'ccx !
-	char
-	1? ( modo ex ; )
-	drop
+	char 1? ( modo ex ; ) drop
 
 	key
 	<ins> =? ( chmode )
@@ -113,31 +107,21 @@
 	<del> =? ( kdel )
 	<home> =? ( padi> 'pad> ! )
 	<end> =? ( padf> 'pad> ! )
-|	<tab> =? ( ktab )
+	<tab> =? ( ktab )
 |	'nextfoco <dn>
 |	'prevfoco <up>
 
 	drop
 	;
 
+
 |************************************
-::inputa | 'var max --
-|	gc.push makesizew
-
-	'proinputa 'iniinput
-|	trace
-	w/foco
-
-|	'clickfoco guiBtn
-|	drop ccx w + >r
+::input | 'var max --
+	'proinputa 'iniinput w/foco
+|	'clickfoco onClick
 	drop
-	print
-|	gc.pop r> 'ccx !
-	;
+	print ;
 
-|************************************
-::input | 'var max  --
-	inputa ;
 
 |************************************
 |:proinputc | --

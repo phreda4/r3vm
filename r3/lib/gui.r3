@@ -3,6 +3,8 @@
 | Immediate mode gui for r3
 |------------------------------
 ^r3/lib/sys.r3
+^r3/lib/sprite.r3
+^r3/util/polygr.r3
 
 ^r3/lib/trace.r3
 
@@ -29,21 +31,33 @@
 	xr2 >? ( drop 0 ; )
 	drop -1 ;
 
+::guiBox | x y w h --
+	pick2 + 'yr2 ! pick2 + 'xr2 !
+	'yr1 ! 'xr1 !
+	;
+
 |---------
 ::gui
 	idf 'idl ! hot 'hotnow !
-	0 dup dup 'id ! 'idf ! 'hot !
+	0 'id ! 0 'idf ! 0 'hot !
+	;
+
+::guidump
+	"idl:" print idl .d print cr
+	"hotnow:" print hotnow .d print cr
+	"foco:" print foco .d print cr
+	"foconow:" print foconow .d print cr
 	;
 
 |-- boton
-::guiBtn | 'click --
+::onClick | 'click --
 	1 'id +!
 	xypen whin 0? ( 2drop ; ) drop
 	bpen 0? ( id hotnow =? ( 2drop ex ; ) 3drop ; ) 2drop
 	id 'hot ! ;
 
 |-- move
-::guiMove | 'move --
+::onMove | 'move --
 	1 'id +!
 	bpen 0? ( 2drop ; ) drop
 	xypen whin 0? ( 2drop ; ) drop
@@ -51,7 +65,7 @@
 	ex ;
 
 |-- dnmove
-::guiDnMove | 'dn 'move --
+::onDnMove | 'dn 'move --
 	1 'id +!
 	bpen 0? ( 3drop ; ) drop
 	xypen whin 0? ( 3drop ; ) drop
@@ -59,7 +73,7 @@
 	hotnow <>? ( 2drop ex ; )
 	drop nip ex ;
 
-::guiDnMoveA | 'dn 'move -- | si apreto adentro.. mueve siempre
+::onDnMoveA | 'dn 'move -- | si apreto adentro.. mueve siempre
 	1 'id +!
 	bpen 0? ( 3drop ; ) drop
 	hotnow 1? ( id <>? ( 3drop ; ) ) drop | solo 1
@@ -101,34 +115,15 @@
 ::guiIO | 'vi 'vo --
 	xypen whin 1? ( 2drop ex ; ) drop nip ex ;
 
-|---------------------------
-::onLineMove | 'vec --
-	bpen 0? ( 2drop ; ) drop
-	xypen
-|	swap 0 <? ( 3drop ; ) sw >=? ( 3drop ; ) drop
-	nip
-	ccy <? ( 2drop ; ) ccy cch + >? ( 2drop ; ) drop
-	ex ;
-
-::onLineClick | 'vec --
-	1 'id +!
-	xypen
-|	swap tx1 <? ( 3drop ; ) tx2 >? ( 3drop ; ) drop
-	nip
-	ccy <? ( 2drop ; ) ccy cch + >? ( 2drop ; ) drop
-	bpen 1? ( 2drop id 'hot ! ; ) drop
-	id hotnow <>? ( 2drop ; ) drop
-	ex ;
-
 
 |---------------------------------------------------
 | manejo de foco (teclado)
 
 ::nextfoco
-	foco 1+ idl >? ( 0 nip ) 'foco ! ;
+	foco 1 + idl >? ( 0 nip ) 'foco ! ;
 
 ::prevfoco
-	foco 1- 0 <=? ( idl nip ) 'foco ! ;
+	foco 1 - 0 <=? ( idl nip ) 'foco ! ;
 
 ::setfoco | nro --
 	'foco ! -1 'foconow ! ;
