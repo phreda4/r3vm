@@ -204,7 +204,7 @@
 |	drop
 
 	mark
-	"r3 r3/edit-code.r3" ,s ,eol
+	"r3 r3/sys/edit-code.r3" ,s ,eol
 	empty here
 	sys drop
 
