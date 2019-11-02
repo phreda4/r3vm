@@ -1,8 +1,8 @@
 | r3STACK 2018
 | PHREDA
 |--------------------
-^r3/lib/gui.txt
-^r3/util/trace.txt
+^r3/lib/gui.r3
+^r3/lib/trace.r3
 
 |-- buffer code
 ##bcode * 8192

@@ -1,7 +1,7 @@
 | Parse words
 | PHREDA 2018
 |-----------------
-^r3/lib/mem.txt
+^r3/lib/mem.r3
 
 ::>>0 | adr -- adr' ; pasa 0
 	( c@+ 1? drop ) drop ;

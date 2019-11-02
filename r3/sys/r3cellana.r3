@@ -1,7 +1,7 @@
 | analisis, detect static cell
 | PHREDA 2019
 |-------------------------
-^./r3stack.txt
+^./r3stack.r3
 
 #itok 0
 

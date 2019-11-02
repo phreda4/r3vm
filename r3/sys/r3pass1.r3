@@ -2,7 +2,7 @@
 | pass 1 - load all includes and define order of compiler
 | PHREDA 2018
 |----------------
-^r3/lib/mprint.r3
+^r3/lib/str.r3
 ^r3/lib/trace.r3
 
 ^./r3base.r3

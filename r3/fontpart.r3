@@ -1,4 +1,5 @@
 |SCR 800 600
+||FULL
 | TV
 | PHREDA 2019
 
@@ -11,6 +12,7 @@
 ^r3/util/penner.r3
 
 ^r3/lib/fontr.r3
+
 ^r3/rft/robotobold.rft
 ^r3/rft/robotoregular.rft
 ^r3/rft/droidsansbold.rft
@@ -26,6 +28,7 @@
 
 :reset
 	'screen p.clear
+	'ltime p.clear
 	;
 
 |---------------------------
@@ -103,6 +106,7 @@
 	1.0 - 1? ( drop ; )
 	;
 
+
 |--- agrega a timeline
 :+rot2d  | fn obj time --
 	't1 'ltime p!+ >a
@@ -156,7 +160,6 @@
 	randtime
 	+rot2d ;
 
-
 |---------------------------
 :xypos
 	rand sw mod abs 16 << rand sh mod abs 16 << ;
@@ -178,17 +181,7 @@
 	;
 
 
-
-|------- SHOW
-:show
-	cls home
-	$ff00 'ink !
-	" r" print over .d print cr
-
-	time.next
-	'ltime p.draw
-	'screen p.draw
-
+:teclado
 	key
 	>esc< =? ( exit )
 	<f1> =? ( "Esto es una prueba" add )
@@ -200,6 +193,18 @@
 	drop
 	;
 
+|------- SHOW
+:show
+	cls home
+|	$ff00 'ink ! " r" print over .d print cr
+
+	time.next
+	'ltime p.draw
+	'screen p.draw
+	
+	teclado
+	;
+
 |------- RAM
 :ram
 	mark
@@ -209,7 +214,7 @@
 	;
 
 |------- BOOT
-: ram
-3
-'show onshow
+:
+	ram
+	'show onshow
 ;

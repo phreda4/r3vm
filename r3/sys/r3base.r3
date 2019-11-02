@@ -1,7 +1,7 @@
 | r3 base words
 | PHREDA 1018
 |-------------
-^r3/util/trace.txt
+^r3/util/trace.r3
 
 ^./r3parse.r3
 ^./r3stack.r3

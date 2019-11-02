@@ -669,10 +669,13 @@ int isinclude(char *str)
 char filename[1024];
 char *fn=filename;	
 char *ns=str;	
-//if (*str=='.') {
+
+if (*str=='.') {
+	str++;
 	strcpy(filename,path);
 	while (*fn!=0) fn++;
-//	}
+	}
+	
 while ((unsigned char)*str>31) { *fn++=*str++; }
 *fn=0;
 //printf("[%s]",filename);
@@ -722,6 +725,10 @@ return nextcr(str);
 void r3includes(char *str) 
 {
 if (str==0) return;
+if (*str=='.') {
+	
+	}
+	
 int ninc;	
 while(*str!=0) {
 	str=trim(str);
@@ -757,6 +764,12 @@ printf("compile:%s...",name);
 
 char *sourcecode;
 
+strcpy(path,name);// para ^. ahora pone el path del codigo origen
+char *aa=path+strlen(path);
+while (path<aa) { if (*aa=='/'||*aa=='\\') { *aa=0;break; } aa--; }
+ 
+//printf("*%s*",path);
+
 sourcecode=openfile(name);
 if (sourcecode==0) return 0;
 memcsize=0;
@@ -789,6 +802,8 @@ if (!r3token(sourcecode)) {
 	printerror(name,sourcecode);
 	return 0;
 	}
+
+//memd+=memd&3; // align
 
 //dumpdicc();
 //dumpcode();
@@ -978,7 +993,7 @@ while(ip!=0) {
 	case BSA:*(int*)REGB=TOS;TOS=*NOS;NOS--;REGB+=4;continue;//B!+
 	case MOVED://MOVE 
 		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
-		while (TOS--) { *(int*)W=*(int*)op;W+=4;op+=4; }
+		while (TOS--) { *(char*)W=*(char*)op;W+=4;op+=4; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case MOVEA://MOVE> 
 		W=(int64_t)*(NOS-1)+(TOS<<2);op=(int64_t)(*NOS)+(TOS<<2);
@@ -1001,16 +1016,16 @@ while(ip!=0) {
 		while (TOS--) { *(char*)W=op;W++; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVED://QMOVE 
-		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
-		while (TOS--) { *(int64_t*)W=*(int64_t*)op;W+=8;op+=8; }
+		W=(uint64_t)*(NOS-1);op=(uint64_t)*NOS;
+		while (TOS--) { *(uint64_t*)W=*(uint64_t*)op;W+=8;op+=8; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVEA://MOVE> 
-		W=(int64_t)*(NOS-1)+(TOS<<3);op=(int64_t)*NOS+(TOS<<3);
-		while (TOS--) { W-=8;op-=8;*(int64_t*)W=*(int64_t*)op; }
+		W=(uint64_t)*(NOS-1)+(TOS<<3);op=(uint64_t)*NOS+(TOS<<3);
+		while (TOS--) { W-=8;op-=8;*(uint64_t*)W=*(uint64_t*)op; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QFILL://QFILL
-		W=(int64_t)*(NOS-1);op=*NOS;
-		while (TOS--) { *(int64_t*)W=op;W+=8; }
+		W=(uint64_t)*(NOS-1);op=*NOS;
+		while (TOS--) { *(uint64_t*)W=op;W+=8; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case UPDATE://"UPDATE"
 		r3update();continue;

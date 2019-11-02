@@ -1,7 +1,7 @@
 | VM r3
 | PHREDA 2018
 |-------------
-^./r3base.txt
+^./r3base.r3
 
 #niv* 1024
 #niv> 'niv
