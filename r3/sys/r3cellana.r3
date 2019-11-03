@@ -63,7 +63,7 @@
 	'PSP 8 + ( NOS <=? dup
 |		cellnewg 1? ( cellconv ) 2drop
 		cellnewg 2drop
-		4+ ) drop
+		4 + ) drop
 	'PSP NOS <? (	| eax already
 |		'TOS cellnewg 1? ( cellconv ) 2drop
 		'TOS cellnewg 2drop
@@ -281,14 +281,14 @@ iFFIRST iFNEXT
 iSYSCALL iSYSMEM
 
 ::anastep | tok --
-	$ff and 2 << 'vmc + @
-	1? ( exec )( drop )
 	1 'itok +!
-	;
+	$ff and 2 << 'vmc + @
+	1? ( ex ; )
+	drop ;
 
 
 |------------------------------------------
-#:cntvreg 1
+##cntvreg 1
 
 :cused | nro -- used
 	2 << 'cellf + @ $800 and ;
@@ -366,21 +366,21 @@ iSYSCALL iSYSMEM
 | $40 dir code
 | $80 copia de A
 :cflags
-	$1 and? ( " >W" ,s )
-	$2 and? ( " W>" ,s )
-	$4 and? ( " >C" ,s )
-	$8 and? ( " C>" ,s )
-	$10 and? ( " V" ,s )
-	$20 and? ( " 'D" ,s )
-	$40 and? ( " 'C" ,s )
-	$80 and? ( " CPY" ,s )
-	$100 and? ( " EXE" ,s )
-	$800 and? ( " U" ,s )
+	$1 an? ( " >W" ,s )
+	$2 an? ( " W>" ,s )
+	$4 an? ( " >C" ,s )
+	$8 an? ( " C>" ,s )
+	$10 an? ( " V" ,s )
+	$20 an? ( " 'D" ,s )
+	$40 an? ( " 'C" ,s )
+	$80 an? ( " CPY" ,s )
+	$100 an? ( " EXE" ,s )
+	$800 an? ( " U" ,s )
 
-	$1000 and? ( " A" ,s )
-	$2000 and? ( " C" ,s )
-	$4000 and? ( " SI" ,s )
-	$8000 and? ( " DI" ,s )
+	$1000 an? ( " A" ,s )
+	$2000 an? ( " C" ,s )
+	$4000 an? ( " SI" ,s )
+	$8000 an? ( " DI" ,s )
 	drop ;
 
 :cconst
@@ -390,7 +390,7 @@ iSYSCALL iSYSMEM
 	over 2 << 'cellf + @
 	0? ( drop ; )
 	256 <? ( ,sp ,d ; )
-	@ "%h" ,sp ,print
+	@ "%h" ,sp ,format
 	;
 
 
@@ -407,8 +407,8 @@ iSYSCALL iSYSMEM
 	2 << 'cellv + @
 	dup 10 >> $3ff and
 	over $3ff and
-	" (%d:%d)" ,print
-	24 >> $ff and " %d" ,print
+	" (%d:%d)" ,format
+	24 >> $ff and " %d" ,format
 	;
 
 ::cellinfo

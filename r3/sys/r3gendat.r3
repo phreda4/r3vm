@@ -4,13 +4,13 @@
 ^./r3base.r3
 
 :tok>dicn | nro -- adr
-	8 0>> 4 << dicc + @ "%w" mprint ;
+	8 >>> 4 << dicc + @ "%w" mprint ;
 
 :tok>cte | tok -- nro
-	8 0>> src + "%w" mprint ;
+	8 >>> src + "%w" mprint ;
 
 :tok>str | tok -- str
-	8 0>> src + ;
+	8 >>> src + ;
 
 |------------ compila DATO
 #d1 "dd "
@@ -31,12 +31,13 @@
 
 :dfin
 	instr 1? ( drop pasoinstr ; ) drop
-	dini 1? ( dtipo )( "," ) ,s drop 0 'dini ! ;
+	dini 1? ( dtipo ,s drop 0 'dini ! ; ) 
+	"," ,s drop 0 'dini ! ;
 :dfins
-	dini 1? ( "db " )( drop stringdd ; ) ,s drop 0 'dini ! ;
+	dini 0? ( drop stringdd ; ) "db " ,s drop 0 'dini ! ;
 :dfind
 	instr 1? ( drop pasoinstr ; ) drop
-	dini 1? ( "dd " )( "," ) ,s drop 0 'dini ! ;
+	dini 1? ( "dd " ,s drop 0 'dini ! ; ) "," ,s drop 0 'dini ! ;
 
 :dtipoch
 	dini 1? ( drop ; ) drop
@@ -85,14 +86,14 @@
 |----- data
 :datastep
 	dup $ff and
-	21 <? ( 2 << 'coded + @ exec ; )
+	21 <? ( 2 << 'coded + @ ex ; )
 	$3c =? ( ,d* )
 	2drop  | vacio
 	;
 
 :gendata | adr --
-	dup 8 + @ 1 nand? ( 2drop ; )	| data
-	$8 and? ( 2drop ; ) 			| cte!!
+	dup 8 + @ 1 na? ( 2drop ; )	| data
+	$8 an? ( 2drop ; ) 			| cte!!
 	12 >> $fff and 0? ( 2drop ; )	| no calls
 	drop
 
@@ -120,13 +121,13 @@
 
 :otrostr
 	1 'dini !
-	nstr "str%h " ,print
+	nstr "str%h " ,format
 	over ,dlits
 	1 'nstr +!
 	,cr ;
 
 :gendatastr | adr --
-	dup 8 + @ 1 and? ( 2drop ; )	 | code
+	dup 8 + @ 1 an? ( 2drop ; )	 | code
 	12 >> $fff and 0? ( 2drop ; )	 | no calls
 	drop
 

@@ -31,7 +31,7 @@
 
 :calcmagic | d --
 	dup abs 'ad !
-    $80000000 over 31 0>> + 't !
+    $80000000 over 31 >>> + 't !
     t dup 1- swap ad mod - 'anc !
     31 'p !
     $80000000 anc / abs 'q1 !
@@ -43,7 +43,7 @@
 		q1 =? ( r1 0? ( swap 1+ swap ) drop )
 		q1 >? drop ) drop
 	q2 1+
-	swap -? ( drop neg )( drop )
+	swap -? ( drop neg 'divm ! p 'divs ! ; ) drop
 	'divm ! p 'divs ! ;
 
 |--- ajuste por signo
@@ -76,21 +76,21 @@
 	2code!+ ;
 
 |----------- inline cte
-:d1 8 0>> src + getsrcnro push.nro ;
-:d2 8 0>> push.str ;
-:d3 8 0>> push.wrd ;
+:d1 8 >>> src + getsrcnro push.nro ;
+:d2 8 >>> push.str ;
+:d3 8 >>> push.wrd ;
 
 #tcte d1 d1 d1 d1 d2 d3 d3 d3
 
 :icte | adr word -- adr
 	dic>tok @ @ dup
-	dup $ff and 7 - 2 << 'tcte + @ exec
+	dup $ff and 7 - 2 << 'tcte + @ ex
 	code!+
 	;
 
 :ivar
 	getval
-	dup dic>inf @ $8 and? ( drop icte ; ) drop | inline
+	dup dic>inf @ $8 an? ( drop icte ; ) drop | inline
 	push.var
 	2code!+
 	;
@@ -216,8 +216,8 @@
 :*nro
 	code<<
 	vTOS
-	dup 1- nand? ( *pot ; )
-	dup 1+ nand? ( *pot-1 ; )
+	dup 1- na? ( *pot ; )
+	dup 1+ na? ( *pot-1 ; )
 	drop
 	;
 
@@ -239,23 +239,23 @@
 :/cte2
 	$23 code!+ | dup 31
 	31 cte!+
-	$4d code!+ | 0>>
+	$4d code!+ | >>>
 	$39	code!+ | +
 	$49	code!+ | 2/
 	;
 
-|----  4 / --> dup 31 >> 30 0>> + 2 >>
+|----  4 / --> dup 31 >> 30 >>> + 2 >>
 :/nro
 	code<<
 	vTOS 
-	dup 1- and? ( /cte ; )
+	dup 1- an? ( /cte ; )
 	2 =? ( /cte2 ; )
 	swap
 	31 cte!+
 	$23 code!+
 	$4c code!+ | >>
 	33 32 pick2 clz - - cte!+ |30
-	$4d code!+ | 0>>
+	$4d code!+ | >>>
 	$39	code!+	| +
 	31 swap clz - cte!+ | 2
 	$4c code!+ | >>
@@ -294,14 +294,14 @@
 :/MODnro
 	code<<
 	vTOS
-	dup 1- and? ( /modcte ; )
+	dup 1- an? ( /modcte ; )
 	swap
     $23 code!+
 	$23 code!+
     31 cte!+ | 31
 	$4c code!+ | >>
 	33 32 pick2 clz - - cte!+ |30
-	$4d code!+ | 0>>
+	$4d code!+ | >>>
 	$39	code!+	| +
 	31 over clz - cte!+ 	| 2
 	$4c code!+ | >>
@@ -310,7 +310,7 @@
 	31 cte!+ |31
 	$4c code!+ | >>
 	33 32 pick2 clz - - cte!+
-	$4d code!+	| 0>>
+	$4d code!+	| >>>
 	$29	code!+	| swap
 	$25	code!+	| over
 	$39	code!+	| +
@@ -342,15 +342,15 @@
 	;
 
 |----  8 mod --> $7 and
-|	dup 31 >> (33-4)29 0>> swap over + 7 and swap -
+|	dup 31 >> (33-4)29 >>> swap over + 7 and swap -
 :modnro
     code<<
-	dup 1- and? ( modcte ; )
+	dup 1- an? ( modcte ; )
 	31 cte!+
 	$23 code!+ | dup 31
 	$4c code!+ | >>
 	33 32 pick2 clz - - cte!+
-	$4d code!+	| 0>>
+	$4d code!+	| >>>
 	$29	code!+	| swap
 	$25	code!+	| over
 	$39	code!+	| +
@@ -492,7 +492,7 @@ iSYSCALL iSYSMEM
 	$ff and
 |	printstk cr
 |	dup r3tokenname slog
-	2 << 'vmc + @ exec
+	2 << 'vmc + @ ex
 	;
 
 :,header | adr -- adr
@@ -505,7 +505,7 @@ iSYSCALL iSYSMEM
 |-----------------------------
 :gencode | adr --
 	dup 8 + @
-	1 and? ( 2drop ; )	| code
+	1 an? ( 2drop ; )	| code
 	12 >> $fff and 0? ( 2drop ; )	| no calls
 	drop
 	codeini
@@ -526,7 +526,7 @@ iSYSCALL iSYSMEM
 	'bcode ( bcode> <? 
 		@+
 
-		,printstka dup $ff and r3tokenname " %s " ,print ,cr
+		,printstka dup $ff and r3tokenname " %s " ,format ,cr
 |		"r4asm/code.asm" savemem | debug
 
 		anastep
@@ -547,11 +547,11 @@ iSYSCALL iSYSMEM
 	blok >a
 	,cr
 	nbloques ( 1? 1 -
-		nbloques over - "; %h. " ,print
-		a@+ dup 28 0>>
+		nbloques over - "; %h. " ,format
+		a@+ dup 28 >>>
 		swap $ffffff and
 		a@+
-		"%d %d %d" ,print ,cr
+		"%d %d %d" ,format ,cr
 		) drop ;
 |----------------------------
 

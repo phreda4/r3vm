@@ -12,7 +12,7 @@
 #deltaD	0	| pila de datos
 #deltaD1fin | pila de datos en el 1er fin
 #deltaR	0	| pila de retorno
-#:maxdepth
+##maxdepth
 
 #flags	0
 #cntfin
@@ -167,7 +167,7 @@
 
 
 |------------- recorre cada palabra
-#pilaint )( 1024
+#pilaint * 1024
 #pilaint> 'pilaint
 
 :pushvar
@@ -203,7 +203,7 @@
 :es??
 	dup 4 - @
 	8 >> 3 << blok + @
-	$10000000 nand? ( drop ; ) drop
+	$10000000 na? ( drop ; ) drop
 	dropvar
 	pushvar
 	;
@@ -280,7 +280,7 @@ inA usoA inB usoB usomem
 	c@+ 'deltaD +!
 	deltaD maxdepth max 'maxdepth !
 	c@+ 'deltaR +!
-	c@ 2 << 'acct + @ exec
+	c@ 2 << 'acct + @ ex
 
 |	deltaD usoD "U:%d D:%d" slog
 	;
@@ -300,7 +300,7 @@ inA usoA inB usoB usomem
 	;
 
 :inlinemark
-|	$fc nand? (  | no dir, no r, no ;;, no []
+|	$fc na? (  | no dir, no r, no ;;, no []
 |		pick2
 |		cntwords 1- <? (
 |			dic>len@ MAXINLINE <? ( drop $100 or )( drop ) | inline
@@ -388,7 +388,8 @@ inA usoA inB usoB usomem
 	0? ( drop 3 <? ( 3 ; ) 7 ; ) drop | hay string, no dv ni dc
 	cntdv
 	0? ( drop 3 <? ( 2 ; ) 6 ; ) drop | direccion de codigo
-	3 <? ( 1 )( 5 ) ;                 | direccion de dato
+	3 <? ( 1 ; )
+	5 ;                 | direccion de dato
 
 :resetvars
 	0 'deltaS !
@@ -400,8 +401,8 @@ inA usoA inB usoB usomem
 :setvars | nro -- nro
 	dup dic>len@ decodeinfov nip
 	24 << over dic>inf dup @ rot or
-|	$f000004 nand? ( $8 or )	| solo nros??
-	$4 nand? ( $8 or )
+|	$f000004 na? ( $8 or )	| solo nros??
+	$4 na? ( $8 or )
 	swap !
 
 	deltaS over dic>mov dup @ rot or swap !	| stack mov of vectors in var
@@ -421,7 +422,7 @@ inA usoA inB usoB usomem
 
 |	dup dic>adr @ "::%w" slog
 
-	dup dic>inf @ 1 and? ( drop analisisvar ; ) drop
+	dup dic>inf @ 1 an? ( drop analisisvar ; ) drop
 	analisiscode
 	;
 

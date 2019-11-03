@@ -10,7 +10,7 @@
 
 |--- @@
 ::getval | a -- a v
-	dup 4 - @ 8 0>> ;
+	dup 4 - @ 8 >>> ;
 
 ::getiw | v -- v iw
     dup 3 << blok + @ $10000000 and ;
@@ -21,10 +21,10 @@
 	"error" slog ;
 
 ::getcte | a -- a v
-	dup 4 - @ 8 0>> src + getsrcnro ;
+	dup 4 - @ 8 >>> src + getsrcnro ;
 
 ::getcte2 | a -- a v
-	dup 4 - @ 8 0>> 'ctecode + @	;
+	dup 4 - @ 8 >>> 'ctecode + @	;
 
 |----------------------
 :g0 :g: :g:: :g# :g: :g| :g^    ;
@@ -42,10 +42,10 @@
 	stk.normal
 
 	dup @ $ff and	| tail call optimization
-	16 =? ( drop getval "jmp w%h" ,print ,cr ; ) drop | ret?
+	16 =? ( drop getval "jmp w%h" ,format ,cr ; ) drop | ret?
 
 	getval
-	dup "call w%h" ,print ,cr
+	dup "call w%h" ,format ,cr
 
 	dic>du stk.gennormal
 	;
@@ -66,7 +66,7 @@
 	stk.push
 	getval
 	getiw 0? ( 2drop ; ) drop
-	"_i%h:" ,print ,cr ;		| while
+	"_i%h:" ,format ,cr ;		| while
 
 :g)
 	dup 8 - @ $ff and
@@ -77,8 +77,8 @@
 	drop
 
 	getval
-	getiw 1? ( over "jmp _i%h" ,print ,cr ) drop	| while
-	"_o%h:" ,print ,cr
+	getiw 1? ( over "jmp _i%h" ,format ,cr ) drop	| while
+	"_o%h:" ,format ,cr
 	stk.pop
 	;
 
@@ -97,44 +97,43 @@
 
 |	lastdircode
 |	dic>du
-|	"; u:%d d:%d" ,print ,cr
+|	"; u:%d d:%d" ,format ,cr
 |	dup ( 1? 1 - .drop ) drop
 |	+ ( 1? 1 - dup push.reg ) drop
 
 	stk.normal | TOS in eax or something
 
 	over @ $ff and
-	16 <>? ( "call #0" )( "jmp #0" ) | call..ret?
-	nip
-	,asm
+	16 <>? ( drop "call #0" ,asm ; ) drop
+	"jmp #0" ,asm | call..ret?
 	;
 
 :g0?
 	'TOS needREG
 	gwhilejmp
 	"or #0,#0" ,asm
-	getval "jnz _o%h" ,print ,cr
+	getval "jnz _o%h" ,format ,cr
 	;
 
 :g1?
 	'TOS needREG
 	gwhilejmp
 	"or #0,#0" ,asm
-	getval "jz _o%h" ,print ,cr
+	getval "jz _o%h" ,format ,cr
 	;
 
 :g+?
 	'TOS needREG
 	gwhilejmp
 	"or #0,#0" ,asm
-	getval "js _o%h" ,print ,cr
+	getval "js _o%h" ,format ,cr
 	;
 
 :g-?
 	'TOS needREG
 	gwhilejmp
 	"or #0,#0" ,asm
-	getval "jns _o%h" ,print ,cr
+	getval "jns _o%h" ,format ,cr
 	;
 
 :g<?
@@ -142,7 +141,7 @@
 	"cmp #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jge _o%h" ,print ,cr
+	getval "jge _o%h" ,format ,cr
 	;
 
 :g>?
@@ -150,7 +149,7 @@
 	"cmp #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jle _o%h" ,print ,cr
+	getval "jle _o%h" ,format ,cr
 	;
 
 :g=?
@@ -158,7 +157,7 @@
 	"cmp #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jne _o%h" ,print ,cr
+	getval "jne _o%h" ,format ,cr
 	;
 
 :g>=?
@@ -166,7 +165,7 @@
 	"cmp #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jl _o%h" ,print ,cr
+	getval "jl _o%h" ,format ,cr
 	;
 
 :g<=?
@@ -174,7 +173,7 @@
 	"cmp #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jg _o%h" ,print ,cr
+	getval "jg _o%h" ,format ,cr
 	;
 
 :g<>?
@@ -182,7 +181,7 @@
 	"cmp #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "je _o%h" ,print ,cr
+	getval "je _o%h" ,format ,cr
 	;
 
 :gA?
@@ -190,7 +189,7 @@
 	"test #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jnz _o%h" ,print ,cr
+	getval "jnz _o%h" ,format ,cr
 	;
 
 :gN?
@@ -198,7 +197,7 @@
 	"test #1,#0" ,asm
 	.drop
 	gwhilejmp
-	getval "jz _o%h" ,print ,cr
+	getval "jz _o%h" ,format ,cr
 	;
 
 :gB?
@@ -209,7 +208,7 @@
 
 	.2drop
 	gwhilejmp
-	getval "jge _o%h" ,print ,cr
+	getval "jge _o%h" ,format ,cr
 	;
 
 :g>R
@@ -514,8 +513,8 @@
 :,callsys | "" --
 	stk.normal
 	over @ $ff and | word ;
-	$10 =? ( "jmp " )( "call " ) nip
-	,s ,s ,cr ;
+	$10 =? ( drop "jmp " ,s ,s ,cr ; )
+	drop "call " ,s ,s ,cr ;
 
 :vstack+ | delta --
 	drop
@@ -534,7 +533,7 @@
 
 :gSYSCALLc
 	vTOS 2 <<
-	"call [SYSCALL+%d]" ,print ,cr
+	"call [SYSCALL+%d]" ,format ,cr
 	;
 
 :gSYSCALL
@@ -544,7 +543,7 @@
 
 :gSYSMEMc
 	vTOS 2 <<
-	"mov eax,[SYSMEM+%d]" ,print ,cr
+	"mov eax,[SYSMEM+%d]" ,format ,cr
 	;
 
 :gSYSMEM
@@ -608,7 +607,7 @@ gSYSCALL gSYSMEM
 :codestep | token --
 	$ff and
 |	dup r3tokenname slog
-	2 << 'vmc + @ exec ;
+	2 << 'vmc + @ ex ;
 
 
 ::genasmcode | duse --
@@ -622,7 +621,7 @@ gSYSCALL gSYSMEM
 		cell.fillreg
 		@+
 
-        ,printstk	dup $ff and r3tokenname " %s " ,print ,cr
+        ,printstk	dup $ff and r3tokenname " %s " ,format ,cr
 
 		codestep
 |		"r4asm/code.asm" savemem | debug

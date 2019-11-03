@@ -39,6 +39,9 @@
 	( c@+ 1?
 		10 =? ( 3 + ) 13 =? ( drop 'here ! ; )
 		,c ) drop 'here ! ;
+::,d .d ,s ;
+::,h .h ,s ;
+::,b .b ,s ;
 
 ::,ln ,s
 ::,cr 13 ,c ;
@@ -86,8 +89,11 @@
 	$25 <>? ( ,c ; ) drop
 	c@+ $f and 2 << 'control + @ ex ;
 
-::,format | p p .. adr --
+::,format | p p .. "" --
 	( c@+ 1? ,emit ) 2drop ;
 
-::,d
-	.d ,s ;
+::mprint | p p .. "" -- adr
+	mark
+	here 4096 + dup 'here ! >r
+	,format
+	empty r> ;

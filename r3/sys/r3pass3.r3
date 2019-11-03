@@ -52,6 +52,11 @@
 		$c >=? ( $f <=? ( overdire ) )
 		2drop r> ) 2drop ;
 
+
+:datacode
+	dup dic>inf @ 1 an? ( drop rdata ; )
+	drop rcode ;
+
 ::r3-stage-3 | --
 	| ...arbol de llamadas...
 	cntdef 1-
@@ -60,6 +65,6 @@
 	( here >?
 		4 - dup @
 |        dup dic>adr @ "%w*" slog
-		dup dic>inf @ 1 and? ( drop rdata )( drop rcode )
+        datacode
 		) drop ;
 

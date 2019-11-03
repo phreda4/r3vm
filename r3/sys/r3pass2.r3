@@ -2,6 +2,8 @@
 | pass 2 - tokenizer
 | PHREDA 2018
 |----------------
+^r3/lib/parse.r3
+
 ^./r3base.r3
 
 #flag
@@ -17,7 +19,7 @@
 #codeini
 
 |-----
-#sst )( 1024 	| stack of blocks
+#sst * 1024 	| stack of blocks
 #sst> 'sst
 :sst!	sst> !+ 'sst> ! ;
 :sst@   -4 'sst> +! sst> @ ;
@@ -37,16 +39,20 @@
 
 :.def
 	inidef
-	1+ dup c@
+	0 'flag !
+	1 + dup c@
 	33 <? ( code> '<<boot ! )
-	$3A =? ( drop 1+ 2 'flag ! )( drop 0 'flag ! )  |::
+	$3A =? ( swap 1 + swap 2 'flag ! ) |::
+	drop
 	0 flag code> pick3 word!+
     >>sp ;
 
 :.var
 	inidef
-	1+ dup c@
-	$23 =? ( drop 1+ 3 'flag ! )( drop 1 'flag ! ) | ##
+	1 'flag !
+	1 + dup c@
+	$23 =? ( swap 1 + swap 3 'flag ! ) | ##
+	drop
 	0 flag code> pick3 word!+
     >>sp ;
 
@@ -135,7 +141,7 @@
 |		dup ?base 0 >=? ( drop 7 'error ! drop 0 ; ) drop
 		?word 1? ( .adr ; ) drop
 		1 'error !
-		dup "error1d %w" slog ;
+|		dup "error1d %w" slog ;
 		drop 0 ; )
 	drop
 	dup isNro 1? ( drop .nro ; ) drop		| numero
@@ -159,7 +165,7 @@
 	0 'codeini !
 	'inc ( inc> <?
 		dup @ "%w" slog
-		4+ @+
+		4 + @+
 		str2token
 		error 1? ( nip ; ) drop
 		dicc> 'dicc< !

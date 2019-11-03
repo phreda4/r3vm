@@ -3,6 +3,7 @@
 ^r3/lib/print.r3
 ^r3/lib/sprite.r3
 ^r3/lib/mem.r3
+^r3/lib/str.r3
 
 ^r3/lib/fontm.r3
 ^r3/fntm/droidsans13.fnt
@@ -76,7 +77,7 @@
 	;
 
 :reload
-	'path 
+	'path
 	ffirst drop | quita .
 	fnext drop	| quita ..
 	( fnext 1? fileadd ) drop
@@ -137,6 +138,57 @@
 		dup c@ $2f =? ( drop 0 swap c! remfiles ; )
 		drop 1 - ) drop
 	remfiles ;
+
+|-------------
+#pathaux * 1024
+#nameaux * 64
+
+:next/ | adr -- adr'
+	( c@+ 1?
+		$2f =? ( drop 0 swap 1 - c!+ ; )
+		drop ) nip ;
+
+:getactual | adr actual --
+	( nfiles <?
+		dup getname pick2 = 1? ( drop nip ; )
+		drop 1 + ) nip ;
+
+
+|--------------------------
+:remlastpath
+	'path ( c@+ 1? drop ) drop 1 -
+	( dup c@ $2f <>? drop 1 - ) drop
+	0 swap c! ;
+
+:setactual
+	actual dup getlvl makepath
+	actual getinfo 1 >? ( remlastpath ) drop
+	actual getname 'name strcpy
+	;
+
+|---------------------
+:loadm
+	'path "r3/mem/menu.mem" load 'path =? ( drop ; ) drop
+	'path dup c@ 0? ( 2drop ; ) drop
+	'pathaux strcpy
+	'name 'nameaux strcpy
+	0 'actual !
+	'pathaux next/ 0? ( drop ; )
+	( dup next/ swap | sig act
+		actual getactual 'actual !
+		expande
+		0? ) drop
+	'nameaux
+	dup c@ 0? ( 2drop ; ) drop
+	actual getactual
+	pagina linesv + 1- >=? ( dup linesv - 1+ 'pagina ! )
+	'actual !
+	'nameaux 'name strcpy
+	;
+
+:savem
+	setactual
+	'path 2048 "r3/mem/menu.mem" save ;
 
 |--------------------------------
 :printfn | n
@@ -337,7 +389,9 @@
 	rebuild
 	'fontdroidsans13 fontm
 	rows 2 - 'linesv !
+|	loadm
 	'inicio onshow
+|	savem
 	;
 
 : main ;

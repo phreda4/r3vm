@@ -36,7 +36,7 @@
 
 ::count | s1 -- s1 cnt	v3
 	dup >a
-	0 ( a@+ dup $01010101 - 
+	0 ( a@+ dup $01010101 -
 		swap not and
 		$80808080 na? drop 4 + )
 	$80 an? ( drop ; )

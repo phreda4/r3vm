@@ -1,7 +1,8 @@
 | r3 base words
 | PHREDA 1018
 |-------------
-^r3/lib/trace.r3
+^r3/lib/mem.r3
+^r3/lib/print.r3
 
 ^./r3parse.r3
 ^./r3stack.r3
@@ -162,12 +163,17 @@
 ::?word | str -- str dir / str 0
 	dicc> 16 -	|---largo
 	( dicc >=?
-		dup @						| str ind pal
-		pick2
-		=s 0? ( drop )( drop
+		dup @ pick2			| str ind pal str
+		=s 1? ( drop
 			dup 8 + @
-			%10 an? ( drop ; )( drop dicc< >=? ( ; ) )
-			)
+			%10 na? ( drop dicc< >=? ( ; ) dup )
+			) drop
+
+|		=s 0? ( drop )( drop
+|			dup 8 + @
+|			%10 an? ( drop ; )( drop dicc< >=? ( ; ) )
+|			)
+
 		16 - ) drop
 	0 ;
 
@@ -198,8 +204,8 @@
 
 :,movx | mov --
 	dup
-	dup $f and "U:%d " ,print
-	23 << 27 >> "D:%d " ,print
+	dup $f and "U:%d " ,format
+	23 << 27 >> "D:%d " ,format
 	,mov
 	;
 
@@ -207,24 +213,32 @@
 ::,codeinfo | nro --
 	"; " ,s
 	dic>adr
-	@+ ":%w " ,print
-	@+ code - 2 >> "(%h) " ,print
+	@+ ":%w " ,format
+	@+ code - 2 >> "(%h) " ,format
 	@+
 |	$1 an? ( ":" )( "#" ) ,s	| data/code
-	$2 an? ( "e" )( "l" ) ,s	| export/local
-	$4 an? ( "'" )( "" ) ,s	| /adress used
-	$8 an? ( "r" )( "" ) ,s	| /rstack mod
-	$10 an? ( ";" )( "" ) ,s	| /multi;
-	$20 an? ( "R" )( "" ) ,s	| /recurse
-	$40 an? ( "[" )( "" ) ,s	| /anon
-	$80 an? ( "." )( "" ) ,s	| /no ;
-	$100 an? ( ">" )( "" ) ,s	| /inline
+|	$2 an? ( "e" )( "l" ) ,s	| export/local
+	1 >> $1 and "el" + ,c
+|	$4 an? ( "'" )( "" ) ,s	| /adress used
+	2 >> $1 and "' " + ,c
+|	$8 an? ( "r" )( "" ) ,s	| /rstack mod
+	3 >> $1 and "r " + ,c
+|	$10 an? ( ";" )( "" ) ,s	| /multi;
+	4 >> $1 and "; " + ,c
+|	$20 an? ( "R" )( "" ) ,s	| /recurse
+	5 >> $1 and "R " + ,c
+|	$40 an? ( "[" )( "" ) ,s	| /anon
+	6 >> $1 and "[ " + ,c
+|	$80 an? ( "." )( "" ) ,s	| /no ;
+	7 >> $1 and ". " + ,c
+|	$100 an? ( ">" )( "" ) ,s	| /inline
+	8 >> $1 and "> " + ,c
 
-	dup 12 >> $fff and " <%d> " ,print
-	24 >> $ff and " nivel:%d " ,print
-	@ dup 12 >>> "len:%d " ,print
+	dup 12 >> $fff and " <%d> " ,format
+	24 >> $ff and " nivel:%d " ,format
+	@ dup 12 >>> "len:%d " ,format
 	,mov
-|	$fff and " %h " ,print
+|	$fff and " %h " ,format
 	;
 
 #datastr "val" "ddata" "dcode" "str" "lval" "lddata" "ldcode" "lstr" "multi" "buff"
@@ -235,21 +249,29 @@
 ::,datainfo | nro --
 	"; " ,s
 	dic>adr
-	@+ "#%w " ,print
-	@+ code - 2 >> "(%h) " ,print
+	@+ "#%w " ,format
+	@+ code - 2 >> "(%h) " ,format
 	@+
-	$2 an? ( "e" )( "l" ) ,s	| export/local
-	$4 an? ( "'" )( "" ) ,s	| /adress used
-	$8 an? ( "c" )( "" ) ,s	| cte
+|	$2 an? ( "e" )( "l" ) ,s	| export/local
+	1 >> $1 and "el" + ,c
+|	$4 an? ( "'" )( "" ) ,s	| /adress used
+	2 >> $1 and "' " + ,c
+|	$8 an? ( "c" )( "" ) ,s	| cte
+	3 >> $1 and "c " + ,c
 
-	dup 12 >> $fff and " <%d> " ,print
+	dup 12 >> $fff and " <%d> " ,format
 	" tipo:" ,s
 	24 >> $f and datatype ,s
 
-	@ dup 12 >>> " len:%d " ,print
-	$fff and " %h " ,print
+	@ dup 12 >>> " len:%d " ,format
+	$fff and " %h " ,format
 	;
 
+
+::slog | ... --
+	mprint print cr
+	redraw
+	;
 
 ::debugdicc
 	dicc ( dicc> <? dup >a
