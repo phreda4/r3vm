@@ -32,5 +32,5 @@
 		swap c@+ $ff and toupp r> | s2 s1 c1 c2
 		<>? ( 3drop 0 ; ) drop
 		swap ) drop
-	swap c@ $ff and 32 >? ( 0 )( 1 )
-	nip nip ;
+	swap c@ $ff and 32 >? ( 2drop 0 ;
+	2drop 1 ;

@@ -88,3 +88,6 @@
 
 ::,format | p p .. adr --
 	( c@+ 1? ,emit ) 2drop ;
+
+::,d
+	.d ,s ;

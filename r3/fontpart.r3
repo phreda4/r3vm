@@ -135,7 +135,6 @@
 	a!
 	;
 
-
 :randobj
 	rand 'screen p.cnt mod abs 'screen p.nro ;
 
@@ -161,6 +160,26 @@
 	+rot2d ;
 
 |---------------------------
+:lrmove | adr --
+	>a
+	a@+ a@+
+	a@+ a@+ 2swap
+	( over <?
+		pick2 over 4 + +!
+		pick3 over 8 + +!
+		64 + ) 4drop ;
+
+:lrmove2d | dx dy o1 o2 --
+	'lrmove 'ltime p!+ >a
+ 	a!+ | o2
+	a!+ | o1
+	a!+	| dy
+	a!+	| dx
+	;
+
+| 1.0 1000
+
+|---------------------------
 :xypos
 	rand sw mod abs 16 << rand sh mod abs 16 << ;
 :vxypos
@@ -180,6 +199,29 @@
 	" Que Tul " $ff +bstring
 	;
 
+|------- APP
+
+:inicio
+	opensansregular 88 fontr!
+	800 500 atxy
+
+	-0.9 0.0
+	screen
+	"* ULTIMA NOTICIA * zocalo de prueba * " +string
+	screen
+	lrmove2d
+	;
+
+:inicio
+	opensansregular 80 fontr!
+	800 500 atxy
+
+    -1.0 -0.2
+	screen
+	"- Cuatro noquis - " +string
+	screen
+	lrmove2d
+	;
 
 :teclado
 	key
@@ -201,7 +243,7 @@
 	time.next
 	'ltime p.draw
 	'screen p.draw
-	
+
 	teclado
 	;
 
@@ -216,5 +258,6 @@
 |------- BOOT
 :
 	ram
+	inicio
 	'show onshow
 ;

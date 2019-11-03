@@ -1,7 +1,7 @@
 | r3 base words
 | PHREDA 1018
 |-------------
-^r3/util/trace.r3
+^r3/lib/trace.r3
 
 ^./r3parse.r3
 ^./r3stack.r3
@@ -142,19 +142,19 @@
 	swap $f and ;	| uso
 
 ::dic>len@
-	dic>adr 12 + @ 12 0>> ;
+	dic>adr 12 + @ 12 >>> ;
 
 ::adr>dicname | adr -- nadr
 	adr>dic "W%h" mprint ;
 
 ::tok>dicname | nro -- nadr
-	8 0>> "W%h" mprint ;
+	8 >>> "W%h" mprint ;
 
 ::dic>toklen | nro -- adr len
-	dic>adr 4+ @+ swap 4+ @ 12 0>> ;
+	dic>adr 4 + @+ swap 4 + @ 12 >>> ;
 
 ::adr>toklen | adr+4 -- adr len
-	4+ @+ swap 4+ @ 12 0>> ;
+	4 + @+ swap 4 + @ 12 >>> ;
 
 ::dic>call@ | nr -- calls
 	dic>inf @ 12 >> $fff and ;
@@ -166,7 +166,7 @@
 		pick2
 		=s 0? ( drop )( drop
 			dup 8 + @
-			%10 and? ( drop ; )( drop dicc< >=? ( ; ) )
+			%10 an? ( drop ; )( drop dicc< >=? ( ; ) )
 			)
 		16 - ) drop
 	0 ;
@@ -210,19 +210,19 @@
 	@+ ":%w " ,print
 	@+ code - 2 >> "(%h) " ,print
 	@+
-|	$1 and? ( ":" )( "#" ) ,s	| data/code
-	$2 and? ( "e" )( "l" ) ,s	| export/local
-	$4 and? ( "'" )( "" ) ,s	| /adress used
-	$8 and? ( "r" )( "" ) ,s	| /rstack mod
-	$10 and? ( ";" )( "" ) ,s	| /multi;
-	$20 and? ( "R" )( "" ) ,s	| /recurse
-	$40 and? ( "[" )( "" ) ,s	| /anon
-	$80 and? ( "." )( "" ) ,s	| /no ;
-	$100 and? ( ">" )( "" ) ,s	| /inline
+|	$1 an? ( ":" )( "#" ) ,s	| data/code
+	$2 an? ( "e" )( "l" ) ,s	| export/local
+	$4 an? ( "'" )( "" ) ,s	| /adress used
+	$8 an? ( "r" )( "" ) ,s	| /rstack mod
+	$10 an? ( ";" )( "" ) ,s	| /multi;
+	$20 an? ( "R" )( "" ) ,s	| /recurse
+	$40 an? ( "[" )( "" ) ,s	| /anon
+	$80 an? ( "." )( "" ) ,s	| /no ;
+	$100 an? ( ">" )( "" ) ,s	| /inline
 
 	dup 12 >> $fff and " <%d> " ,print
 	24 >> $ff and " nivel:%d " ,print
-	@ dup 12 0>> "len:%d " ,print
+	@ dup 12 >>> "len:%d " ,print
 	,mov
 |	$fff and " %h " ,print
 	;
@@ -230,7 +230,7 @@
 #datastr "val" "ddata" "dcode" "str" "lval" "lddata" "ldcode" "lstr" "multi" "buff"
 
 :datatype | nro -- str
-	'datastr swap ( 0 <>? )( 1- swap >>0 swap ) drop ;
+	'datastr swap ( 0 <>? 1 - swap >>0 swap ) drop ;
 
 ::,datainfo | nro --
 	"; " ,s
@@ -238,15 +238,15 @@
 	@+ "#%w " ,print
 	@+ code - 2 >> "(%h) " ,print
 	@+
-	$2 and? ( "e" )( "l" ) ,s	| export/local
-	$4 and? ( "'" )( "" ) ,s	| /adress used
-	$8 and? ( "c" )( "" ) ,s	| cte
+	$2 an? ( "e" )( "l" ) ,s	| export/local
+	$4 an? ( "'" )( "" ) ,s	| /adress used
+	$8 an? ( "c" )( "" ) ,s	| cte
 
 	dup 12 >> $fff and " <%d> " ,print
 	" tipo:" ,s
 	24 >> $f and datatype ,s
 
-	@ dup 12 0>> " len:%d " ,print
+	@ dup 12 >>> " len:%d " ,print
 	$fff and " %h " ,print
 	;
 
