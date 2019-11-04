@@ -22,10 +22,11 @@
 
 ::r3c | str --
 	r3name
-
-	"load" slog
 	here dup 'src !
 	'r3filename
+
+	dup "load %s" slog
+
 	2dup load | "fn" mem
 	here =? ( "no src" slog ; )
 	0 swap c!+ 'here !
@@ -35,13 +36,13 @@
 	0 'cntdef !
 	'inc 'inc> !
 
-	"pass1" slog
+	" pass1" slog
 	swap r3-stage-1
 
 	cnttokens "..toks:%d" slog
 	cntdef "..def:%d" slog
 
-	"pass2" slog
+	" pass2" slog
 	r3-stage-2
 
 	1? ( "error ** %d" slog ; ) drop
@@ -49,21 +50,28 @@
 
 |	debugdicc
 
-	"pass3" slog
+	" pass3" slog
 	r3-stage-3
 
-	"pass4" slog
+	" pass4" slog
 	r3-stage-4
 
-	"gencode" slog
+	" gencode" slog
 	r3-gencode
 	r3-gendata
 
 	;
 
 : mark
+	cls
+	$ff00 'ink ! " PHREDA - 2019" print cr
+	$ff0000 'ink ! " r3 compiler" print cr
+	$ffffff 'ink !
+	redraw
+
 	"r3/test.r3"
 	r3c
+
 	waitesc
 	;
 

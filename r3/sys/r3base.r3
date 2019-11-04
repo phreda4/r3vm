@@ -66,22 +66,20 @@
 ##dicc<
 
 #r3machine
-"nop" ":" "::" "#" "##" "|" "^" 	| 6
-"Nd" "Nh" "Nb" "Nf" "str" 					| 11
-"call" "var" "dcode" "ddata" 		| 15
-|";" "jmp" "jmpw" "[" "]"
+";" "lit1" "adr" "call" "var"
 
 #r3base
 ";" "(" ")" "[" "]"
-"EX" "0?" "1?" "+?" "-?" 				| 10
-"<?" ">?" "=?" ">=?" "<=?" "<>?" "AN?" "NA?" "BTW?" 		| 19
-"DUP" "DROP" "OVER" "PICK2" "PICK3" "PICK4" "SWAP" "NIP" 	| 27
-"ROT" "2DUP" "2DROP" "3DROP" "4DROP" "2OVER" "2SWAP" 		| 34
-">R" "R>" "R@" 												| 37
-"AND" "OR" "XOR" "NOT" "NEG" 								| 42
-"+" "-" "*" "/" "*/" 										| 47
-"/MOD" "MOD" "ABS" "SQRT" "CLZ" 							| 52
-"<<" ">>" ">>>" "*>>" "<</" 								| 57
+"EX" "0?" "1?" "+?" "-?"
+"<?" ">?" "=?" ">=?" "<=?" "<>?" "AN?" "NA?" "BT?"
+"DUP" "DROP" "OVER" "PICK2" "PICK3" "PICK4" "SWAP" "NIP"
+"ROT" "2DUP" "2DROP" "3DROP" "4DROP" "2OVER" "2SWAP"
+">R" "R>" "R@"
+"AND" "OR" "XOR"
+"+" "-" "*" "/"
+"<<" ">>" ">>>"
+"MOD" "/MOD" "*/" "*>>" "<</"
+"NOT" "NEG" "ABS" "SQRT" "CLZ"
 "@" "C@" "Q@" "@+" "C@+" "Q@+"  							| 65
 "!" "C!" "Q!" "!+" "C!+" "Q!+"  							| 71
 "+!" "C+!" "Q+!"  											| 74
@@ -89,16 +87,18 @@
 ">B" "B>" "B@" "B!" "B+" "B@+" "B!+" 						| 88
 "MOVE" "MOVE>" "FILL" 										| 91
 "CMOVE" "CMOVE>" "CFILL" 									| 94
-"DMOVE" "DMOVE>" "DFILL" 									| 97
-
+"QMOVE" "QMOVE>" "QFILL" 									| 97
 "UPDATE" "REDRAW"
 "MEM" "SW" "SH" "VFRAME"
-"XYPEN" "BPEN" "KEY"
+"XYPEN" "BPEN" "KEY" "CHAR"
 "MSEC" "TIME" "DATE"
 "LOAD" "SAVE" "APPEND"
 "FFIRST" "FNEXT"
 
-"SYSCALL" "SYSMEM"
+"INK" "'INK" "ALPHA" "OPX" "OPY"
+"OP" "LINE" "CURVE" "CURVE3" 
+"PLINE" "PCURVE" "PCURVE3" "POLI"
+
 "SYS"
 ( 0 )
 
@@ -269,9 +269,7 @@
 
 
 ::slog | ... --
-	mprint print cr
-	redraw
-	;
+	mprint print cr redraw	;
 
 ::debugdicc
 	dicc ( dicc> <? dup >a

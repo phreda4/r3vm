@@ -53,6 +53,7 @@
 
 :includes | src --
 	dup ( trim 1?
+		dup "%w " slog
 		( $5e =? drop | $5e ^  Include
 			ininc? 0? ( drop
 				load.inc |0? ( 1 'error ! ; ) |no existe
