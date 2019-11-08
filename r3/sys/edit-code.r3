@@ -611,7 +611,7 @@
 
 |----------- principal
 :main
-	'name "r3/mem/main.mem" load drop
+	'name "mem/main.mem" load drop
 	'fontdroidsans13 fontm
 	ram
 	loadtxt

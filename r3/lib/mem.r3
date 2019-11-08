@@ -95,5 +95,5 @@
 ::mprint | p p .. "" -- adr
 	mark
 	here 4096 + dup 'here ! >r
-	,format
+	,format ,eol
 	empty r> ;

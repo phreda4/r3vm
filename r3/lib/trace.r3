@@ -18,3 +18,22 @@
 	'screen onshow
 	;
 
+::dumpc | adr --
+	16 ( 1?
+		32 ( 1?
+			rot c@+
+			$ff and 32 <? ( drop $7e )
+			emit
+			rot rot 1 - ) drop
+		cr 1 - ) 2drop
+	waitesc ;
+
+::dumpd | adr --
+	16 ( 1?
+		8 ( 1?
+			rot @+ .d print sp
+			rot rot 1 - ) drop
+		cr 1 - ) 2drop
+	waitesc ;
+
+
