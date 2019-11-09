@@ -24,10 +24,13 @@
 ^r3/rft/opensansregular.rft
 
 #screen 0 0
+#scrbarra 0 0
+
 #ltime 0 0	| tiempo
 
 :reset
 	'screen p.clear
+	'scrbarra p.clear
 	'ltime p.clear
 	;
 
@@ -46,6 +49,56 @@
 	b!+
 	swap 16 << b!+ 16 << b!+
 	swap 16 << b!+ 16 << b!+
+	;
+
+|---------------------------
+| letra
+| x y w h c r adr
+|4 8 12162024
+#lastx
+
+:letrap | adr --
+	>b
+	b@+
+	dup 1.0 - b> 4 - !
+	16 >> 'ccx ! b@+ 16 >> 'ccy !
+	b@+ 16 >> 'ccw ! b@+ 16 >> 'cch !
+
+	ccx ccw 1 >> +
+	lastx >? ( dup 'lastx ! )
+	-? ( drop 0 ; ) drop
+
+	b@+ 'ink !
+	b@+ fontremit
+	;
+
+:+letrap | adr --
+	'letrap 'scrbarra p!+ >b
+	ccx 16 << b!+ ccy 16 << b!+
+	ccw 16 << b!+ cch 16 << b!+
+	ink b!+
+	b!+
+	;
+
+:+stringp | "" --
+    '+letrap swap fontrprint
+	;
+
+:+barra | "" --
+	droidsansbold 40 fontr!
+	$444444 'ink !
+	lastx 560 atxy
+	+stringp
+	;
+
+:barradraw
+	'scrbarra p.cnt 1? (
+		$f0f0f0 'ink !
+		0 550 800 600
+		fillbox
+		) drop
+	sw 'lastx !
+	'scrbarra p.draw
 	;
 
 |---------------------------
@@ -199,35 +252,15 @@
 	" Que Tul " $ff +bstring
 	;
 
+:inicio
+	;
+
 |------- APP
-
-:inicio
-	opensansregular 88 fontr!
-	800 500 atxy
-
-	-0.9 0.0
-	screen
-	"* ULTIMA NOTICIA * zocalo de prueba * " +string
-	screen
-	lrmove2d
-	;
-
-:inicio
-	opensansregular 80 fontr!
-	800 500 atxy
-
-    -1.0 -0.2
-	screen
-	"- Cuatro noquis - " +string
-	screen
-	lrmove2d
-	;
-
 :teclado
 	key
 	>esc< =? ( exit )
 	<f1> =? ( "Esto es una prueba" add )
-	<f2> =? ( movt )
+	<f2> =? ( "coso de prueba" +barra )
 	<f3> =? ( scat )
 	<f4> =? ( rot2 )
 
@@ -244,12 +277,15 @@
 	'ltime p.draw
 	'screen p.draw
 
+	barradraw
+
 	teclado
 	;
 
 |------- RAM
 :ram
 	mark
+	1024 'scrbarra p.ini
 	8192 'screen p.ini
 	8192 'ltime p.ini
 	time.ini

@@ -76,8 +76,8 @@
 ::pcursor | adr -- adr
 	pad> <>? ( ; )
 	blink 1? ( drop ; ) drop
-	ccx 1- ccy 2dup op cch + pline
-	dup c@ emitsize 1+
+	ccx 1 - ccy 2dup op cch + pline
+	dup c@ emitsize 1 +
 	ccx + ccy 2dup cch + op pline
 	;
 

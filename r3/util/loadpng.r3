@@ -51,7 +51,7 @@
 :decodesym | adr dt -- adr sym
 	dup 4 + >a swap
 	0 0	( 					| dt a sum cur
-		2* rot read1bit		| dt sum cur a 1
+		1 << rot read1bit		| dt sum cur a 1
 		rot + rot a@+		| dt a cur sum l
 		rot over -			| dt a sum l cur-l
 		rot rot + swap
@@ -224,16 +224,16 @@
 :favgline | x y data x -- x y data
 	pxsize ( 1? >r
 		1 - swap
-		dup wf - c@ $ff and 2/ over c+! 1 + swap
+		dup wf - c@ $ff and 1 >> over c+! 1 + swap
 		r> 1 - ) drop
 	( 1? 1 - swap
-		dup pxsize - c@ $ff and over wf - c@ $ff and + 2/ over c+! 1 +
+		dup pxsize - c@ $ff and over wf - c@ $ff and + 1 >> over c+! 1 +
 		swap ) drop ;
 
 :favgline0 | x y data x -- x y data
 	pxsize - swap pxsize + swap
 	( 1? 1 - swap
-		dup pxsize - c@ $ff and 2/ over c+! 1 +
+		dup pxsize - c@ $ff and 1 >> over c+! 1 +
 		swap ) drop ;
 
 :fpaeline | x y data x -- x y data

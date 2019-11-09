@@ -35,7 +35,7 @@
 	ncell
 	0 over 2 << 'cellf + !
 	itok over 2 << 'cellv + ! | inicio de vida
-	dup 1+ 'ncell !
+	dup 1 + 'ncell !
 	;
 
 :cellend | nro ---
@@ -46,10 +46,10 @@
 |	'ncell ! ;
 
 ::cellnewg2 | -- nc
-	ncell dup 1+ 'ncell ! ;
+	ncell dup 1 + 'ncell ! ;
 
 ::cellnewg | -- vreg
-	ncell dup 1+ 'ncell !
+	ncell dup 1 + 'ncell !
 	2 << 'cellv + @
 	24 >>
 	;
@@ -315,14 +315,14 @@ iSYSCALL iSYSMEM
 
 :searchend | ini desde -- vreg/0
 	( 1? 1 -
-      	reuse? 1? ( nip nip 1+ ; ) drop
+      	reuse? 1? ( nip nip 1 + ; ) drop
 		) 2drop 0 ;
 
 :marcau
 	$800 over 2 << 'cellf + +! ;
 
 :reusa | n reu -- n
-	1- marcau
+	1 - marcau
 	cellreg over cellreg!
 	;
 
@@ -338,7 +338,7 @@ iSYSCALL iSYSMEM
 	1 'cntvreg !
 	0 ( ncell <?
 		needreg
-		1+ ) drop ;
+		1 + ) drop ;
 
 ::anaend
     ( NOS 'PSP >? drop
@@ -418,4 +418,4 @@ iSYSCALL iSYSMEM
 		dup celli
 		dup cellvida
 		,cr
-		1+ ) drop ;
+		1 + ) drop ;

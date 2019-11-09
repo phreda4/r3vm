@@ -23,16 +23,16 @@
 
 :calcstep
 	1 'p +!
-	q1 2* 'q1 ! r1 2* 'r1 !
+	q1 1 << 'q1 ! r1 1 << 'r1 !
 	r1 anc >=? ( 1 'q1 +! anc neg 'r1 +! ) drop
-	q2 2* 'q2 ! r2 2* 'r2 !
+	q2 1 << 'q2 ! r2 1 << 'r2 !
 	r2 ad >=? ( 1 'q2 +! ad neg 'r2 +! ) drop
 	;
 
 :calcmagic | d --
 	dup abs 'ad !
     $80000000 over 31 >>> + 't !
-    t dup 1- swap ad mod - 'anc !
+    t dup 1 - swap ad mod - 'anc !
     31 'p !
     $80000000 anc / abs 'q1 !
     $80000000 q1 anc * - abs 'r1 !
@@ -40,9 +40,9 @@
 	$80000000 q2 ad * - abs 'r2 !
 	( calcstep
 		ad r2 -	| delta
-		q1 =? ( r1 0? ( swap 1+ swap ) drop )
+		q1 =? ( r1 0? ( swap 1 + swap ) drop )
 		q1 >? drop ) drop
-	q2 1+
+	q2 1 +
 	swap -? ( drop neg 'divm ! p 'divs ! ; ) drop
 	'divm ! p 'divs ! ;
 
@@ -103,7 +103,7 @@
 	getval
 	dic>du
 	dup ( 1? 1 - .drop ) drop
-	+ ( 1? 1-  dup push.reg ) drop
+	+ ( 1? 1 -  dup push.reg ) drop
 	2code!+
 	;
 
@@ -126,7 +126,7 @@
 :iex
 	lastdircode dic>du
 	dup ( 1? 1 - .drop ) drop
-	+ ( 1? 1- dup push.reg ) drop
+	+ ( 1? 1 - dup push.reg ) drop
 	2code!+
 	;
 
@@ -216,8 +216,8 @@
 :*nro
 	code<<
 	vTOS
-	dup 1- na? ( *pot ; )
-	dup 1+ na? ( *pot-1 ; )
+	dup 1 - na? ( *pot ; )
+	dup 1 + na? ( *pot-1 ; )
 	drop
 	;
 
@@ -248,7 +248,7 @@
 :/nro
 	code<<
 	vTOS 
-	dup 1- an? ( /cte ; )
+	dup 1 - an? ( /cte ; )
 	2 =? ( /cte2 ; )
 	swap
 	31 cte!+
@@ -294,7 +294,7 @@
 :/MODnro
 	code<<
 	vTOS
-	dup 1- an? ( /modcte ; )
+	dup 1 - an? ( /modcte ; )
 	swap
     $23 code!+
 	$23 code!+
@@ -314,7 +314,7 @@
 	$29	code!+	| swap
 	$25	code!+	| over
 	$39	code!+	| +
-	1- cte!+  | mask
+	1 - cte!+  | mask
 	$35 code!+	| AND
 	$29	code!+	| swap
 	$3A	code!+	| -
@@ -345,7 +345,7 @@
 |	dup 31 >> (33-4)29 >>> swap over + 7 and swap -
 :modnro
     code<<
-	dup 1- an? ( modcte ; )
+	dup 1 - an? ( modcte ; )
 	31 cte!+
 	$23 code!+ | dup 31
 	$4c code!+ | >>
@@ -354,7 +354,7 @@
 	$29	code!+	| swap
 	$25	code!+	| over
 	$39	code!+	| +
-	1- cte!+ | mask
+	1 - cte!+ | mask
 	$35 code!+	| AND
 	$29	code!+	| swap
 	$3A	code!+	| -

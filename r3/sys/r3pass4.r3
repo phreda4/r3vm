@@ -223,7 +223,7 @@
 :esPal | palabra
 	dup 4 - @ 8 >>	| obtener palabra
 	pick2 =? ( drop $20 flags or 'flags ! ; ) | es recursiva?
-    dup dic>inf @ 24 >> 1+ 'nivel !
+    dup dic>inf @ 24 >> 1 + 'nivel !
 	dic>mov @
 
 	dup $f and neg usoDcalc
@@ -244,7 +244,7 @@
 :esExe | calcular deltaD de palabra llamada
 	lastdircode	| averiguar palabra en pila !!!
 
-	dup dic>inf @ 24 >> 1+ 'nivel !
+	dup dic>inf @ 24 >> 1 + 'nivel !
 
 	dic>mov @
 
@@ -302,7 +302,7 @@ inA usoA inB usoB usomem
 :inlinemark
 |	$fc na? (  | no dir, no r, no ;;, no []
 |		pick2
-|		cntwords 1- <? (
+|		cntwords 1 - <? (
 |			dic>len@ MAXINLINE <? ( drop $100 or )( drop ) | inline
 |			)( drop )
 |		)

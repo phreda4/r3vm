@@ -61,7 +61,7 @@
 #stkvalue# 0
 
 :newval | -- newval
-	stkvalue# dup 1+ 'stkvalue# ! ;
+	stkvalue# dup 1 + 'stkvalue# ! ;
 
 ::PUSH.NRO	| nro --
 	.DUP
@@ -282,12 +282,12 @@
 :,cstack | adr -- adr
 	c@+ $30 -
 	0? ( drop TOS ,cell ; )
-	1- 2 << NOS swap - @ ,cell ;
+	1 - 2 << NOS swap - @ ,cell ;
 
 :,cstackb | adr -- adr
 	c@+ $30 -
 	0? ( drop TOS ,cellb ; )
-	1- 2 << NOS swap - @ ,cellb ;
+	1 - 2 << NOS swap - @ ,cellb ;
 
 :,car
 	$23 =? ( drop ,cstack ; ) | # dword reg
@@ -345,7 +345,7 @@
 
 ::newreg | -- reg
 	0 maskreg
-	( 1 an? 2/ swap 1+ swap ) drop
+	( 1 an? 1 >> swap 1 + swap ) drop
 	;
 
 ::setreg | reg --
@@ -376,7 +376,7 @@
 	3 8 << 5 or swap ! ;
 
 :setSTK | 'cell --
-	NOS over swap - 1- 2 >>
+	NOS over swap - 1 - 2 >>
 	dup 8 << 6 or
 	pick2 @ =? ( 3drop ; ) drop | ya esta en orden
 	swap cell.STK ;
@@ -401,9 +401,9 @@
 	'stacknormal >a
 	dup 2 << a!+
 	0? ( drop ; )
-	1- ( 1? 
+	1 - ( 1? 
 		dup neg 8 << 6 or a!+
-		1- )
+		1 - )
 	5 or a!+ ;
 
 
@@ -479,7 +479,7 @@
 	'PSP 8 + >a
 	( 1? swap
 		@+ a@+ cellcpy 		| to from
-		swap 1- ) 2drop
+		swap 1 - ) 2drop
 
 	NOS 4 + @ 'TOS !
 	;
@@ -506,7 +506,7 @@
 
 :spillhere | cellreg 'stk --
 	4 - | cell
-	NOS over - 2 >> 1+
+	NOS over - 2 >> 1 +
 	stacknow stack.cnt - +
 	neg | <- where in stack
 
@@ -532,9 +532,9 @@
 	IniStack
 	dup 'stacknow !
 	0? ( drop ; )
-	1- ( 1? 
+	1 - ( 1? 
 		dup neg push.stk
-		1- )
+		1 - )
 	push.reg ;
 
 :stk.setnormal | deep --
@@ -542,9 +542,9 @@
 	'RSP 'RTOS !
 	dup 'stacknow !
 	0? ( drop ; )
-	1- ( 1? 
+	1 - ( 1? 
 		dup neg push.stk
-		1- )
+		1 - )
 	push.reg ;
 
 ::stk.normal | --
@@ -556,12 +556,12 @@
 	;
 
 ::stk.gennormal | d u --
-	dup ( 1? 1- .drop ) drop
+	dup ( 1? 1 - .drop ) drop
 	+
 	0? ( drop ; )
-	1- ( 1? 
+	1 - ( 1? 
 		dup neg push.stk
-		1- )
+		1 - )
 	push.reg
 	stack.cnt stk.setnormal
 	;
@@ -669,7 +669,7 @@
 	@ @+ 2 >>
 	( 1?
 		swap @+ "%h " print
-		swap 1- ) 2drop ;
+		swap 1 - ) 2drop ;
 
 :mt0 value
 	2 << 'stkvalue + @ "%d" print ;			|--	0 nro 	33

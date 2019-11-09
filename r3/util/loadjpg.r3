@@ -89,7 +89,7 @@
 	( a@+ 1?	| bitfield cnt code
 		dup $ff and
 		( pick2 >?
-			>r >r >r 2* swap readbit rot or r> 1 + r> r> )
+			>r >r >r 1 << swap readbit rot or r> 1 + r> r> )
 		drop 	| bitfield cnt code
 		16 >> $ffff and pick2 =? ( 3drop a> 4 - @ 8 >> $ff and ; )
 		drop
@@ -147,7 +147,7 @@
 	        get8 8 << pick4 or curnum 16 << or a!+
 			1 'curnum +!
 			rot rot ) drop
-		curnum 2* 'curnum !
+		curnum 1 << 'curnum !
 		rot ) 2drop			| adr ht
 	0 a! ;
 
@@ -347,7 +347,7 @@
 	pick4 pick2 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector1 + @
-	pick2 2/ pick2 2/ 3 << +
+	pick2 1 >> pick2 1 >> 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :q234
@@ -355,7 +355,7 @@
 	pick4 pick2 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector2 + @
-	pick2 2/ 4 + pick2 2/ 3 << +
+	pick2 1 >> 4 + pick2 1 >> 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :q334
@@ -363,7 +363,7 @@
 	pick4 pick2 + 8 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector3 + @
-	pick2 2/ pick2 2/ 4 + 3 << +
+	pick2 1 >> pick2 1 >> 4 + 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :q434
@@ -371,7 +371,7 @@
 	pick4 pick2 + 8 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector4 + @
-	pick2 2/ 4 + pick2 2/ 4 + 3 << +
+	pick2 1 >> 4 + pick2 1 >> 4 + 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :modo34 | x y a -- x y a ;3 components (Y-Cb-Cr) 4 samplesY
@@ -422,7 +422,7 @@
 	pick4 pick2 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector1 + @
-	pick2 2/ pick2 2/ 3 << +
+	pick2 1 >> pick2 1 >> 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :q232
@@ -430,7 +430,7 @@
 	pick4 pick2 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector2 + @
-	pick2 2/ 4 + pick2 2/ 3 << +
+	pick2 1 >> 4 + pick2 1 >> 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :modo32 | a -- a
@@ -472,7 +472,7 @@
 	pick4 pick2 + imgrows >=? ( 2drop ; )
 	xyimg >r
 	2dup 3 << + 2 << 'YVector1 + @
-	pick2 2/ pick2 2/ 3 << +
+	pick2 1 >> pick2 1 >> 3 << +
 	n2cbcr 2rgb r> ! ;
 
 :modo31 | a -- a
@@ -576,6 +576,8 @@
 	buildimg drop
 	here >a
 	imgcols imgrows 12 << or a!+	| size
-	a> emem imgcols imgrows * 2 << dup >r moveor
+	a> emem imgcols imgrows * 2 << dup >r 
+	|moveor
+	move
 	here r> 8 + 'here +! ;
 

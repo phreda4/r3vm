@@ -66,13 +66,13 @@ Bou_In Bou_Out Bou_InOut
 0
 
 ::catmullRom | p0 p1 p2 p3 t -- v
-	>r pick2 - 2/ 	| p0 p1 p2 v1
+	>r pick2 - 1 >> 	| p0 p1 p2 v1
 	>r rot over
-	swap - 2/ r>	| p1 p2 v0 v1
+	swap - 1 >> r>	| p1 p2 v0 v1
 	2dup +			| p1 p2 v0 v1 v0+v1
-	pick3 2* - pick4 2* +
+	pick3 1 << - pick4 1 << +
 	r@ dup dup *. *. *.	| p1 p2 v0 v1 A
-	pick4 dup 2* + neg pick4 dup 2* + + pick3 2* - rot -
+	pick4 dup 1 << + neg pick4 dup 1 << + + pick3 1 << - rot -
 	r@ dup *. *. +		| p1 p2 v0 A+B
 	swap r> *. +
 	nip + ;

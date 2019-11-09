@@ -363,8 +363,8 @@
 	$23 =? ( col_dat npal ; )	| $23 #  Variable
 	$22 =? ( col_dat palstr ; )	| $22 "	 Cadena
 	$27 =? ( col_adr npal ; )		| $27 ' Direccion
-|	over 1- isNro 1? ( drop amarillo npal ; ) drop
-|	over 1- ?macro 1? ( drop verde npal ; ) drop		| macro
+|	over 1 - isNro 1? ( drop amarillo npal ; ) drop
+|	over 1 - ?macro 1? ( drop verde npal ; ) drop		| macro
 	col_nor npal ;
 
 :codelinecolor | adr -- adr++/0
@@ -447,7 +447,7 @@
 :cursormouse
 	xypen
 	pantaini>
-	swap cch 2*			| x adr y ya
+	swap cch 1 <<			| x adr y ya
 	( over <?
 		cch + rot >>13 2 + rot rot ) 2drop
 	swap ccw 2 << ccw +	| adr x xa

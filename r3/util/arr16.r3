@@ -9,9 +9,12 @@
 ::p.clear | list --
 	dup 4 + @ swap ! ;
 
-::p.cnt | list --
+::p.cnt | list -- cnt
 	@+ swap @ | last fist
 	- 6 >> ;
+
+::p.nro | nro list -- adr
+	4 + @ swap 6 << + ;
 
 ::p!+ | 'act list -- adr
 	dup >r @ !+
@@ -49,10 +52,3 @@
 	( over <?
 		pick2 ex 0? ( drop dup delp )
 		64 + ) 3drop ;
-
-::p.nro | nro list -- adr
-	4 + @ swap 6 << + ;
-
-::p.cnt | list --
-	@+ swap @ | last fist
-	- 6 >> ;

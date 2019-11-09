@@ -20,7 +20,7 @@
 :nextis!+ | stack adr v -- stack adr v v
 	over @ $ff and
 	$52 <? ( ; ) $54 >? ( ; )  | !+ c!+ w!+
-	drop over 4 - @ 8 >> 1+ nip dup
+	drop over 4 - @ 8 >> 1 + nip dup
 	dic>inf dup
 	@ dup $1000 + $4 or rot !	| set adr!
 	$3ff000 and 1? ( ; )
@@ -59,7 +59,7 @@
 
 ::r3-stage-3 | --
 	| ...arbol de llamadas...
-	cntdef 1-
+	cntdef 1 -
 	dup dic>inf dup @ $1000 + swap ! | marca ultima palabra
 	here !+
 	( here >?

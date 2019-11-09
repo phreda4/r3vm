@@ -124,7 +124,7 @@
 	( dup getlvl pick2 >=?
 		drop 1 + ) drop
 	nip
-	actual 1+
+	actual 1 +
 	( swap nfiles <?
 		dup 2 << 'files + @
 		pick2 2 << 'files + !
@@ -135,7 +135,7 @@
 	;
 
 :contrae
-	'path ( c@+ 1? drop ) drop 1-
+	'path ( c@+ 1? drop ) drop 1 -
 	( 'path >?
 		dup c@ $2f =? ( drop 0 swap c! remfiles ; )
 		drop 1 - ) drop
@@ -182,9 +182,10 @@
 	0 'path !
 	traverse
 	actual getactual nip
-	pagina linesv + 1- >=? ( dup linesv - 1+ 'pagina ! )
+	pagina linesv + 1 - >=? ( dup linesv - 1 + 'pagina ! )
 	'actual !
-	;
+
+	setactual ;
 
 :savem
     'path 'name strcpy
@@ -221,7 +222,7 @@
 |--------------------------
 :remlastpath
 	'path ( c@+ 1? drop ) drop 1 -
-	( dup c@ $2f <>? drop 1- ) drop
+	( dup c@ $2f <>? drop 1 - ) drop
 	0 swap c! ;
 
 |--------------------------------
@@ -230,9 +231,6 @@
 	getinfo $7 and
 	2 <? ( drop ; )
 	drop
-
-	actual dup getlvl makepath
-	actual getinfo $7 and 1? ( remlastpath ) drop
 
 	mark
 	"r3 " ,s 'path ,s "/" ,s ,s ,eol
@@ -252,16 +250,10 @@
 
 	'name 1024 "mem/main.mem" save
 
-|	ed.load
-|	'name 'path "%s/%s" mprint 'ed.nombre =
-|	0? ( 'name 'path "%s/%s" mprint 'ed.nombre strcpy 0 'ed.ncar ! 0 'ed.ipan ! ed.save )
-|	drop
-
 	mark
 	"r3 r3/sys/edit-code.r3" ,s ,eol
 	empty here
 	sys drop
-
 	;
 
 #nfile
@@ -310,39 +302,39 @@
 	actual nfiles 1 - >=? ( drop ; )
 	1 + pagina linesv + 1 - >=? ( dup linesv - 1 + 'pagina ! )
 	'actual !
-	;
+	setactual ;
 
 :fup
 	actual 0? ( drop ; )
 	1 - pagina <? ( dup 'pagina ! )
 	'actual !
-	;
+	setactual ;
 
 :fpgdn
 	actual nfiles 1 - >=? ( drop ; )
 	20 + nfiles >? ( drop nfiles 1 - ) 'actual !
 	actual pagina linesv + 1 -
 	>=? ( dup linesv - 1 + 'pagina ! ) drop
-	;
+	setactual ;
 
 :fpgup
 	actual 0? ( drop ; )
 	20 - 0 <? ( drop 0 )
 	pagina <? ( dup 'pagina ! )
 	'actual !
-	;
+	setactual ;
 
 :fhome
 	actual 0? ( drop ; ) drop
 	0 'actual ! 0 'pagina !
-	;
+	setactual ;
 
 :fend
-	actual nfiles 1- >=? ( drop ; ) drop
+	actual nfiles 1 - >=? ( drop ; ) drop
 	nfiles 1 - 'actual !
 	actual 1 + pagina linesv + 1 -
 	>=? ( dup linesv - 1 + 'pagina ! ) drop
-	;
+	setactual ;
 
 
 |---------------------------------
@@ -367,7 +359,8 @@
 	$888888 'ink !
 	0 rows 1 - gotoxy backline
 	$888888 $ffffff fontmcolor
-	" /" print 'path print
+|	" /" print 'path print
+	" " print 'name print
 
 	0 0 gotoxy backline
 	$0 $ff00 fontmcolor

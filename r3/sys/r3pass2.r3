@@ -57,7 +57,7 @@
     >>sp ;
 
 :.str
-	1+ dup src - 8 <<
+	1 + dup src - 8 <<
 	11 or ,,
 	>>" ;
 
@@ -137,7 +137,7 @@
 	$3A =? ( drop .def ; )	| $3a :  Definicion
 	$23 =? ( drop .var ; )	| $23 #  Variable
 	$22 =? ( drop .str ; )	| $22 "	 Cadena
-	$27 =? ( drop 1+ 		| $27 ' Direccion
+	$27 =? ( drop 1 + 		| $27 ' Direccion
 |		dup ?base 0 >=? ( drop 7 'error ! drop 0 ; ) drop
 		?word 1? ( .adr ; ) drop
 		1 'error !
@@ -171,5 +171,5 @@
 		dicc> 'dicc< !
 		) drop
 	callen
-	nbloques 1+ 3 << 'here +!
+	nbloques 1 + 3 << 'here +!
 	0 ;

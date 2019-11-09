@@ -5,8 +5,8 @@
 
 :signo | str -- str signo
 	dup c@
-	$2b =? ( drop 1+ 0 ; )	| + $2b
-	$2d =? ( drop 1+ 1 ; )	| - $2d
+	$2b =? ( drop 1 + 0 ; )	| + $2b
+	$2d =? ( drop 1 + 1 ; )	| - $2d
 	drop 0 ;
 
 :dighex | c --  dig / -1
@@ -17,7 +17,7 @@
 
 ::str$>nro | adr -- adr' nro
 	0 swap ( c@+ $2f >?
-		dighex -? ( drop 1- swap ; )
+		dighex -? ( drop 1 - swap ; )
 		rot 4 << + swap )
 	drop 1 - swap ;
 
@@ -29,10 +29,10 @@
 
 ::str>nro | adr -- adr' nro ;1234 $12f %101 -12
 	signo
-	over c@ 33 <? ( 2drop 1- 0 ; ) | caso + y - solos
+	over c@ 33 <? ( 2drop 1 - 0 ; ) | caso + y - solos
 	swap  1? ( [ neg ; ] >r ) drop
-	$24 =? ( drop 1+ 16 'basen ! str$>nro ; )	| $ hexa $24
-	$25 =? ( drop 1+ 2 'basen ! str%>nro ; ) 	| % bin  $25
+	$24 =? ( drop 1 + 16 'basen ! str$>nro ; )	| $ hexa $24
+	$25 =? ( drop 1 + 2 'basen ! str%>nro ; ) 	| % bin  $25
 	drop 10 'basen !
 	0 swap ( c@+ $2f >? 	| 0 adr car
 		$39 >? ( drop 1 - swap ; )			| 0..9
@@ -51,7 +51,7 @@
 	10 'basen !
 	signo swap
 	dup c@ 33 <? ( 3drop 0 ; ) drop
-|	dup 1+ c@ que pasa con .0?
+|	dup 1 + c@ que pasa con .0?
 	0 ( over c@ 32 >?				| -1 str 0 dig
 		$2e =? ( drop 'parte0 ! 1 over c@ ) 	| 1.33 .. parte0=1 retorna 133
 	    $30 <? ( 4drop 0 ; )

@@ -94,11 +94,11 @@
 
 |---------spline
 :sp-cal1 | x y _cx _cy px py -- x y xn yn
-	rot 2* + pick3 + 2 >> >r			| x y cx px   r: ye
-	swap 2* + pick2 + 2 >> r> ;		| x y xe ye
+	rot 1 << + pick3 + 2 >> >r			| x y cx px   r: ye
+	swap 1 << + pick2 + 2 >> r> ;		| x y xe ye
 
 :sp-cal2 | cx cy px py -- x y
-	rot + 2/ >r + 2/ r> ;
+	rot + 1 >> >r + 1 >> r> ;
 
 :sp-dist | x y xe ye -- x y xe ye dd
 	pick3 pick2 - dup * pick3 pick2 - dup * + ;

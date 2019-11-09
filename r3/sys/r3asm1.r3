@@ -613,7 +613,7 @@ gSYSCALL gSYSMEM
 ::genasmcode | duse --
 
 |	dup cellinig
-	0? ( 1+ ) |
+	0? ( 1 + ) |
 	stk.start
 	cellstart
 
