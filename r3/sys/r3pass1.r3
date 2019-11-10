@@ -42,21 +42,23 @@
 
 :load.inc | str -- str new ; incluye codigo
     here over		| str here str
-|	"." =pre 1? ( drop 2 + 'path "%s%w" mprint )( drop "%w" mprint )
-	'r3path "%s/%l" mprint
-	load
-	here =? ( drop 0 ; ) | no existe
-	here 0 rot c!+ 'here ! ;
+	load here =? ( drop 0 ; ) | no existe
+	here 0 rot c!+ 'here !
+	;
 
 :add.inc | src here -- src
 	over inc> !+ !+ 'inc> ! ;
 
 :includes | src --
 	dup ( trim 1?
-		dup "%w " slog
 		( $5e =? drop | $5e ^  Include
+
+|	"." =pre 1? ( drop 2 + 'path "%s%w" mprint )( drop "%w" mprint )
+|	'r3path "%s/%l" mprint
+
+			"%l" mprint
 			ininc? 0? ( drop
-				load.inc |0? ( 1 'error ! ; ) |no existe
+				load.inc 0? ( 1 'error ! ; ) |no existe
 				includes
 				| error 1? ( drop ; ) drop
 				dup ) drop
@@ -65,7 +67,7 @@
 		) 2drop
 	add.inc ;
 
-::r3-stage-1 | name str -- err/0
+::r3-stage-1 | filename str -- err/0
 	includes ;
 
 

@@ -285,22 +285,27 @@ void videoclose()
 {
 int tv;	
 if (videoa==0) return;
-SDL_CloseAudio();
 is.quit=1;
-if (hVideoThread) SDL_WaitThread(hVideoThread, &tv);
 if (hParseThread) SDL_WaitThread(hParseThread, &tv);
-PacketQueueFree(&is.videoq);
-PacketQueueFree(&is.audioq);
-if (is.pAudioFrame) av_frame_free(&is.pAudioFrame);
-if (is.pFrameRGB) av_frame_free(&is.pFrameRGB);
-if (is.pFrameBuffer) av_free(is.pFrameBuffer);
-if (is.videoCtx) avcodec_free_context(&is.videoCtx);
-if (is.audioCtx) avcodec_free_context(&is.audioCtx);
-if (is.pSwrCtx) swr_free(&is.pSwrCtx);
-if (is.pSwsCtx) sws_freeContext(is.pSwsCtx);
-if (is.pFormatCtx)	avformat_close_input(&is.pFormatCtx);
+if (is.videoStream !=-1) {
+	if (hVideoThread) SDL_WaitThread(hVideoThread, &tv);
+	PacketQueueFree(&is.videoq);
+	if (is.pFrameRGB) av_frame_free(&is.pFrameRGB);
+	if (is.pFrameBuffer) av_free(is.pFrameBuffer);
+	if (is.videoCtx) avcodec_free_context(&is.videoCtx);
+	if (is.pSwsCtx) sws_freeContext(is.pSwsCtx);
+	if (is.pFormatCtx)	avformat_close_input(&is.pFormatCtx);
+	}
+if (is.audioStream !=-1) {
+	SDL_CloseAudio();
+	PacketQueueFree(&is.audioq);
+	if (is.pAudioFrame) av_frame_free(&is.pAudioFrame);
+	if (is.audioCtx) avcodec_free_context(&is.audioCtx);
+	if (is.pSwrCtx) swr_free(&is.pSwrCtx);
+	}
 avformat_network_deinit();
 is.pFrameBuffer=NULL;
+//memset((void*)&is,0,sizeof(is));
 videoa=0;
 }
 
@@ -315,7 +320,9 @@ memset((void*)&is,0,sizeof(is));
 int rv=0,audioStream=-1,videoStream=-1;
 is.pFormatCtx = avformat_alloc_context();
 rv=avformat_open_input(&is.pFormatCtx,filename,NULL,NULL);
+if (rv<0) return;
 rv=avformat_find_stream_info(is.pFormatCtx,NULL);
+if (rv<0) return;
 for (int s = 0; s < is.pFormatCtx->nb_streams; ++s) {
 	if (is.pFormatCtx->streams[s]->codecpar->codec_type==AVMEDIA_TYPE_AUDIO && audioStream<0) { audioStream=s; } 
 	else if (is.pFormatCtx->streams[s]->codecpar->codec_type==AVMEDIA_TYPE_VIDEO && videoStream<0) { videoStream=s; }
@@ -334,6 +341,7 @@ return;
 ////////////////////////////////////////////////////////////////////////////
 int redrawframe(int x,int y)
 {
+if (videoa==0) return 0;	
 if (is.pFrameBuffer==NULL) return 0;
 if (is.videoq.nb_packets==0 && is.audioq.nb_packets==0) {
 	hVideoThread=hParseThread=0;
@@ -344,6 +352,7 @@ Uint32 *s=(Uint32*)is.pFrameBuffer;
 Uint32 *d=gr_buffer+(y*gr_ancho+x);
 for (i=0;i<videoh;i++,d+=videostride) 
 	for(j=0;j<videow;j++) *d++=*s++;
+	
 return 0;
 }
 

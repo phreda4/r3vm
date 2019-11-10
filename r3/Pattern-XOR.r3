@@ -1,7 +1,7 @@
 |SCR 512 512
 | Example 1
 
-^r3/lib/gr.r3
+^r3/lib/sys.r3
 
 :patternxor
  vframe >a

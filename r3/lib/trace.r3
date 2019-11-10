@@ -28,6 +28,14 @@
 		cr 1 - ) 2drop
 	waitesc ;
 
+::dumpb | adr --
+	16 ( 1?
+		16 ( 1?
+			rot c@+ $ff and .h print sp
+			rot rot 1 - ) drop
+		cr 1 - ) 2drop
+	waitesc ;
+
 ::dumpd | adr --
 	16 ( 1?
 		8 ( 1?

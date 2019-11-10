@@ -109,8 +109,8 @@
 	;
 
 :expande
-	actual
-	dup getlvl makepath
+	actual dup
+	getlvl makepath
    	actual chginfo
 	actual getlvl 1 + 'nivel !
     actual 1 + 2 << 'files + 'files< !
@@ -171,8 +171,10 @@
 :traverse | adr -- adrname
 	dup next/ 0? ( drop ; )
 	( dup next/ 1?
-		swap getactual 'actual !
-		expande ) drop ;
+		swap 
+		actual getactual 'actual !
+		expande
+		) drop ;
 
 :loadm
 	'nameaux "mem/menu.mem" load

@@ -1,55 +1,66 @@
+|SCR 256 512
+| Example 1
+
 ^r3/lib/sys.r3
-^r3/lib/math.r3
-^r3/lib/str.r3
-^r3/lib/mem.r3
+^r3/lib/gui.r3
 ^r3/lib/print.r3
-^r3/lib/input.r3
-|^r3/lib/btn.r3
 
-#k
-#c
+:patternxor
+ vframe >a
+ sh ( 1? 1 -
+  sw ( 1? 1 -
+    2dup xor msec + 8 <<
+	a!+
+    ) drop
+  ) drop
+  key 27 =? ( exit ) drop
+  ;
 
-:teclado
-	key
-	>esc< =? ( exit )
-	1? ( 'k ! ; )
-	drop
-	char
-	1? ( 'c ! ; )
-	drop
+:
+ 'patternxor onshow
+;
+
+
+:scroll
+	cch neg 'ccy +!
+	vframe sw cch * 2 << over + sw sh cch - * move
+	vframe sw ccy * 2 << + 0 sw cch * fill
 	;
 
-#pad * 128
-#pad2 * 64
-#pad3 * 16
+::slog | ... --
+	mprint print cr
+	ccy sh >=? ( scroll ) drop
+	redraw	;
 
-:main
-	cls home gui
-	
-	guidump
+#b1 * 8192
+#b2 * 8192
+#b3 * 8192
 
-	cr
-	"key: " print k .h print cr
-	"char: " print c .h print cr
-
-	"tx1:" print cr
-	'pad 127 input cr
-
-	
-	"tx2:" print cr
-	'pad2 64 input cr
-
-
-    'pad3 16 input cr
-
-	200 300 100 100 guibox
-
-	$ff 'ink !
-	[ $ff00 'ink ! ; ] onClick
-	xr1 yr1 xr2 yr2 fillbox
-
-	teclado
-	acursor
+:showb
+	cls
+	vframe >a
+	'b1 >b
+	2048 ( 1? 1 - b@+ a!+ ) drop
+	8192 a+
+	'b2 >b
+	2048 ( 1? 1 - b@+ a!+ ) drop
+	8192 a+
+	'b3 >b
+	2048 ( 1? 1 - b@+ a!+ ) drop
 	;
 
-: 33 'main onshow ;
+:t1
+	'b1 $ff 2048 fill
+	'b2 $ff00 2048 fill
+	'b3 $ff0000 2048 fill
+
+
+	;
+
+:
+	mark
+	t1
+	showb
+	home
+	40 ( 1? 1 - dup "hola %d" slog waitesc ) drop
+	;

@@ -992,36 +992,42 @@ while(ip!=0) {
 	case BFA:NOS++;*NOS=TOS;TOS=*(int*)REGB;REGB+=4;continue;//B@+ 
 	case BSA:*(int*)REGB=TOS;TOS=*NOS;NOS--;REGB+=4;continue;//B!+
 	case MOVED://MOVE 
-		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
-		while (TOS--) { *(char*)W=*(char*)op;W+=4;op+=4; }
+//		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
+//		while (TOS--) { *(int*)W=*(int*)op;W+=4;op+=4; }
+		memcpy((void*)*(NOS-1),(void*)*NOS,TOS<<2);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case MOVEA://MOVE> 
-		W=(int64_t)*(NOS-1)+(TOS<<2);op=(int64_t)(*NOS)+(TOS<<2);
-		while (TOS--) { W-=4;op-=4;*(int*)W=*(int*)op; }
+//		W=(int64_t)*(NOS-1)+(TOS<<2);op=(int64_t)(*NOS)+(TOS<<2);
+//		while (TOS--) { W-=4;op-=4;*(int*)W=*(int*)op; }
+		memmove((void*)*(NOS-1),(void*)*NOS,TOS<<2);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case FILL://FILL
 		W=*(NOS-1);op=*NOS;
 		while (TOS--) { *(int*)W=op;W+=4; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CMOVED://CMOVE 
-		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
-		while (TOS--) { *(char*)W=*(char*)op;W++;op++; }
+//		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
+//		while (TOS--) { *(char*)W=*(char*)op;W++;op++; }
+		memcpy((void*)*(NOS-1),(void*)*NOS,TOS);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CMOVEA://CMOVE> 
-		W=(int64_t)*(NOS-1)+TOS;op=(int64_t)*NOS+TOS;
-		while (TOS--) { W--;op--;*(char*)W=*(char*)op; }
+//		W=(int64_t)*(NOS-1)+TOS;op=(int64_t)*NOS+TOS;
+//		while (TOS--) { W--;op--;*(char*)W=*(char*)op; }
+		memmove((void*)*(NOS-1),(void*)*NOS,TOS);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CFILL://CFILL
 		W=(int64_t)*(NOS-1);op=*NOS;
 		while (TOS--) { *(char*)W=op;W++; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVED://QMOVE 
-		W=(uint64_t)*(NOS-1);op=(uint64_t)*NOS;
-		while (TOS--) { *(uint64_t*)W=*(uint64_t*)op;W+=8;op+=8; }
+//		W=(uint64_t)*(NOS-1);op=(uint64_t)*NOS;
+//		while (TOS--) { *(uint64_t*)W=*(uint64_t*)op;W+=8;op+=8; }
+		memcpy((void*)*(NOS-1),(void*)*NOS,TOS<<3);	
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVEA://MOVE> 
-		W=(uint64_t)*(NOS-1)+(TOS<<3);op=(uint64_t)*NOS+(TOS<<3);
-		while (TOS--) { W-=8;op-=8;*(uint64_t*)W=*(uint64_t*)op; }
+//		W=(uint64_t)*(NOS-1)+(TOS<<3);op=(uint64_t)*NOS+(TOS<<3);
+//		while (TOS--) { W-=8;op-=8;*(uint64_t*)W=*(uint64_t*)op; }
+		memmove((void*)*(NOS-1),(void*)*NOS,TOS<<3);		
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QFILL://QFILL
 		W=(uint64_t)*(NOS-1);op=*NOS;

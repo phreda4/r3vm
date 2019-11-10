@@ -1,3 +1,5 @@
+|MEM 8192
+
 | r3 compiler
 | PHREDA 2019
 |------------------
@@ -9,7 +11,7 @@
 ^./r3gencod.r3
 ^./r3gendat.r3
 
-::r3name | "" --
+:r3name | "" --
 	dup
 	'r3filename strcpy
 	'r3path strcpyl
@@ -30,7 +32,6 @@
 	2dup load | "fn" mem
 	here =? ( "no src" slog ; )
 	0 swap c!+ 'here !
-
 	0 'error !
 	0 'cnttokens !
 	0 'cntdef !
@@ -44,6 +45,8 @@
 
 	" pass2" slog
 	r3-stage-2
+
+	debugdicc
 
 	1? ( "error ** %d" slog ; ) drop
 	code> code - 2 >> "..code:%d" slog
@@ -69,8 +72,9 @@
 	$ffffff 'ink !
 	redraw
 
-	"r3/test.r3"
-	r3c
+	"r3/test.r3" r3c
+
+|	40 ( 1? 1 - dup "hola %d" slog ) drop
 
 	waitesc
 	;
