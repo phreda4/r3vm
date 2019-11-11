@@ -20,6 +20,10 @@
 ::font! | 'vemit 'vsize --
   '_charsize ! '_charemit ! ;
 
+::fontpc
+	8 'ccw ! 16 'cch !
+	'char8pc 'size8pc font! ;
+
 ::calcrowcol
 	sw ccw / 'cols !
 	sh cch / 'rows !

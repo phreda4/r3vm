@@ -26,7 +26,7 @@
     >>cr ;
 
 
-:includepal | str -- str'
+:includepal | str car -- str'
 	$7c =? ( drop escom ; )		| $7c |	 Comentario
 	$3A =? ( 1 'cntdef +! )		| $3a :  Definicion
 	$23 =? ( 1 'cntdef +! )		| $23 #  Variable
@@ -42,6 +42,12 @@
 
 :load.inc | str -- str new ; incluye codigo
     here over		| str here str
+
+|	"." =pre 1? ( drop 2 + 'path "%s%w" mprint )( drop "%w" mprint )
+|	'r3path "%s/%l" mprint
+
+	"%l" mprint
+	dup slog
 	load here =? ( drop 0 ; ) | no existe
 	here 0 rot c!+ 'here !
 	;
@@ -52,15 +58,10 @@
 :includes | src --
 	dup ( trim 1?
 		( $5e =? drop | $5e ^  Include
-
-|	"." =pre 1? ( drop 2 + 'path "%s%w" mprint )( drop "%w" mprint )
-|	'r3path "%s/%l" mprint
-
-			"%l" mprint
 			ininc? 0? ( drop
 				load.inc 0? ( 1 'error ! ; ) |no existe
 				includes
-				| error 1? ( drop ; ) drop
+				error 1? ( drop ; ) drop
 				dup ) drop
 			>>cr trim )
 		includepal
@@ -68,6 +69,11 @@
 	add.inc ;
 
 ::r3-stage-1 | filename str -- err/0
-	includes ;
+	includes
+	;
 
-
+::debuginc
+	'inc ( inc>  <?
+		@+ swap @+
+		rot rot "%h %w" slog
+		) drop ;

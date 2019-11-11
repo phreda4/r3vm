@@ -146,3 +146,8 @@
 	swap ( over >?
 		1 - $20 over c!
 		) drop ;
+		
+::trim | adr -- adr'	; proximo no espacio
+	( c@+ $ff and 33 <?
+		0? ( drop 1 - ; )
+		drop ) drop 1 - ;

@@ -215,3 +215,33 @@
 	dup 16 >> or
 	1 +
 	;
+
+::6/ | n -- r
+	dup 1 >> over 3 >> + | n q
+	dup 4 >> + dup 8 >> + dup 16 >> + 2 >> | n q
+	swap over  | q n q
+	dup 1 << + 1 << - | q n-q*6
+	2 + 3 >> + ;
+
+::6mod | n -- m
+	dup 6/ dup 1 << + 1 << - ;
+
+::10/mod | n -- r m
+	dup 1 >> over 2 >> + | n q
+	dup 4 >> + dup 8 >> + dup 16 >> + 3 >> | n q
+	swap over | q n q
+	dup 1 << dup 2 << + -
+	swap over | r q r
+	6 + 4 >> + ;
+
+::100/ | n -- r
+	10/mod drop
+::10/ | n -- r
+	10/mod drop ;
+
+::1000000*	1 << dup 2 << +
+::100000*	1 << dup 2 << +
+::10000*	1 << dup 2 << +
+::1000*		1 << dup 2 << +
+::100*		1 << dup 2 << +
+::10*		1 << dup 2 << + ;

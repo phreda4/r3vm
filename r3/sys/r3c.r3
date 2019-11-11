@@ -43,15 +43,15 @@
 	cnttokens "..toks:%d" slog
 	cntdef "..def:%d" slog
 
+|	debuginc
+
 	" pass2" slog
 	r3-stage-2
-
-	debugdicc
 
 	1? ( "error ** %d" slog ; ) drop
 	code> code - 2 >> "..code:%d" slog
 
-|	debugdicc
+	debugdicc
 
 	" pass3" slog
 	r3-stage-3
@@ -72,9 +72,9 @@
 	$ffffff 'ink !
 	redraw
 
-	"r3/test.r3" r3c
-
-|	40 ( 1? 1 - dup "hola %d" slog ) drop
+|	"r3/test.r3"
+	"r3/testgui.r3"
+	r3c
 
 	waitesc
 	;

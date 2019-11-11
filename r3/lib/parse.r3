@@ -36,7 +36,7 @@
 	drop 10 'basen !
 	0 swap ( c@+ $2f >? 	| 0 adr car
 		$39 >? ( drop 1 - swap ; )			| 0..9
-		$30 - rot 10 * + swap )
+		$30 - rot 10* + swap )
 	drop 1 - swap ;
 
 |-----
@@ -56,13 +56,13 @@
 		$2e =? ( drop 'parte0 ! 1 over c@ ) 	| 1.33 .. parte0=1 retorna 133
 	    $30 <? ( 4drop 0 ; )
 	    $39 >? ( 4drop 0 ; )
-	    $30 - swap 10 * +
+	    $30 - swap 10* +
 		swap 1 + swap )
 	drop 1 =? ( parte0 0? ( 4drop 0 ; ) drop ) | casos -. y
 	rot >r
 	parte0
 	16 << $10000 rot
-	1 over ( 1 >? 10 / swap 10 * swap ) drop
+	1 over ( 1 >? 10/ swap 10* swap ) drop
 	*/ $ffff and or
 	r> 1? ( drop neg 1 ; )
 	drop 1 ;
