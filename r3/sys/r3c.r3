@@ -40,25 +40,26 @@
 	" pass1" slog
 	swap r3-stage-1
 
+	error 1? ( "ERROR %s" slog ; ) drop
+
 	cnttokens "..toks:%d" slog
 	cntdef "..def:%d" slog
-
-|	debuginc
+	debuginc
 
 	" pass2" slog
 	r3-stage-2
 
-	1? ( "error ** %d" slog ; ) drop
+	1? ( "ERROR %s" slog ; ) drop
 	code> code - 2 >> "..code:%d" slog
-
-	debugdicc
 
 	" pass3" slog
 	r3-stage-3
 
+debugdicc
+
 	" pass4" slog
 	r3-stage-4
-
+trace
 	" gencode" slog
 	r3-gencode
 	r3-gendata
@@ -72,8 +73,8 @@
 	$ffffff 'ink !
 	redraw
 
-|	"r3/test.r3"
-	"r3/testgui.r3"
+	"r3/test.r3"
+|	"r3/testgui.r3"
 	r3c
 
 	waitesc

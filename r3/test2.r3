@@ -11,16 +11,13 @@
 #cc
 
 :test
-	cls
-	trace
-	cc "%l" mprint
-	trace
-	print
-	trace
+	cls home
+	cc "%h" mprint print cr
+	cc "%l" mprint print
 
 	key
 	>esc< =? ( exit )
-	<up> =? ( cc >>cr 'cc ! )
+	<up> =? ( cc >>cr trimcar drop 'cc ! )
 	<dn> =? ( exit )
 	drop
 	;

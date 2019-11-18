@@ -4,25 +4,36 @@
 |---------------
 ^r3/lib/sys.r3
 ^r3/lib/str.r3
-^r3/lib/fontpc.r3
+
+^r3/lib/fonti.r3
+
+|^r3/lib/fontpc.r3
+
 
 ##rows 40
 ##cols 80		| filas/columnas texto
 
-##cch 16 ##ccw 8
+##cch 12 | 16
+##ccw 8
+
 ##charrom
 ##charsiz
 ##charlin
 
-#_charemit 'char8pc
-#_charsize 'size8pc
+|#_charemit 'char8pc
+|#_charsize 'size8pc
+
+#_charemit 'char8i
+#_charsize 'size8i
 
 ::font! | 'vemit 'vsize --
   '_charsize ! '_charemit ! ;
 
 ::fontpc
 	8 'ccw ! 16 'cch !
-	'char8pc 'size8pc font! ;
+|	'char8pc 'size8pc font!
+8	'char8i 'size8i font!
+	;
 
 ::calcrowcol
 	sw ccw / 'cols !

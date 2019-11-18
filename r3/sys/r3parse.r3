@@ -15,7 +15,7 @@
 ::>>" | adr -- adr'
 	( c@+ 1? 34 =? ( drop c@+ 34 <>? ( drop 1 - ; ) ) drop ) drop 1 - ;
 
-::trim | adr -- adr' c
+::trimcar | adr -- adr' c
 	( c@+ $ff and 33 <? 0? ( swap 1 - swap ; ) drop ) ;
 
 | prefijo?

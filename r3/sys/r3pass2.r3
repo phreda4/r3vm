@@ -32,7 +32,7 @@
 	;
 
 :inidef
-	nivel 1? ( 2drop 9 'error ! 0 ; ) drop
+	nivel 1? ( 2drop "error" 'error ! 0 ; ) drop
 	codeini 1? ( callen ) drop
 	code> 'codeini !
 	;
@@ -138,17 +138,18 @@
 	$23 =? ( drop .var ; )	| $23 #  Variable
 	$22 =? ( drop .str ; )	| $22 "	 Cadena
 	$27 =? ( drop 1 + 		| $27 ' Direccion
-|		dup ?base 0 >=? ( drop 7 'error ! drop 0 ; ) drop
+|		dup ?base 0 >=? ( drop "macro no address" 'error ! drop 0 ; ) drop
 		?word 1? ( .adr ; ) drop
-		1 'error !
-|		dup "error1d %w" slog ;
+		"Addr not exist" 'error !
 		drop 0 ; )
 	drop
 	dup isNro 1? ( drop .nro ; ) drop		| numero
 	dup ?base 0 >=? ( .base ; ) drop		| macro
 	?word 1? ( .word ; ) drop		| palabra
- 	1 'error !
-	dup "error1 %w" slog
+ 	"Word not found" 'error !
+ 	dup "%l" slog
+ 	trace
+|	dup "Word %w" 'error !
 	drop 0 ;
 
 :str2token | str --

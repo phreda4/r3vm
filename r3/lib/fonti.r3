@@ -278,3 +278,5 @@
 	sw 2 << dup 1 << + 2 << 32 - neg a+
 	3drop ;
 
+::size8i
+  8 nip ;

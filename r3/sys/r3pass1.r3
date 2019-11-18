@@ -47,23 +47,25 @@
 |	'r3path "%s/%l" mprint
 
 	"%l" mprint
-	dup slog
-	load here =? ( drop 0 ; ) | no existe
-	here 0 rot c!+ 'here !
+|	dup slog
+
+	load here =? ( drop 0 "File not found" 'error ! "File not found" slog ; ) | no existe
+	here
+	0 rot c!+ 'here !
 	;
 
 :add.inc | src here -- src
 	over inc> !+ !+ 'inc> ! ;
 
 :includes | src --
-	dup ( trim 1?
+	dup ( trimcar 1?
 		( $5e =? drop | $5e ^  Include
 			ininc? 0? ( drop
-				load.inc 0? ( 1 'error ! ; ) |no existe
+				load.inc 0? ( drop ; ) |no existe
 				includes
 				error 1? ( drop ; ) drop
 				dup ) drop
-			>>cr trim )
+			>>cr trimcar )
 		includepal
 		) 2drop
 	add.inc ;
@@ -73,7 +75,7 @@
 	;
 
 ::debuginc
-	'inc ( inc>  <?
+	'inc ( inc> <?
 		@+ swap @+
-		rot rot "%h %w" slog
+		rot "%l %h" slog
 		) drop ;

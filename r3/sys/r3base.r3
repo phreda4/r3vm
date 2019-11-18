@@ -166,7 +166,8 @@
 		dup @ pick2			| str ind pal str
 		=s 1? ( drop
 			dup 8 + @
-			%10 na? ( drop dicc< >=? ( ; ) dup )
+			%10 an? ( drop ; )
+			drop dicc< >=? ( ; ) dup
 			) drop
 
 |		=s 0? ( drop )( drop

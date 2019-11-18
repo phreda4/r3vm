@@ -31,14 +31,14 @@
 ::, here !+ 'here ! ;
 ::,c here c!+ 'here ! ;
 ::,q here q!+ 'here ! ;
-::,s here swap 
+::,s here swap
 	( c@+ 1? rot c!+ swap ) 2drop 'here ! ;
 ::,w here swap
 	( c@+ $ff and 32 >? rot c!+ swap ) 2drop 'here ! ;
 ::,l here swap
 	( c@+ 1?
-		10 =? ( 3 + ) 13 =? ( drop 'here ! ; )
-		,c ) drop 'here ! ;
+		10 =? ( 3 + ) 13 =? ( 2drop 'here ! ; )
+		rot c!+ swap ) 2drop 'here ! ;
 ::,d .d ,s ;
 ::,h .h ,s ;
 ::,b .b ,s ;
@@ -94,6 +94,8 @@
 
 ::mprint | p p .. "" -- adr
 	mark
-	here 4096 + dup 'here ! >r
+	here 4096 + 
+	over =? ( 4096 + )
+	dup 'here ! >r
 	,format ,eol
 	empty r> ;
