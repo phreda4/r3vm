@@ -247,7 +247,7 @@
 |----  4 / --> dup 31 >> 30 >>> + 2 >>
 :/nro
 	code<<
-	vTOS 
+	vTOS
 	dup 1 - an? ( /cte ; )
 	2 =? ( /cte2 ; )
 	swap
@@ -402,15 +402,15 @@
 	.2drop ;
 
 
-:i@ :iC@ :iD@
+:i@ :iC@ :iQ@
 	2code!+ ;
-:i@+ :iC@+ :iD@+
+:i@+ :iC@+ :iQ@+
 	2code!+ .dup ;
-:i! :iC! :iD!
+:i! :iC! :iQ!
 	2code!+ .2drop ;
-:i!+ :iC!+ :iD!+
+:i!+ :iC!+ :iQ!+
 	2code!+ .drop ;
-:i+! :iC+! :iD+!
+:i+! :iC+! :iQ+!
 	2code!+ .2drop ;
 
 :i>A	2code!+ .drop ;
@@ -431,13 +431,13 @@
 
 :iMOVE :iMOVE> :iFILL
 :iCMOVE :iCMOVE> :iCFILL
-:iDMOVE :iDMOVE> :iDFILL
+:iQMOVE :iQMOVE> :iQFILL
 	2code!+ .3drop ;
 :iUPDATE :iREDRAW
 	2code!+ ;
 
 :iMEM :iSW :iSH :iFRAMEV
-:iXYPEN :iBPEN :iKEY
+:iXYPEN :iBPEN :iKEY :iCHAR
 	0 push.cte 2code!+ ;
 
 :iMSEC :iTIME :iDATE
@@ -453,45 +453,54 @@
 	2code!+ ;
 :iFNEXT		|FNEXT     -- a
 	.dup 2code!+ ;
-:iSYSCALL
+
+:iSYS
 	2code!+ ;
-:iSYSMEM
-	2code!+ .drop ;
 
 #vmc
-0 0 0 0 0 0 0		| 0 1 2 3 4 5 6
-idec ihex idec idec istr    | 7 8 9 a b
-iwor ivar idwor idvar		| c d e f
-i; i( i) i[ i] iEX			| 10..15
-i0? i1? i+? i-? i<? i>? i=? i>=? i<=? i<>? iA? iN? iB?	| 16..22
-iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP		| 23..2A
-iROT i2DUP i2DROP i3DROP i4DROP i2OVER i2SWAP			| 2B..31
-i>R iR> iR@                                             | 32..34
-iAND iOR iXOR iNOT iNEG									| 35..39
-i+ i- i* i/ i*/                                         | 3A..3E
-i/MOD iMOD iABS iSQRT iCLZ								| 3F..43
-i<< i>> i>>> i*>> i<</									| 44..48
-i@ iC@ iD@ i@+ iC@+ iD@+								| 49..4e
-i! iC! iD! i!+ iC!+ iD!+								| 4f..54
-i+! iC+! iD+!											| 55..57
+0 0 0 0 0 0 0
+idec ihex idec idec istr
+iwor ivar idwor idvar
+i; i( i) i[ i]
+iEX i0? i1? i+? i-?
+i<? i>? i=? i>=? i<=? i<>? iA? iN? iB?
+iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP
+iROT i2DUP i2DROP i3DROP i4DROP i2OVER i2SWAP
+i>R iR> iR@
+iAND iOR iXOR
+i+ i- i* i/
+i<< i>> i>>>
+iMOD i/MOD i*/ i*>> i<</
+iNOT iNEG iABS iSQRT iCLZ
+
+i@ iC@ iQ@ i@+ iC@+ iQ@+								| 49..4e
+i! iC! iQ! i!+ iC!+ iQ!+								| 4f..54
+i+! iC+! iQ+!											| 55..57
 i>A iA> iA@ iA! iA+ iA@+ iA!+
 i>B iB> iB@ iB! iB+ iB@+ iB!+
 iMOVE iMOVE> iFILL
 iCMOVE iCMOVE> iCFILL
-iDMOVE iDMOVE> iDFILL
+iQMOVE iQMOVE> iQFILL
 iUPDATE iREDRAW
 iMEM iSW iSH iFRAMEV
-iXYPEN iBPEN iKEY
+iXYPEN iBPEN iKEY iCHAR
 iMSEC iTIME iDATE
 iLOAD iSAVE iAPPEND
 iFFIRST iFNEXT
-iSYSCALL iSYSMEM
+
+0 0 0 0 0 |iINK i'INK iALPHA iOPX iOPY
+0 0 0 0 |iOP iLINE iCURVE iCURVE3
+0 0 0 0 |iPLINE iPCURVE iPCURVE3 iPOLI
+
+iSYS
+( 0 )
 
 |------------------------------------------
 :tocode | adr token -- adr
 	$ff and
 |	printstk cr
 |	dup r3tokenname slog
+	trace
 	2 << 'vmc + @ ex
 	;
 
@@ -509,9 +518,7 @@ iSYSCALL iSYSMEM
 	12 >> $fff and 0? ( 2drop ; )	| no calls
 	drop
 	codeini
-
 	,header
-
 	dup 12 + @ $f and
 	DeepStack
 |    ";---------OPT" ,ln |----- generate buffer
@@ -519,11 +526,10 @@ iSYSCALL iSYSMEM
 	( 1? 1 - swap
 		@+ tocode
 		swap ) 2drop
-
 |    ";---------ANA" ,ln |----- cell analisys
 	dup 12 + @ $f and
 	anaDeepStack
-	'bcode ( bcode> <? 
+	'bcode ( bcode> <?
 		@+
 
 		,printstka dup $ff and r3tokenname " %s " ,format ,cr

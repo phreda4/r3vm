@@ -219,21 +219,21 @@
 	@+
 |	$1 an? ( ":" )( "#" ) ,s	| data/code
 |	$2 an? ( "e" )( "l" ) ,s	| export/local
-	1 >> $1 and "el" + ,c
+	dup 1 >> $1 and "el" + c@ ,c
 |	$4 an? ( "'" )( "" ) ,s	| /adress used
-	2 >> $1 and "' " + ,c
+	dup 2 >> $1 and "' " + c@ ,c
 |	$8 an? ( "r" )( "" ) ,s	| /rstack mod
-	3 >> $1 and "r " + ,c
+	dup 3 >> $1 and "r " + c@ ,c
 |	$10 an? ( ";" )( "" ) ,s	| /multi;
-	4 >> $1 and "; " + ,c
+	dup 4 >> $1 and "; " + c@ ,c
 |	$20 an? ( "R" )( "" ) ,s	| /recurse
-	5 >> $1 and "R " + ,c
+	dup 5 >> $1 and "R " + c@ ,c
 |	$40 an? ( "[" )( "" ) ,s	| /anon
-	6 >> $1 and "[ " + ,c
+	dup 6 >> $1 and "[ " + c@ ,c
 |	$80 an? ( "." )( "" ) ,s	| /no ;
-	7 >> $1 and ". " + ,c
+	dup 7 >> $1 and ". " + c@ ,c
 |	$100 an? ( ">" )( "" ) ,s	| /inline
-	8 >> $1 and "> " + ,c
+	dup 8 >> $1 and "> " + c@ ,c
 
 	dup 12 >> $fff and " <%d> " ,format
 	24 >> $ff and " nivel:%d " ,format

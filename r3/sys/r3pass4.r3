@@ -26,7 +26,7 @@
 0 0 0 0		|1 :  | --  define codigo
 0 0 0 0		|2 :: | --  define codigo
 0 0 0 0		|3 #  | --  define variable
-0 0 0 0		|4 #: | --  define variable
+0 0 0 0		|4 ## | --  define variable
 0 0 0 0		|5 |  | -- comentario
 0 0 0 0		|6 ^  | -- include
 0 1 0 0		|7 1  | -- n 	numero decimal

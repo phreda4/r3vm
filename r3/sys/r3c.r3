@@ -42,9 +42,8 @@
 
 	error 1? ( "ERROR %s" slog ; ) drop
 
-	cnttokens "..toks:%d" slog
-	cntdef "..def:%d" slog
-	debuginc
+	cntdef cnttokens "toks:%d def:%d" slog
+|debuginc
 
 	" pass2" slog
 	r3-stage-2
@@ -55,13 +54,15 @@
 	" pass3" slog
 	r3-stage-3
 
-debugdicc
+|debugdicc
 
 	" pass4" slog
 	r3-stage-4
-trace
+
+|trace
 	" gencode" slog
 	r3-gencode
+	
 	r3-gendata
 
 	;

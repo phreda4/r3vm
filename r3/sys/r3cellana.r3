@@ -228,7 +228,7 @@
 	;
 :iMEM
 :iSW :iSH :iFRAMEV
-:iXYPEN :iBPEN :iKEY
+:iXYPEN :iBPEN :iKEY :iCHAR
 :iMSEC :iTIME :iDATE
 	newReg ;
 :iLOAD
@@ -241,8 +241,7 @@
 :iFNEXT
 	newReg ;
 
-:iSYSCALL
-:iSYSMEM
+:iSYS
 	;
 
 :i0? cellr gwhilejmp ;
@@ -274,11 +273,12 @@ iUPDATE
 iREDRAW
 iMEM
 iSW iSH iFRAMEV
-iXYPEN iBPEN iKEY
+iXYPEN iBPEN iKEY iCHAR
 iMSEC iTIME iDATE
 iLOAD iSAVE iAPPEND
 iFFIRST iFNEXT
-iSYSCALL iSYSMEM
+
+iSYS
 
 ::anastep | tok --
 	1 'itok +!
