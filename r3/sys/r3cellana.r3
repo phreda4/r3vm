@@ -184,23 +184,23 @@
 
 :i@
 :iC@
-:iD@
+:iQ@
 	cellW ;
 :i@+
 :iC@+
-:iD@+
+:iQ@+
 	cellW newreg ;
 :i!
 :iC!
-:iD!
+:iQ!
 	endREG endREG  ;
 :i!+
 :iC!+
-:iD!+
+:iQ!+
 	cellW endREG ;
 :i+!
 :iC+!
-:iD+!
+:iQ+!
 	endREG endREG ;
 :i>A	endReg ;
 :iA>    newReg ;
@@ -219,9 +219,9 @@
 
 :iMOVE :iMOVE>
 :iCMOVE :iCMOVE>
-:iDMOVE :iDMOVE>
+:iQMOVE :iQMOVE>
 	cellA endReg cellC endReg cellDI endReg ;
-:iFILL :iCFILL :iDFILL
+:iFILL :iCFILL :iQFILL
 	cellC endReg cellDI endReg cellSI endReg ;
 
 :iUPDATE :iREDRAW
@@ -261,14 +261,16 @@ iop2a1 iop2a1 iop2a1 iop1a1 iop1a1					| 35..39
 iop2a1 iop2a1 iop2a1 i/ i*/							| 3A..3E
 i/MOD iMOD iABS iSQRT iCLZ							| 3F..43
 i<< i>> i>>> i*>> i<</								| 44..48
-i@ iC@ iD@ i@+ iC@+ iD@+							| 49..4e
-i! iC! iD! i!+ iC!+ iD!+							| 4f..54
-i+! iC+! iD+!										| 55..57
+
+i@ iC@ iQ@ i@+ iC@+ iQ@+							| 49..4e
+i! iC! iQ! i!+ iC!+ iQ!+							| 4f..54
+i+! iC+! iQ+!										| 55..57
 i>A iA> iA@ iA! iA+ iA@+ iA!+
 i>B iB> iB@ iB! iB+ iB@+ iB!+
 iMOVE iMOVE> iFILL
 iCMOVE iCMOVE> iCFILL
-iDMOVE iDMOVE> iDFILL
+iQMOVE iQMOVE> iQFILL
+
 iUPDATE
 iREDRAW
 iMEM

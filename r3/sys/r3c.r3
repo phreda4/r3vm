@@ -58,11 +58,11 @@
 
 	" pass4" slog
 	r3-stage-4
-
-|trace
+trace
 	" gencode" slog
 	r3-gencode
-	
+
+
 	r3-gendata
 
 	;

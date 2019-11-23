@@ -154,6 +154,6 @@
 		16 + ) drop
 
 	0 ,c
-	"r4asm/data.asm"
+	"asm/data.asm"
 	savemem
 	empty ;

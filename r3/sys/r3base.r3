@@ -96,7 +96,7 @@
 "FFIRST" "FNEXT"
 
 "INK" "'INK" "ALPHA" "OPX" "OPY"
-"OP" "LINE" "CURVE" "CURVE3" 
+"OP" "LINE" "CURVE" "CURVE3"
 "PLINE" "PCURVE" "PCURVE3" "POLI"
 
 "SYS"
@@ -218,28 +218,20 @@
 	@+ code - 2 >> "(%h) " ,format
 	@+
 |	$1 an? ( ":" )( "#" ) ,s	| data/code
-|	$2 an? ( "e" )( "l" ) ,s	| export/local
-	dup 1 >> $1 and "el" + c@ ,c
-|	$4 an? ( "'" )( "" ) ,s	| /adress used
-	dup 2 >> $1 and "' " + c@ ,c
-|	$8 an? ( "r" )( "" ) ,s	| /rstack mod
-	dup 3 >> $1 and "r " + c@ ,c
-|	$10 an? ( ";" )( "" ) ,s	| /multi;
-	dup 4 >> $1 and "; " + c@ ,c
-|	$20 an? ( "R" )( "" ) ,s	| /recurse
-	dup 5 >> $1 and "R " + c@ ,c
-|	$40 an? ( "[" )( "" ) ,s	| /anon
-	dup 6 >> $1 and "[ " + c@ ,c
-|	$80 an? ( "." )( "" ) ,s	| /no ;
-	dup 7 >> $1 and ". " + c@ ,c
-|	$100 an? ( ">" )( "" ) ,s	| /inline
-	dup 8 >> $1 and "> " + c@ ,c
+	dup 1 >> $1 and "el" + c@ ,c	| export/local
+	dup 2 >> $1 and "' " + c@ ,c	| /adress used
+	dup 3 >> $1 and "r " + c@ ,c	| /rstack mod
+	dup 4 >> $1 and "; " + c@ ,c	| /multi;
+	dup 5 >> $1 and "R " + c@ ,c	| /recurse
+	dup 6 >> $1 and "[ " + c@ ,c	| /anon
+	dup 7 >> $1 and ". " + c@ ,c	| /no ;
+	dup 8 >> $1 and "> " + c@ ,c	| /inline
 
 	dup 12 >> $fff and " <%d> " ,format
 	24 >> $ff and " nivel:%d " ,format
 	@ dup 12 >>> "len:%d " ,format
-	,mov
-|	$fff and " %h " ,format
+|	,mov
+	$fff and " %h " ,format
 	;
 
 #datastr "val" "ddata" "dcode" "str" "lval" "lddata" "ldcode" "lstr" "multi" "buff"
@@ -253,12 +245,9 @@
 	@+ "#%w " ,format
 	@+ code - 2 >> "(%h) " ,format
 	@+
-|	$2 an? ( "e" )( "l" ) ,s	| export/local
-	1 >> $1 and "el" + ,c
-|	$4 an? ( "'" )( "" ) ,s	| /adress used
-	2 >> $1 and "' " + ,c
-|	$8 an? ( "c" )( "" ) ,s	| cte
-	3 >> $1 and "c " + ,c
+	dup 1 >> $1 and "el" + c@ ,c	| export/local
+	dup 2 >> $1 and "' " + c@ ,c	| /adress used
+	dup 3 >> $1 and "c " + c@ ,c	| cte
 
 	dup 12 >> $fff and " <%d> " ,format
 	" tipo:" ,s

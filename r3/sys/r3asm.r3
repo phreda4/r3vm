@@ -654,6 +654,6 @@ gSYSCALL gSYSMEM
 
 		codestep
 	
-		"r4asm/code.asm" savemem | debug
+		"asm/code.asm" savemem | debug
 		
 		) drop ;

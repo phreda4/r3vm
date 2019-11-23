@@ -124,9 +124,9 @@
 	;
 
 :iex
-	lastdircode dic>du
-	dup ( 1? 1 - .drop ) drop
-	+ ( 1? 1 - dup push.reg ) drop
+|	lastdircode dic>du
+|	dup ( 1? 1 - .drop ) drop
+|	+ ( 1? 1 - dup push.reg ) drop
 	2code!+
 	;
 
@@ -500,7 +500,9 @@ iSYS
 	$ff and
 |	printstk cr
 |	dup r3tokenname slog
-	trace
+
+|	trace
+
 	2 << 'vmc + @ ex
 	;
 
@@ -508,8 +510,8 @@ iSYS
     ";--------------------------" ,s ,cr
 	dup dicc - 4 >> ,codeinfo ,cr
 	dicc> 16 - =? ( "INICIO:" ,s ,cr ; )
-	dup adr>dicname
-	,s ":" ,s ,cr ;
+	dup adr>dicname ,s
+	":" ,s ,cr ;
 
 |-----------------------------
 :gencode | adr --
@@ -521,19 +523,19 @@ iSYS
 	,header
 	dup 12 + @ $f and
 	DeepStack
-|    ";---------OPT" ,ln |----- generate buffer
+    ";---------OPT" ,ln |----- generate buffer
 	dup adr>toklen
 	( 1? 1 - swap
 		@+ tocode
 		swap ) 2drop
-|    ";---------ANA" ,ln |----- cell analisys
+    ";---------ANA" ,ln |----- cell analisys
 	dup 12 + @ $f and
 	anaDeepStack
 	'bcode ( bcode> <?
 		@+
 
 		,printstka dup $ff and r3tokenname " %s " ,format ,cr
-|		"r4asm/code.asm" savemem | debug
+		"asm/code.asm" savemem | debug
 
 		anastep
 		) drop
@@ -572,7 +574,7 @@ iSYS
 		16 + ) drop
 
 	0 ,c
-	"r4asm/code.asm"
+	"asm/code.asm"
 	savemem
 	empty ;
 

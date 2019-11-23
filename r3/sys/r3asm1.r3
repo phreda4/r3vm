@@ -624,6 +624,6 @@ gSYSCALL gSYSMEM
         ,printstk	dup $ff and r3tokenname " %s " ,format ,cr
 
 		codestep
-|		"r4asm/code.asm" savemem | debug
+		"asm/code.asm" savemem | debug
 
 		) drop ;
