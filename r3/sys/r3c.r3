@@ -1,4 +1,4 @@
-|MEM 8192
+|MEM 8192  | 8MB
 
 | r3 compiler
 | PHREDA 2019

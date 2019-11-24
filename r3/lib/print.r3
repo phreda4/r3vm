@@ -26,19 +26,20 @@
 #_charemit 'char8i
 #_charsize 'size8i
 
-::font! | 'vemit 'vsize --
-  '_charsize ! '_charemit ! ;
-
-::fontpc
-	8 'ccw ! 16 'cch !
-|	'char8pc 'size8pc font!
-8	'char8i 'size8i font!
-	;
-
 ::calcrowcol
 	sw ccw / 'cols !
 	sh cch / 'rows !
 	;
+
+::font! | 'vemit 'vsize --
+  '_charsize ! '_charemit !
+  calcrowcol ;
+
+::fontpc
+	8 'ccw ! 16 'cch !
+|	'char8pc 'size8pc font!
+	'char8i 'size8i font!
+	calcrowcol ;
 
 ::noemit | c --
 	$ff and _charsize ex 'ccx +! ;

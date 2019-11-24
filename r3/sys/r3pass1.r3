@@ -16,7 +16,7 @@
 
 :escom
 	"|WIN|" =pre 1? ( drop 5 + ; ) drop | Compila para WINDOWS
-	"||G" =pre 1? ( setgraf ; ) drop | GRAPHIC (F/Ww,h)(x2/x3/x4)
+|	"||G" =pre 1? ( setgraf ; ) drop | GRAPHIC (F/Ww,h)(x2/x3/x4)
 	| MOUSE/PEN
 	| SOCKET
 	| JOYSTICK
@@ -73,9 +73,3 @@
 ::r3-stage-1 | filename str -- err/0
 	includes
 	;
-
-::debuginc
-	'inc ( inc> <?
-		@+ swap @+
-		rot "%l %h" slog
-		) drop ;

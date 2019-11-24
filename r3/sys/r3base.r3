@@ -258,6 +258,12 @@
 	;
 
 
+::debuginc
+	'inc ( inc> <?
+		@+ swap @+
+		rot "%l %h" slog
+		) drop ;
+
 ::debugdicc
 	dicc ( dicc> <? dup >a
 		a@+ a@+ a@+ a@+ 2swap swap
