@@ -1,5 +1,4 @@
 |MEM 8192  | 8MB
-
 | r3 compiler
 | PHREDA 2019
 |------------------
@@ -10,17 +9,6 @@
 ^./r3pass4.r3
 ^./r3gencod.r3
 ^./r3gendat.r3
-
-:r3name | "" --
-	dup
-	'r3filename strcpy
-	'r3path strcpyl
-	( 'r3path >? 1 -
-		dup c@ $2f | /
-			=? ( drop 0 swap c! ; )
-		drop ) drop
-	0 'r3path !
-	;
 
 ::r3c | str --
 	r3name
@@ -36,35 +24,21 @@
 	0 'cnttokens !
 	0 'cntdef !
 	'inc 'inc> !
-
 	" pass1" slog
 	swap r3-stage-1
-
 	error 1? ( "ERROR %s" slog ; ) drop
-
 	cntdef cnttokens "toks:%d def:%d" slog
-|debuginc
-
 	" pass2" slog
 	r3-stage-2
-
 	1? ( "ERROR %s" slog ; ) drop
 	code> code - 2 >> "..code:%d" slog
-
 	" pass3" slog
 	r3-stage-3
-
-|debugdicc
-
 	" pass4" slog
 	r3-stage-4
-trace
 	" gencode" slog
 	r3-gencode
-
-
 	r3-gendata
-
 	;
 
 : mark

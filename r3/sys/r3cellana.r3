@@ -8,6 +8,7 @@
 #lastdircode 0 | ultima direccion de codigo
 
 ##ncell 0	| cnt cells
+
 ##cellf * 4096	| flags
 ##cellv * 4096 | vida de celda | vr iii fff
 
@@ -41,9 +42,6 @@
 :cellend | nro ---
 	itok 10 <<
 	swap 2 << 'cellv + +!  ;
-
-|::cellinig | start --
-|	'ncell ! ;
 
 ::cellnewg2 | -- nc
 	ncell dup 1 + 'ncell ! ;
@@ -253,14 +251,15 @@
 idec idec idec idec istr    | 7 8 9 a b
 iwor ivar idwor idvar		| c d e f
 i; i( i) i[ i] iEX			| 10..15
-i0? i0? i0? i0? i1? i1? i1? i1? i1? i1? i1? i1? i2?	| 16..22
-iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP	| 23..2A
-iROT i2DUP i2DROP i3DROP i4DROP i2OVER i2SWAP		| 2B..31
-i>R iR> iR@											| 32..34
-iop2a1 iop2a1 iop2a1 iop1a1 iop1a1					| 35..39
-iop2a1 iop2a1 iop2a1 i/ i*/							| 3A..3E
-i/MOD iMOD iABS iSQRT iCLZ							| 3F..43
-i<< i>> i>>> i*>> i<</								| 44..48
+i0? i0? i0? i0? i1? i1? i1? i1? i1? i1? i1? i1? i2?	
+iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP
+iROT i2DUP i2DROP i3DROP i4DROP i2OVER i2SWAP
+i>R iR> iR@
+iop2a1 iop2a1 iop2a1
+iop2a1 iop2a1 iop2a1 i/
+i<< i>> i>>>
+iMOD i/MOD i*/ i*>> i<</
+iop1a1 iop1a1 iABS iSQRT iCLZ
 
 i@ iC@ iQ@ i@+ iC@+ iQ@+							| 49..4e
 i! iC! iQ! i!+ iC!+ iQ!+							| 4f..54
@@ -270,16 +269,12 @@ i>B iB> iB@ iB! iB+ iB@+ iB!+
 iMOVE iMOVE> iFILL
 iCMOVE iCMOVE> iCFILL
 iQMOVE iQMOVE> iQFILL
-
-iUPDATE
-iREDRAW
-iMEM
-iSW iSH iFRAMEV
+iUPDATE iREDRAW
+iMEM iSW iSH iFRAMEV
 iXYPEN iBPEN iKEY iCHAR
 iMSEC iTIME iDATE
 iLOAD iSAVE iAPPEND
 iFFIRST iFNEXT
-
 iSYS
 
 ::anastep | tok --
@@ -287,7 +282,6 @@ iSYS
 	$ff and 2 << 'vmc + @
 	1? ( ex ; )
 	drop ;
-
 
 |------------------------------------------
 ##cntvreg 1

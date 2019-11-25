@@ -65,9 +65,6 @@
 ##dicc>
 ##dicc<
 
-#r3machine
-";" "lit1" "adr" "call" "var"
-
 #r3base
 ";" "(" ")" "[" "]"
 "EX" "0?" "1?" "+?" "-?"
@@ -80,35 +77,30 @@
 "<<" ">>" ">>>"
 "MOD" "/MOD" "*/" "*>>" "<</"
 "NOT" "NEG" "ABS" "SQRT" "CLZ"
-"@" "C@" "Q@" "@+" "C@+" "Q@+"  							| 65
-"!" "C!" "Q!" "!+" "C!+" "Q!+"  							| 71
-"+!" "C+!" "Q+!"  											| 74
-">A" "A>" "A@" "A!" "A+" "A@+" "A!+" 						| 81
-">B" "B>" "B@" "B!" "B+" "B@+" "B!+" 						| 88
-"MOVE" "MOVE>" "FILL" 										| 91
-"CMOVE" "CMOVE>" "CFILL" 									| 94
-"QMOVE" "QMOVE>" "QFILL" 									| 97
+"@" "C@" "Q@" "@+" "C@+" "Q@+"
+"!" "C!" "Q!" "!+" "C!+" "Q!+"
+"+!" "C+!" "Q+!"
+">A" "A>" "A@" "A!" "A+" "A@+" "A!+"
+">B" "B>" "B@" "B!" "B+" "B@+" "B!+"
+"MOVE" "MOVE>" "FILL"
+"CMOVE" "CMOVE>" "CFILL"
+"QMOVE" "QMOVE>" "QFILL"
 "UPDATE" "REDRAW"
 "MEM" "SW" "SH" "VFRAME"
 "XYPEN" "BPEN" "KEY" "CHAR"
 "MSEC" "TIME" "DATE"
 "LOAD" "SAVE" "APPEND"
 "FFIRST" "FNEXT"
+"SYS"
 
 "INK" "'INK" "ALPHA" "OPX" "OPY"
 "OP" "LINE" "CURVE" "CURVE3"
 "PLINE" "PCURVE" "PCURVE3" "POLI"
-
-"SYS"
 ( 0 )
 
 ::r3basename | nro -- str
 	'r3base swap
-	( 0 <>? 1 - swap >>0 swap ) drop ;
-
-::r3tokenname | nro -- str
-	'r3machine swap
-	( 0 <>? 1 - swap >>0 swap ) drop ;
+	( 1? 1 - swap >>0 swap ) drop ;
 
 ::?base | adr -- nro/-1
 	0 'r3base			| adr 0 'r3base
@@ -169,12 +161,6 @@
 			%10 an? ( drop ; )
 			drop dicc< >=? ( ; ) dup
 			) drop
-
-|		=s 0? ( drop )( drop
-|			dup 8 + @
-|			%10 an? ( drop ; )( drop dicc< >=? ( ; ) )
-|			)
-
 		16 - ) drop
 	0 ;
 
@@ -185,6 +171,18 @@
 
 ::wordnow | -- now
 	dicc> dicc - 4 >> ;
+
+
+::r3name | "" --
+	dup
+	'r3filename strcpy
+	'r3path strcpyl
+	( 'r3path >? 1 -
+		dup c@ $2f | /
+			=? ( drop 0 swap c! ; )
+		drop ) drop
+	0 'r3path !
+	;
 
 |--- dibuja movimiento pilas
 | mov
@@ -212,23 +210,21 @@
 
 
 ::,codeinfo | nro --
-	"; " ,s
 	dic>adr
-	@+ ":%w " ,format
-	@+ code - 2 >> "(%h) " ,format
+	@+ ":%w  " ,format
+	@+ drop |code - 2 >> "(%h) " ,format
 	@+
-|	$1 an? ( ":" )( "#" ) ,s	| data/code
-	dup 1 >> $1 and "el" + c@ ,c	| export/local
-	dup 2 >> $1 and "' " + c@ ,c	| /adress used
-	dup 3 >> $1 and "r " + c@ ,c	| /rstack mod
-	dup 4 >> $1 and "; " + c@ ,c	| /multi;
-	dup 5 >> $1 and "R " + c@ ,c	| /recurse
-	dup 6 >> $1 and "[ " + c@ ,c	| /anon
-	dup 7 >> $1 and ". " + c@ ,c	| /no ;
-	dup 8 >> $1 and "> " + c@ ,c	| /inline
+	dup 1 >> $1 and "le" + c@ ,c	| export/local
+	dup 2 >> $1 and " '" + c@ ,c	| /adress used
+	dup 3 >> $1 and " r" + c@ ,c	| /rstack mod
+	dup 4 >> $1 and " ;" + c@ ,c	| /multi;
+	dup 5 >> $1 and " R" + c@ ,c	| /recurse
+	dup 6 >> $1 and " [" + c@ ,c	| /anon
+	dup 7 >> $1 and " ." + c@ ,c	| /no ;
+	dup 8 >> $1 and " >" + c@ ,c	| /inline
 
-	dup 12 >> $fff and " <%d> " ,format
-	24 >> $ff and " nivel:%d " ,format
+	dup 12 >> $fff and "calls:%d " ,format
+	24 >> $ff and "niv:%d " ,format
 	@ dup 12 >>> "len:%d " ,format
 |	,mov
 	$fff and " %h " ,format
@@ -240,24 +236,75 @@
 	'datastr swap ( 0 <>? 1 - swap >>0 swap ) drop ;
 
 ::,datainfo | nro --
-	"; " ,s
 	dic>adr
 	@+ "#%w " ,format
-	@+ code - 2 >> "(%h) " ,format
+	@+ drop |code - 2 >> "(%h) " ,format
 	@+
-	dup 1 >> $1 and "el" + c@ ,c	| export/local
-	dup 2 >> $1 and "' " + c@ ,c	| /adress used
-	dup 3 >> $1 and "c " + c@ ,c	| cte
+	dup 1 >> $1 and "le" + c@ ,c	| export/local
+	dup 2 >> $1 and " '" + c@ ,c	| /adress used
+	dup 3 >> $1 and " c" + c@ ,c	| cte
 
-	dup 12 >> $fff and " <%d> " ,format
-	" tipo:" ,s
+	dup 12 >> $fff and "calls:%d " ,format
+	" type:" ,s
 	24 >> $f and datatype ,s
+|	drop
 
 	@ dup 12 >>> " len:%d " ,format
 	$fff and " %h " ,format
 	;
 
+::,wordinfo
+	dup dic>adr 8 + @
+	$1 na? ( drop ,codeinfo ; )
+	drop ,datainfo ;
 
+|--------------------
+:val 8 >>> ;
+
+:valstr
+	8 >>> src +
+	( c@+ 1?
+		34 =? ( drop c@+ 34 <>? ( 2drop ; ) dup ,c )
+		,c )
+	2drop ;
+
+:tn val src + "%w" mprint ,s ;
+:ts """" ,s valstr """" ,s ;
+:tw val dic>adr @ "%w" mprint ,s ;
+:taw val dic>adr @ "'%w" mprint ,s ;
+
+#ltok 0 0 0 0 0 0 0 tn tn tn tn ts tw tw taw taw
+
+::,tokenprint | nro --
+	dup $ff and
+	15 >? ( 16 - r3basename ,s drop ; )
+	2 << 'ltok + @ ex ;
+
+|--------------------
+:val 8 >>> ;
+
+:valstr
+	8 >>> src +
+	( c@+ 1?
+		34 =? ( drop c@+ 34 <>? ( 2drop ; ) dup emit )
+		emit )
+	2drop ;
+
+:tn val src + "%w" mprint print ;
+:ts """" print valstr """" print ;
+:tw val dic>adr @ "%w" mprint print ;
+:taw val dic>adr @ "'%w" mprint print ;
+
+#ltok 0 0 0 0 0 0 0 tn tn tn tn ts tw tw taw taw
+
+::tokenprint | nro --
+	dup $ff and
+	15 >? ( 16 - r3basename print drop ; )
+	2 << 'ltok + @ ex
+	;
+
+
+|------------- DEBUG
 ::debuginc
 	'inc ( inc> <?
 		@+ swap @+

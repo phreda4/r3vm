@@ -267,6 +267,19 @@
 	2code!+
 	.drop ;
 
+:i<<
+	nro2stk 0? ( drop .<< ; ) drop
+	2code!+
+	.drop ;
+:i>>
+	nro2stk 0? ( drop .>> ; ) drop
+	2code!+
+	.drop ;
+:i>>>
+	nro2stk 0? ( drop .>>> ; ) drop
+	2code!+
+	.drop ;
+
 |---------------- */
 :i*/
 	nro3stk 0? ( drop .*/ ; ) drop
@@ -380,18 +393,6 @@
 	nro1stk 0? ( drop .CLZ ; ) drop
 	2code!+
 	;
-:i<<
-	nro2stk 0? ( drop .<< ; ) drop
-	2code!+
-	.drop ;
-:i>>
-	nro2stk 0? ( drop .>> ; ) drop
-	2code!+
-	.drop ;
-:i>>>
-	nro2stk 0? ( drop .>>> ; ) drop
-	2code!+
-	.drop ;
 :i*>>
 	nro3stk 0? ( drop .*>> ; ) drop
 	2code!+
@@ -473,9 +474,9 @@ i<< i>> i>>>
 iMOD i/MOD i*/ i*>> i<</
 iNOT iNEG iABS iSQRT iCLZ
 
-i@ iC@ iQ@ i@+ iC@+ iQ@+								| 49..4e
-i! iC! iQ! i!+ iC!+ iQ!+								| 4f..54
-i+! iC+! iQ+!											| 55..57
+i@ iC@ iQ@ i@+ iC@+ iQ@+
+i! iC! iQ! i!+ iC!+ iQ!+
+i+! iC+! iQ+!
 i>A iA> iA@ iA! iA+ iA@+ iA!+
 i>B iB> iB@ iB! iB+ iB@+ iB!+
 iMOVE iMOVE> iFILL
@@ -487,27 +488,22 @@ iXYPEN iBPEN iKEY iCHAR
 iMSEC iTIME iDATE
 iLOAD iSAVE iAPPEND
 iFFIRST iFNEXT
+iSYS
 
 0 0 0 0 0 |iINK i'INK iALPHA iOPX iOPY
 0 0 0 0 |iOP iLINE iCURVE iCURVE3
 0 0 0 0 |iPLINE iPCURVE iPCURVE3 iPOLI
 
-iSYS
 ( 0 )
 
 |------------------------------------------
 :tocode | adr token -- adr
-	$ff and
-|	printstk cr
-|	dup r3tokenname slog
-
-|	trace
-
-	2 << 'vmc + @ ex
-	;
+|	"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
+	$ff and 2 << 'vmc + @ ex ;
 
 :,header | adr -- adr
     ";--------------------------" ,s ,cr
+    "; " ,s
 	dup dicc - 4 >> ,codeinfo ,cr
 	dicc> 16 - =? ( "INICIO:" ,s ,cr ; )
 	dup adr>dicname ,s
@@ -523,7 +519,7 @@ iSYS
 	,header
 	dup 12 + @ $f and
 	DeepStack
-    ";---------OPT" ,ln |----- generate buffer
+|    ";---------OPT" ,ln |----- generate buffer
 	dup adr>toklen
 	( 1? 1 - swap
 		@+ tocode
@@ -534,7 +530,10 @@ iSYS
 	'bcode ( bcode> <?
 		@+
 
-		,printstka dup $ff and r3tokenname " %s " ,format ,cr
+		"; " ,s dup ,tokenprint 9 ,c ,printstka
+|		ncell ,d
+		,cr
+
 		"asm/code.asm" savemem | debug
 
 		anastep

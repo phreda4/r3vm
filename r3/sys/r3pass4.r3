@@ -81,37 +81,35 @@
 2 -1 0 0	|AND	ab -- c
 2 -1 0 0	|OR    ab -- c
 2 -1 0 0	|XOR   ab -- c
-1 0 0 0		|NOT    a -- b
-1 0 0 0		|NEG    a -- b
 2 -1 0 0	|+		ab -- c
 2 -1 0 0	|-     ab -- c
-2 -1 0 0	|*     ab -- c	3b
+2 -1 0 0	|*     ab -- c
 2 -1 0 0	|/     ab -- c
-3 -2 0 0	|*/    abc -- d
-2 0 0 0		|/MOD   ab -- cd
+2 -1 0 0	|<<    ab -- c
+2 -1 0 0	|>>    ab -- c
+2 -1 0 0	|>>>    ab -- c
 2 -1 0 0	|MOD    ab -- c
+2 0 0 0		|/MOD   ab -- cd
+3 -2 0 0	|*/    abc -- d
+3 -2 0 0	|*>>   abc -- d
+3 -2 0 0	|<</	abc -- d
+1 0 0 0		|NOT    a -- b
+1 0 0 0		|NEG    a -- b
 1 0 0 0		|ABS    a -- b
 1 0 0 0		|SQRT	a -- b
 1 0 0 0		|CLZ	a -- b
-2 -1 0 0	|<<    ab -- c    4b
-2 -1 0 0	|>>    ab -- c
-2 -1 0 0	|>>>    ab -- c
-3 -2 0 0	|*>>   abc -- d
-3 -2 0 0	|<</	abc -- d
-
 1 0 0 0		|@      a -- b
 1 0 0 0		|C@     a -- b
-1 0 0 0		|W@     a -- b
+1 0 0 0		|Q@     a -- b
 1 1 0 16	|@+     a -- bc
 1 1 0 16	|C@+    a -- bc
-1 1 0 16	|W@+    a -- bc
-
+1 1 0 16	|Q@+    a -- bc
 2 -2 0 16	|!     ab --
 2 -2 0 16	|C!    ab --
-2 -2 0 16	|W!    ab --
+2 -2 0 16	|Q!    ab --
 2 -1 0 16	|!+    ab -- c
 2 -1 0 16	|C!+   ab -- c
-2 -1 0 16	|W!+   ab -- c
+2 -1 0 16	|Q!+   ab -- c
 2 -2 0 16	|+!    ab --
 2 -2 0 16	|C+!   ab --
 2 -2 0 16	|W+!   ab --
@@ -147,10 +145,11 @@
 0 1 0 0		|MEM	-- a
 0 1 0 0		|SW      -- a
 0 1 0 0		|SH      -- a
-0 1 0 0		|FRAMEV  -- a
+0 1 0 0		|VFRAME  -- a
 0 1 0 0		|XYPEN -- a
 0 1 0 0		|BPEN  -- a
 0 1 0 0		|KEY     -- a
+0 1 0 0		|CHAR     -- a
 0 1 0 0		|MSEC    -- a
 0 1 0 0		|TIME    -- a
 0 1 0 0		|DATE    -- a
@@ -159,10 +158,7 @@
 3 -3 0 0	|APPEND   abc --
 1 0 1 0		|FFIRST   a -- b
 0 1 0 0		|FNEXT     -- a
-
-2 -2 0 0	|syscall ab --
-1 0 0 0		|sysmem  a -- b
-
+1 -1 0 0	|SYS 	a --
 )
 
 
@@ -332,17 +328,12 @@ inA usoA inB usoB usomem
 |----------------------------
 :analisiscode | nro -- nro
 	resetvars
-
-|	dup dic>adr @ ":%w" slog
-
 	dup dic>toklen
 	( 1? 1 - swap
 		@+ $ff and
 		prosstoken
 		swap ) 2drop
 	setvars
-
-|	spause
 	;
 
 |----------------------------

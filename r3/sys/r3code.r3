@@ -14,24 +14,10 @@
 ^r3/lib/fontm.r3
 ^r3/fntm/droidsans13.fnt
 
-
-:r3name | "" --
-	dup
-	'r3filename strcpy
-	'r3path strcpyl
-	( 'r3path >? 1 -
-		dup c@ $2f | /
-			=? ( drop 0 swap c! ; )
-		drop ) drop
-	0 'r3path !
-	;
-
 ::r3c | str --
 	r3name
 	here dup 'src !
 	'r3filename
-
-|	dup "load %s" slog
 
 	2dup load | "fn" mem
 	here =? ( "no src" slog ; )
@@ -41,31 +27,13 @@
 	0 'cntdef !
 	'inc 'inc> !
 
-|	" pass1" slog
-	swap r3-stage-1
-
+	swap
+	r3-stage-1
 	error 1? ( "ERROR %s" slog ; ) drop
-
-|	cntdef cnttokens "toks:%d def:%d" slog
-|debuginc
-
-|	" pass2" slog
 	r3-stage-2
-
 	1? ( "ERROR %s" slog ; ) drop
-|	code> code - 2 >> "..code:%d" slog
-
-	" pass3" slog
 	r3-stage-3
-
-|debugdicc
-
-|	" pass4" slog
 	r3-stage-4
-|trace
-|	" gencode" slog
-|	r3-gencode
-|	r3-gendata
 	;
 
 |------------------------------------------------
@@ -81,12 +49,17 @@
 #cntlines
 
 :header
+	$555555 'ink ! backline
     $888888 $ff00 fontmcolor
 	"r3Code " print
     $444444 $ffffff fontmcolor
-
 	filenow 3 << 'inc + @
-	"%l" mprint print
+	" %l " mprint print
+    $222222 $ffffff fontmcolor
+    mark
+    defnow ,wordinfo ,eol
+    empty
+    here print
 	cr
 	;
 
@@ -104,19 +77,27 @@
 	cntdef 1 - min
 	defpnow <? ( dup 'defpnow ! )
 	defpnow cntlines 1 - + >? ( dup cntlines 1 - - 'defpnow ! )
-	dup 4 << dicc + 4 + @ 'iniword !
+	dup 4 << dicc + 4 +
+	@+ 'iniword !
+	4 + @ 12 >>> 'cntword !
+
 	'defnow !
 	0 'wordpnow !
 	;
 
-:insline
+:insline | nro --
+	cntword >=? ( drop ; )
+    $0 $ff00 fontmcolor
+	wordnow =? ( $ff00 $0 fontmcolor )
 	2 << iniword + @
-	"%h" mprint print
+	tokenprint
 	;
 
 :paglin
 	0 max
 	cntword 1 - min
+	wordpnow <? ( dup 'wordpnow ! )
+	wordpnow cntlines 1 - + >? ( dup cntlines 1 - - 'wordpnow ! )
 
 	'wordnow !
 	;
@@ -148,7 +129,7 @@
 
 :r3code
 	inc> 'inc - 3 >> 1 - 'filenow !
-	0 pagdef
+	cntdef 1 - pagdef
 	'browser onshow
 	;
 

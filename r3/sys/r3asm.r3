@@ -648,7 +648,7 @@ gSYSCALL gSYSMEM
 		@+
 
         ,printstk
-		dup $ff and r3tokenname " %s " ,print
+|		dup $ff and r3tokenname " %s " ,print
 |		dup 8 >> 1? ( "%h " ,print )( drop )
 		,cr
 
