@@ -621,9 +621,11 @@ gSYSCALL gSYSMEM
 		cell.fillreg
 		@+
 
-        ,printstk	
-|		dup $ff and r3tokenname " %s " ,format 
-		,cr
+"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
+
+|        ,printstk
+|		dup $ff and r3tokenname " %s " ,format
+|		,cr
 
 		codestep
 		"asm/code.asm" savemem | debug

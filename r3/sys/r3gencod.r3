@@ -499,6 +499,7 @@ iSYS
 |------------------------------------------
 :tocode | adr token -- adr
 |	"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
+
 	$ff and 2 << 'vmc + @ ex ;
 
 :,header | adr -- adr
@@ -524,15 +525,14 @@ iSYS
 	( 1? 1 - swap
 		@+ tocode
 		swap ) 2drop
-    ";---------ANA" ,ln |----- cell analisys
+
+|    ";---------ANA" ,ln |----- cell analisys
 	dup 12 + @ $f and
 	anaDeepStack
 	'bcode ( bcode> <?
 		@+
 
-		"; " ,s dup ,tokenprint 9 ,c ,printstka
-|		ncell ,d
-		,cr
+|		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 
 		"asm/code.asm" savemem | debug
 
@@ -560,12 +560,11 @@ iSYS
 		a@+
 		"%d %d %d" ,format ,cr
 		) drop ;
-|----------------------------
 
+|----------------------------
 ::r3-gencode
 	mark
 	";---r3 compiler code.asm" ,ln
-
 |	debugblok
 
 	dicc ( dicc> <?

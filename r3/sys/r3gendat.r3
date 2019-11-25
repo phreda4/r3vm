@@ -103,6 +103,7 @@
 	0 'instr !
 
     "--------------------------" ,s ,cr
+    "; " ,s
 	dup dicc - 4 >> ,datainfo ,cr
 
 	dup adr>dicname ,s ,sp
@@ -149,7 +150,7 @@
 
 	"; *** VARS ***" ,s ,cr
 	"align 16 " ,s ,cr
-	dicc ( dicc> <? 
+	dicc ( dicc> <?
 		dup gendata
 		16 + ) drop
 

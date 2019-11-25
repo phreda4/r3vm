@@ -131,7 +131,7 @@
 
 ::dic>du | nro -- delta uso
 	dic>adr 12 + @
-	dup	23 << 27 >>	| delta
+	dup	55 << 59 >>	| delta
 	swap $f and ;	| uso
 
 ::dic>len@
@@ -197,14 +197,14 @@
 	dup $f and
 	dup r> ,ncar >r
 	" -- " ,s
-	swap 23 << 27 >> + | deltaD
+	swap 55 << 59 >> + | deltaD
 	r> ,ncar drop
 	" ]" ,s ;
 
 :,movx | mov --
 	dup
 	dup $f and "U:%d " ,format
-	23 << 27 >> "D:%d " ,format
+	55 << 59 >> "D:%d " ,format
 	,mov
 	;
 
@@ -226,11 +226,11 @@
 	dup 12 >> $fff and "calls:%d " ,format
 	24 >> $ff and "niv:%d " ,format
 	@ dup 12 >>> "len:%d " ,format
-|	,mov
-	$fff and " %h " ,format
+	,mov
+|	$fff and " %h " ,format
 	;
 
-#datastr "val" "ddata" "dcode" "str" "lval" "lddata" "ldcode" "lstr" "multi" "buff"
+#datastr "val" "ddat" "dcod" "str" "lval" "lddat" "ldcod" "lstr" "multi" "buff"
 
 :datatype | nro -- str
 	'datastr swap ( 0 <>? 1 - swap >>0 swap ) drop ;
@@ -247,7 +247,6 @@
 	dup 12 >> $fff and "calls:%d " ,format
 	" type:" ,s
 	24 >> $f and datatype ,s
-|	drop
 
 	@ dup 12 >>> " len:%d " ,format
 	$fff and " %h " ,format
