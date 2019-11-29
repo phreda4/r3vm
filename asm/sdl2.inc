@@ -1,4 +1,3 @@
-
 struct SDL_Point
         x               dd ?
         y               dd ?
@@ -23,7 +22,8 @@ ends
 
 struct SDL_Palette
         ncolors         dd ?
-        colors          dd ?
+                        dd ?
+        colors          dq ?
         version         dd ?
         refcount        dd ?
 ends
@@ -33,15 +33,16 @@ struct SDL_DisplayMode
         w               dd ?
         h               dd ?
         refresh_rate    dd ?
-        driverdata      dd ?
+        driverdata      dq ?
 ends
 
 struct SDL_PixelFormat
        ?format          dd ?
-        palette         dd ?
+                        dd ?
+        palette         dq ?
         BitsPerPixel    db ?
         BytesPerPixel   db ?
-        padding         rb 2
+                        rb 2
         Rmask           dd ?
         Gmask           dd ?
         Bmask           dd ?
@@ -55,28 +56,33 @@ struct SDL_PixelFormat
         Bshift          db ?
         Ashift          db ?
         refcount        dd ?
-        next            dd ?
+        next            dq ?
 ends
 
 struct SDL_Surface
-        flags           dd ?            ; Read-only
-       ?format          dd ?            ; Read-only
-        w               dd ?            ; Read-only
-        h               dd ?            ; Read-only
-        pitch           dd ?            ; Read-only
-        pixels          dd ?            ; Read-write
-        userdata        dd ?            ; Read-write
-        locked          dd ?            ; Read-only
-        lock_data       dd ?            ; Read-only
-        clip_rect       SDL_Rect        ; Read-only
-        map             dd ?            ; Private
-        refcount        dd ?            ; Read-mostly
+        flags           dd ?
+                        dd ?
+       ?format          dq ?
+        w               dd ?
+        h               dd ?
+        pitch           dd ?
+                        dd ?
+        pixels          dq ?
+        userdata        dq ?
+        locked          dd ?
+                        dd ?
+        lock_data       dq ?
+        clip_rect       SDL_Rect
+        map             dq ?
+        refcount        dd ?
+                        dd ?
 ends
 
 struct SDL_Keysym
         scancode        dd ?
         sym             dd ?
         mod             dw ?
+                        dw ?
         unused          dd ?
 ends
 
@@ -90,9 +96,9 @@ struct SDL_WindowEvent
         timestamp       dd ?
         windowID        dd ?
         event           db ?
-        padding1        db ?
-        padding2        db ?
-        padding3        db ?
+                        db ?
+                        db ?
+                        db ?
         data1           dd ?
         data2           dd ?
 ends
@@ -103,8 +109,8 @@ struct SDL_KeyboardEvent
         windowID        dd ?
         state           db ?
        ?repeat          db ?
-        padding2        db ?
-        padding3        db ?
+                        db ?
+                        db ?
         keysym          SDL_Keysym
 ends
 
@@ -336,13 +342,13 @@ struct SDL_Event
 ends
 
 struct SDL_RWops
-        size    dd ?
-        seek    dd ?
-        read    dd ?
-        write   dd ?
-        close   dd ?
-        type    dd ?
-        hidden  dd ?
+        size    dq ?
+        seek    dq ?
+        read    dq ?
+        write   dq ?
+        close   dq ?
+        type    dq ?
+        hidden  dq ?
 ends
 
 ; These are the flags which may be passed to SDL_Init().  You should
@@ -829,4 +835,4 @@ SDL_NUM_SCANCODES = 512
 
 SDL_MESSAGEBOX_ERROR        = 0x00000010
 SDL_MESSAGEBOX_WARNING      = 0x00000020
-SDL_MESSAGEBOX_INFORMATION  = 0x00000040
+SDL_MESSAGEBOX_INFORMATION  = 0x00000040    
