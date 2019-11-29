@@ -9,8 +9,6 @@ entry start
 
 XRES equ 1024
 YRES equ 600
-STYLE  = WS_VISIBLE or WS_CAPTION or WS_SYSMENU
-STYLEX = WS_EX_APPWINDOW
 
 include 'include/win64w.inc'
 include 'sdl2.inc'
@@ -18,9 +16,10 @@ include 'sdl2.inc'
 section '' code readable executable
 
 start:
+        push rsi rdi
         enter 8*20,0
 
-        invoke SDL_Init,SDL_INIT_VIDEO or SDL_INIT_AUDIO
+        cinvoke SDL_Init,SDL_INIT_VIDEO or SDL_INIT_AUDIO
 ;        test eax,eax
 ;        jnz errorexit
 
@@ -35,22 +34,28 @@ start:
 
 ;  create_window:
 
-        invoke SDL_CreateWindow,_titulo,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,800,600,0 ;SDL_WINDOW_SHOWN
+        cinvoke SDL_CreateWindow,_titulo,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XRES,YRES,0
+        ;SDL_WINDOW_SHOWN
 
 ;       test    eax,eax
 ;       jz      initialization_error
 
-;        mov     [window],eax
+        mov [window],rax
+
 
         ;SDL_ShowCursor(SDL_DISABLE);
+;        cinvoke SDL_Delay,2000
 
-;        invoke SDL_GetWindowSurface,window
-;        mov [screen],eax
+        cinvoke SDL_GetWindowSurface,window
+        mov [screen],rax
 
-;        mov eax,[eax+SDL_Surface.pixels]
+        lea rax,[rax+SDL_Surface.pixels]
+        mov [SYSFRAME],rax
 
-;        mov [SYSFRAME],eax
 
+
+
+;
 ;    gr_buffer= screen->pixels;
 ;       invoke SDL_CreateRenderer,eax,-1,SDL_RENDERER_PRESENTVSYNC
 ;       test    eax,eax
@@ -64,11 +69,10 @@ start:
 
 
 ;       invoke VirtualAlloc,0,MAXMEM,MEM_COMMIT+MEM_RESERVE,PAGE_READWRITE ;
-        or rax,rax
+;        or rax,rax
 ;       jz SYSEND
-        mov [FREE_MEM],rax
+;        mov [FREE_MEM],rax
 
-        jmp SYSEND
 
 ;---------- INICIO
 ;restart:
@@ -78,7 +82,7 @@ start:
 ;        jmp SYSEND
 ;----- CODE -----
 inicio:
-        mov esi,dword[SYSFRAME]
+        mov rsi,[SYSFRAME]
         mov ecx,640*480
         mov eax,$ff
 
@@ -90,6 +94,7 @@ l:
 
         call SYSREDRAW
 ;        call SYSUPDATE
+        cinvoke SDL_Delay,2000
 ;        mov eax,dword[SYSKEY]
 ;        cmp eax,1
  ;       jne inicio
@@ -99,7 +104,7 @@ errorexit:
         ret
 
 SYSREDRAW:
-        invoke SDL_UpdateWindowSurface,[window]
+        cinvoke SDL_UpdateWindowSurface,[window]
         ret
 
 SYSUPDATE:
@@ -150,17 +155,18 @@ uptext: ;keychar=*(int*)evt.text.text;break;
 ;       }
 
 SYSEND:
-        invoke SDL_DestroyWindow,[window]
-        invoke SDL_Quit
+        cinvoke SDL_DestroyWindow,[window]
+        cinvoke SDL_Quit
+
+        invoke ExitProcess,0
         leave
+        pop rdi rsi
         ret
 
 section '.data' data readable writeable
 
 align 16
 
-;        viewport SDL_Rect 0,0,960,540
-;        desktop SDL_DisplayMode
 
         window dq ? ;SDL_Window
         screen dq ? ;SDL_Surface
