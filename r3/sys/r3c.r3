@@ -52,6 +52,8 @@
 |	"r3/testgui.r3"
 	r3c
 
+|    "asm\fasm.exe asm\r3fasm.asm > log.asm" sys
+    "asm\fasm.exe asm\r3fasm.asm" sys
 	waitesc
 	;
 

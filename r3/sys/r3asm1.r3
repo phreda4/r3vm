@@ -101,6 +101,7 @@
 |	dup ( 1? 1 - .drop ) drop
 |	+ ( 1? 1 - dup push.reg ) drop
 
+	| "mov rcx
 	stk.normal | TOS in eax or something
 
 	over @ $ff and

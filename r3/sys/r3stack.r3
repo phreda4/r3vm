@@ -184,16 +184,16 @@
 :iD@		TOS q@ 'TOS ! ;
 :i!			NOS @ TOS ! .NIP .DROP ;
 :iC!		NOS @ TOS c! .NIP .DROP ;
-:iD!		NOS @ TOS q! .NIP .DROP ;
+:iQ!		NOS @ TOS q! .NIP .DROP ;
 :i+!		NOS @ TOS +! .NIP .DROP ;
 :iC+!		NOS @ TOS c+! .NIP .DROP ;
-:iD+!		NOS @ TOS q+! .NIP .DROP ;
+:iQ+!		NOS @ TOS q+! .NIP .DROP ;
 :i@+		.DUP 4 NOS +! TOS @ 'TOS ! ;
 :i!+		NOS @ TOS ! .NIP 4 'TOS +! ;
 :iC@+		.DUP 1 NOS +! TOS c@ 'TOS ! ;
 :iC!+		NOS @ TOS c! .NIP 1 'TOS +! ;
-:iD@+		.DUP 2 NOS +! TOS q@ 'TOS ! ;
-:iD!+		NOS @ TOS q! .NIP 2 'TOS +! ;
+:iQ@+		.DUP 2 NOS +! TOS q@ 'TOS ! ;
+:iQ!+		NOS @ TOS q! .NIP 2 'TOS +! ;
 
 |-- 0 is nro x tops of stack
 ::nro1stk | --1/0 ok
@@ -241,6 +241,7 @@
 |-------- constantes del sistema
 #syscons "XRES" "YRES" "FREE_MEM" "SYSFRAME" "dword[SYSXYM]" "dword[SYSBM]" "dword[SYSKEY]"
 
+#sysregr "rax" "rbx" "rcx" "rdx" "rdi" "rsi" "r8" "r9" "r10" "r11" "r12" "r13" "r14" "r15"
 #sysregs "eax" "ebx" "ecx" "edx" "edi" "esi" "r8d" "r9d" "r10d" "r11d" "r12d" "r13d" "r14d" "r15d"
 #sysregw  "ax"  "bx"  "cx"  "dx"  "di"  "si" "r8w" "r9w" "r10w" "r11w" "r12w" "r13w" "r14w" "r15w"
 #sysregb  "al"  "bl"  "cl"  "dl" "dil" "sil" "r8b" "r9b" "r10b" "r11b" "r12b" "r13b" "r14b" "r15b"
@@ -260,13 +261,14 @@
 :mt5 value 'sysregs list2str ,s ;	|-- 5 reg 	eax
 :mt5b value 'sysregb list2str ,s ;	|-- 5 regb 	al
 :mt5w value 'sysregw list2str ,s ;	|-- 5 regw 	ax
+:mt5r value 'sysregr list2str ,s ;	|-- 5 reg 	rax
 
-:mt6 value 2 << "dword[ebp" ,s
+:mt6 value 2 << "qword[ebp" ,s
 	0? ( drop "]" ,s ; )
 	+? ( "+" ,s ) ,d
 	"]" ,s ;
 
-#tiposrm mt0 mt1 mt2 mt3 mt4 mt5 mt6 mt0 mt0
+#tiposrm mt0 mt1 mt2 mt3 mt4 mt5r mt6 mt0 mt0
 #tiposrmb mt0 mt1 mt2 mt3 mt4 mt5b mt6 mt0 mt0
 #tiposrmw mt0 mt1 mt2 mt3 mt4 mt5w mt6 mt0 mt0
 
@@ -682,7 +684,7 @@
 :mt5b value 'sysregb list2str print ;	|-- 5 regb 	al
 :mt5w value 'sysregw list2str print ;	|-- 5 regw 	ax
 
-:mt6 value 2 << "dword[ebp" print 1? ( +? ( "+" print ) "%d" print "]" print ; ) drop "]" print ; |-- 6 stack
+:mt6 value 2 << "qword[ebp" print 1? ( +? ( "+" print ) "%d" print "]" print ; ) drop "]" print ; |-- 6 stack
 
 #tiposrm mt0 mt1 mt2 mt3 mt3 mt5 mt6 mt0 mt0
 #tiposrmb mt0 mt1 mt2 mt3 mt3 mt5b mt6 mt0 mt0

@@ -93,9 +93,10 @@
 "FFIRST" "FNEXT"
 "SYS"
 
-"INK" "'INK" "ALPHA" "OPX" "OPY"
-"OP" "LINE" "CURVE" "CURVE3"
-"PLINE" "PCURVE" "PCURVE3" "POLI"
+|"INK" "'INK" "ALPHA" "OPX" "OPY"
+|"OP" "LINE" "CURVE" "CURVE3"
+|"PLINE" "PCURVE" "PCURVE3" "POLI"
+
 ( 0 )
 
 ::r3basename | nro -- str

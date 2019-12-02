@@ -4,6 +4,7 @@
 ^./r3base.r3
 ^./r3cellana.r3
 ^./r3asm1.r3
+|^./r3asm.r3
 
 #lastdircode
 
@@ -498,7 +499,7 @@ iSYS
 
 |------------------------------------------
 :tocode | adr token -- adr
-|	"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
+	"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
 
 	$ff and 2 << 'vmc + @ ex ;
 
@@ -534,7 +535,7 @@ iSYS
 
 |		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 
-		"asm/code.asm" savemem | debug
+|		"asm/code.asm" savemem | debug
 
 		anastep
 		) drop
