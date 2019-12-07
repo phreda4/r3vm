@@ -2,6 +2,7 @@ Lenguaje R3
 -----------
 
 Basic colorforth derived lang form 64 bits.
+Basic ASM x84 transformation
 
 LIT
 TOS=DATA
