@@ -606,9 +606,9 @@ gFFIRST gFNEXT
 gSYSCALL gSYSMEM
 
 :codestep | token --
-	$ff and
-|	dup r3tokenname slog
-	2 << 'vmc + @ ex ;
+|	$ff and 2 << 'vmc + @ ex
+	drop
+	;
 
 
 ::genasmcode | duse --

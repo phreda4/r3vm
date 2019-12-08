@@ -22,8 +22,8 @@ usamos "|" para indicar comentario hasta el fin de la linea (la primera excepcio
 
 ```
 ;			| Fin de Palabra
-( )			| Bloque de palabras para construir IF y WHILE
-[ ]			| Bloque de palabras para construir definiciones sin nombre
+(  )		| Bloque de palabras para construir IF y WHILE
+[  ]		| Bloque de palabras para construir definiciones sin nombre
 EX			| Ejecutar una palabra a travez de su direccion
 0? 1?		| Condicionales cero y no cero
 +? -?		| Condicionales positivo y negativo
@@ -48,7 +48,7 @@ ROT 2DUP 2DROP 3DROP
 
 ## Operadores Logicos
 ```
-AND OR XOR
+AND OR XOR NOT
 ```
 
 ## Operadores Aritmeticos
@@ -56,7 +56,7 @@ AND OR XOR
 + - * /
 << >> >>>
 MOD /MOD */ *>> <</
-NOT NEG ABS SQRT CLZ
+NEG ABS SQRT CLZ
 ```
 
 ## Acceso a Memoria
@@ -107,6 +107,17 @@ No consume ni produce valores en la pila pero actualiza la pantalla grafica con 
 
 ## Prefijos en las palabras
 
+* `|` se ignora hasta el fin de linea, esto es un comentario
+* `^` se toma hasta el fin de linea el nombre del archivo a incluir, esto permite nombres * con espacio.
+* `"` se busca el fin de comillas para delimitar el contenido, si hay una doble comilla "* " se toma como una comilla incluida en el string.
+* `:` define accion
+* `::` define accion y prevalece esta definicion cuando una archivo es incluido (* exportada)
+* `#` define dato
+* `##` define dato exportado
+* `$` define numero hexadecimal
+* `%` define numero binario, permite el . como 0
+* `'` significa direccion de una palabra, esta se apila en la PILA DE DATOS, hay que aclarar que las palabras del DICCIONARIO BASE NO tienen direccion, pero las definidas por el programador, si.
+
 La programacion ocurre cuando definimos nuestras propias palabras.
 Podemos definir palabras como acciones con el prefijo :
 
@@ -120,25 +131,37 @@ o datos con el prefijo #
 #lives 3
 ```
 
-## La lista completa de prefijos es la siguiente:
-
-* `|` se ignora hasta el fin de linea, esto es un comentario
-* `^` se toma hasta el fin de linea el nombre del archivo a incluir, esto permite nombres * con espacio.
-* `"` se busca el fin de comillas para delimitar el contenido, si hay una doble comilla "* " se toma como una comilla incluida en el string.
-* `:` define accion
-* `::` define accion y prevalece esta definicion cuando una archivo es incluido (* exportada)
-* `#` define dato
-* `##` define dato exportado
-* `$` define numero hexadecimal
-* `%` define numero binario, permite el . como 0
-* `'` significa direccion de una palabra y lo que hace es apilar en la PILA DE DATOS la DIRECCION, de la palabra, tanto si es un DATO o una ACCION, hay que aclarar que las palabras del DICCIONARIO BASE NO tienen direccion, pero las definidas por el programador, si.
 
 `: ` solo es el commienzo del programa, un programa completo en r3 puede ser el siguiente
 
 ```
 :sum3 dup dup  + + ;
 
-: 3 sum3 ;
+: 2 sum3 ;
 ```
+
+## Condicionales y Repeticion
+
+La forma de construir condicionales y repeticiones es a travez de las palabra ( y )
+
+por ejemplo:
+```
+5 <? ( drop 5 )
+```
+
+El significado de estas 6 palabras es: comprobar el tope de la pila con 5, si es mayor, quitar este valor y apilar un 5.
+
+La condicion produce un salto al final del bloque de codigo si no se cumple. Se combierte en un bloque IF.
+
+r3 identifica esta construccion cuando hay una palabra condicional antes de la palabra (. Si esto no pasa el bloque representa una repeticion y, un condicional adentro que esta repeticion que no sea un IF se utiliza con condicion de mientras WHILE.
+
+por ejemplo:
+```
+1 ( 10 <?
+	1 + ) drop
+```
+
+cuenta de 1 a 9, mientras se cumple el condicional
+
 
 
