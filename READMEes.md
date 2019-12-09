@@ -18,78 +18,6 @@ El lenguaje posee un DICCIONARIO BASE que ya esta definido, a partir del cual se
 
 ## lista de palabras BASE:
 
-usamos "|" para indicar comentario hasta el fin de la linea (la primera excepcion a la separacion de las palabras)
-
-```
-;			| Fin de Palabra
-(  )		| Bloque de palabras para construir IF y WHILE
-[  ]		| Bloque de palabras para construir definiciones sin nombre
-EX			| Ejecutar una palabra a travez de su direccion
-0? 1?		| Condicionales cero y no cero
-+? -?		| Condicionales positivo y negativo
-<? >? =?	| Condicionales de comparacion
->=? <=? <>?	| Condicionales de comparacion
-AN? NA?		| Condicionales logicos AND y NOT AND
-BT?			| Condicional de entre
-```
-
-## Palabras para modificar la PILA DE DATOS
-```
-DUP DROP OVER PICK2
-PICK3 PICK4 SWAP NIP
-ROT 2DUP 2DROP 3DROP
-4DROP 2OVER 2SWAP
-```
-
-## Palabras para modificar la PILA DE EJECUCION
-```
->R R> R@
-```
-
-## Operadores Logicos
-```
-AND OR XOR NOT
-```
-
-## Operadores Aritmeticos
-```
-+ - * /
-<< >> >>>
-MOD /MOD */ *>> <</
-NEG ABS SQRT CLZ
-```
-
-## Acceso a Memoria
-```
-@ C@ Q@ @+ C@+ Q@+
-! C! Q! !+ C!+ Q!+
-+! C+! Q+!
-```
-
-## Registros de ayuda
-```
->A A> A@ A! A+ A@+ A!+
->B B> B@ B! B+ B@+ B!+
-```
-
-## Copia y Llenado de Memoria
-```
-MOVE MOVE> FILL
-CMOVE CMOVE> CFILL
-QMOVE QMOVE> QFILL
-```
-
-## Uso e Interaccion con el Sistema Operativo
-```
-UPDATE REDRAW
-MEM SW SH VFRAME
-XYPEN BPEN KEY CHAR
-MSEC TIME DATE
-LOAD SAVE APPEND
-FFIRST FNEXT
-SYS
-```
-
 Cada palabra puede tomar y dejar valores en la PILA DE DATOS, se expresa esto con un diagrama de estado de la pila antes -- y despues de la palabra.
 
 por ejemplo
@@ -104,6 +32,159 @@ Ademas de una modificacion en la pila, tambien puede haber un accion lateral, po
 REDRAW | --
 ```
 No consume ni produce valores en la pila pero actualiza la pantalla grafica con el buffer en memoria.
+
+Usamos "|" para indicar comentario hasta el fin de la linea (la primera excepcion a la separacion de las palabras)
+
+```
+;			| Fin de Palabra
+(  )		| Bloque de palabras para construir IF y WHILE
+[  ]		| Bloque de palabras para construir definiciones sin nombre
+EX			| Ejecutar una palabra a travez de su direccion
+```
+
+## Condicionales, junto con bloques hacen las estructuras de control
+```
+0? 1?		| Condicionales cero y no cero
++? -?		| Condicionales positivo y negativo
+<? >? =?	| Condicionales de comparacion
+>=? <=? <>?	| Condicionales de comparacion
+AN? NA?		| Condicionales logicos AND y NOT AND
+BT?			| Condicional de entre
+```
+
+## Palabras para modificar la PILA DE DATOS
+```
+DUP		| a -- a a
+DROP	| a --
+OVER	| a b -- a b a
+PICK2	| a b c -- a b c a
+PICK3	| a b c d -- a b c d a
+PICK4	| a b c d e -- a b c d e a
+SWAP	| a b -- b a
+NIP		| a b -- b
+ROT		| a b c -- b c a
+2DUP	| a b -- a b a b
+2DROP	| a b --
+3DROP	| a b c --
+4DROP	| a b c d --
+2OVER	| a b c d -- a b c d a b
+2SWAP	| a b c d -- c d a b
+```
+
+## Palabras para modificar la PILA DE EJECUCION
+```
+>R		| a --		; r: -- a
+R>		| -- a 		; r: a --
+R@		| -- a 		; r: a -- a
+```
+
+## Operadores Logicos
+```
+AND		| a b -- c
+OR		| a b -- c
+XOR		| a b -- c
+NOT		| a -- b
+```
+
+## Operadores Aritmeticos
+```
++		| a b -- c
+-		| a b -- c
+*		| a b -- c
+/		| a b -- c
+<<		| a b -- c
+>>		| a b -- c
+>>>		| a b -- c
+MOD		| a b -- c
+/MOD	| a b -- c d
+*/		| a b c -- d
+*>>		| a b c -- d
+<</		| a b c -- d
+NEG		| a -- b
+ABS		| a -- b
+SQRT	| a -- b
+CLZ		| a -- b
+```
+
+## Acceso a Memoria
+
+`@` fetch, lee un valor de memoria
+`!` store, graba un valor en memoria
+
+```
+@		| a -- [a]
+C@		| a -- b[a]
+Q@		| a -- q[a]
+@+		| a -- b [a]
+C@+		| a -- b b[a]
+Q@+		| a -- b q[a]
+!		| a b --
+C!		| a b --
+Q!		| a b --
+!+		| a b -- c
+C!+		| a b -- c
+Q!+		| a b -- c
++!		| a b --
+C+!		| a b --
+Q+!		| a b --
+```
+
+## Registros de ayuda
+
+Registro para recorrer la memoria para leer,copiar o llenar.
+
+```
+>A		| a --
+A>		| -- a
+A@		| -- a
+A!		| a --
+A+		| a --
+A@+		| -- a
+A!+		| a --
+>B		| a --
+B>      | -- a
+B@		| -- a
+B!		| a --
+B+      | a --
+B@+     | -- a
+B!+     | a --
+```
+
+## Copia y Llenado de Memoria
+```
+MOVE	| a b c --
+MOVE>	| a b c --
+FILL	| a b c --
+CMOVE	| a b c --
+CMOVE>	| a b c --
+CFILL	| a b c --
+QMOVE	| a b c --
+QMOVE>	| a b c --
+QFILL	| a b c --
+```
+
+## Uso e Interaccion con el Sistema Operativo
+```
+UPDATE	| --
+REDRAW	| --
+MEM		| -- a
+SW		| -- a
+SH		| -- a
+VFRAME	| -- a
+XYPEN	| -- a b
+BPEN	| -- a
+KEY		| -- a
+CHAR	| -- a
+MSEC	| -- a
+TIME	| -- a
+DATE	| -- a
+LOAD	| a b c --
+SAVE	| a b c --
+APPEND	| a b c --
+FFIRST	| a -- b
+FNEXT	| a -- b
+SYS		| a --
+```
 
 ## Prefijos en las palabras
 
@@ -146,14 +227,14 @@ La forma de construir condicionales y repeticiones es a travez de las palabra ( 
 
 por ejemplo:
 ```
-5 <? ( drop 5 )
+5 >? ( drop 5 )
 ```
 
 El significado de estas 6 palabras es: comprobar el tope de la pila con 5, si es mayor, quitar este valor y apilar un 5.
 
 La condicion produce un salto al final del bloque de codigo si no se cumple. Se combierte en un bloque IF.
 
-r3 identifica esta construccion cuando hay una palabra condicional antes de la palabra (. Si esto no pasa el bloque representa una repeticion y, un condicional adentro que esta repeticion que no sea un IF se utiliza con condicion de mientras WHILE.
+r3 identifica esta construccion cuando hay una palabra condicional antes de la palabra `(`. Si esto no pasa el bloque representa una repeticion y, un condicional adentro que esta repeticion que no sea un IF se utiliza con condicion de mientras WHILE.
 
 por ejemplo:
 ```
