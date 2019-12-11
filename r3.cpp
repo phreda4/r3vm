@@ -1153,18 +1153,18 @@ while(ip!=0) {
 		continue;
 		
 #ifdef VIDEOWORD
-	case VIDEO:
-        if (TOS==0) { NOS--;TOS=*NOS;NOS--;videoclose();continue; }
-		videoopen((char*)*(NOS),TOS);
-		NOS--;TOS=*NOS;NOS--;
+	case VIDEO:  // "file" w h --
+        if (TOS==0) { NOS-=2;TOS=*NOS;NOS--;videoclose();continue; }
+		videoopen((char*)*(NOS-1),*NOS,TOS);
+		NOS-=2;TOS=*NOS;NOS--;
 		continue;
-	case VIDEOSHOW:
+	case VIDEOSHOW: // w h --
 		TOS=redrawframe(*NOS,TOS);		
 		NOS--;
 		continue;		
-	case VIDEOSIZE:
-		videoresize(TOS);
-		TOS=*NOS;NOS--;
+	case VIDEOSIZE: // w h --
+		videoresize(*NOS,TOS);
+		NOS--;TOS=*NOS;NOS--;
 		continue;		
 		
 #endif
