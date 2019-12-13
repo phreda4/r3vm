@@ -38,33 +38,34 @@ we use "|" to indicate comment until the end of the line (the first exception to
 
 
 ```
-;		| End of Word
+;	| End of Word
 (  )	| Word block to build IF and WHILE
 [  ]	| Word block to build nameless definitions
-EX		| Run a word through your address
+EX	| Run a word through your address
 ```
 
 ## Conditional, together with blocks make the control structures
 ```
-0? 1?		| Zero and non-zero conditionals
-+? -?		| Conditional positive and negative
-<? >? =?	| Comparison conditions
-> =? <=? <>? | Comparison conditions
-AN? NA?		| Logical conditioners AND and NOT AND
-BT?			| Conditional between
+0? 1?	| Zero and non-zero conditionals
++? -?	| Conditional positive and negative
+<? >?	| Comparison conditions
+=? >=? 	| Comparison conditions
+<=? <>?	| Comparison conditions
+AN? NA?	| Logical conditioners AND and NOT AND
+BT?		| Conditional between
 ```
 
 ## Words to modify the DATA STACK
 ```
-DUP		| a -- a a
+DUP	| a -- a a
 DROP	| a --
 OVER	| a b -- a b a
 PICK2	| a b c -- a b c a
 PICK3	| a b c d -- a b c d a
 PICK4	| a b c d e -- a b c d e a
 SWAP	| a b -- b a
-NIP		| a b -- b
-ROT		| a b c -- b c a
+NIP	| a b -- b
+ROT	| a b c -- b c a
 2DUP	| a b -- a b a b
 2DROP	| a b --
 3DROP	| a b c --
@@ -75,37 +76,37 @@ ROT		| a b c -- b c a
 
 ## Words to modify the RETURN STACK
 ```
->R		| a --		; r: -- a
-R>		| -- a 		; r: a --
-R@		| -- a 		; r: a -- a
+>R	| a --		; r: -- a
+R>	| -- a 		; r: a --
+R@	| -- a 		; r: a -- a
 ```
 
 ## Logical operators
 ```
-AND		| a b -- c
-OR		| a b -- c
-XOR		| a b -- c
-NOT		| a -- b
+AND	| a b -- c
+OR	| a b -- c
+XOR	| a b -- c
+NOT	| a -- b
 ```
 
 ## Arithmetic Operators
 ```
-+		| a b -- c
--		| a b -- c
-*		| a b -- c
-/		| a b -- c
-<<		| a b -- c
->>		| a b -- c
->>>		| a b -- c
-MOD		| a b -- c
++	| a b -- c
+-	| a b -- c
+*	| a b -- c
+/	| a b -- c
+<<	| a b -- c
+>>	| a b -- c
+>>>	| a b -- c
+MOD	| a b -- c
 /MOD	| a b -- c d
-*/		| a b c -- d
-*>>		| a b c -- d
-<</		| a b c -- d
-NEG		| a -- b
-ABS		| a -- b
+*/	| a b c -- d
+*>>	| a b c -- d
+<</	| a b c -- d
+NEG	| a -- b
+ABS	| a -- b
 SQRT	| a -- b
-CLZ		| a -- b
+CLZ	| a -- b
 ```
 
 ## Access to Memory
@@ -136,17 +137,17 @@ Q+!		| a b --
 Registers for keep values to traverse memory and read, copy or fill values
 
 ```
->A		| a --
-A>		| -- a
-A@		| -- a
-A!		| a --
-A+		| a --
-A@+		| -- a
-A!+		| a --
->B		| a --
+>A	| a --
+A>	| -- a
+A@	| -- a
+A!	| a --
+A+	| a --
+A@+	| -- a
+A!+	| a --
+>B	| a --
 B>      | -- a
-B@		| -- a
-B!		| a --
+B@	| -- a
+B!	| a --
 B+      | a --
 B@+     | -- a
 B!+     | a --
@@ -173,13 +174,13 @@ QFILL	| a b c --
 ```
 UPDATE	| --
 REDRAW	| --
-MEM		| -- a
-SW		| -- a
-SH		| -- a
+MEM	| -- a
+SW	| -- a
+SH	| -- a
 VFRAME	| -- a
 XYPEN	| -- a b
 BPEN	| -- a
-KEY		| -- a
+KEY	| -- a
 CHAR	| -- a
 MSEC	| -- a
 TIME	| -- a
@@ -189,7 +190,7 @@ SAVE	| a b c --
 APPEND	| a b c --
 FFIRST	| a -- b
 FNEXT	| a -- b
-SYS		| a --
+SYS	| a --
 ```
 
 ## Prefixes in words
@@ -218,10 +219,10 @@ or data with the prefix #
 #lives 3
 ```
 
-`: ` it is only the beginning of the program, a complete program in r3 can be the following
+`: ` only is the beginning of the program, a complete program in r3 can be the following
 
 ```
-: sum3 dup dup + + ;
+:sum3 dup dup + + ;
 
 : 2 sum3 ;
 ```
