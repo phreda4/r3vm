@@ -606,8 +606,7 @@ gFFIRST gFNEXT
 gSYSCALL gSYSMEM
 
 :codestep | token --
-|	$ff and 2 << 'vmc + @ ex
-	drop
+	$ff and 2 << 'vmc + @ ex
 	;
 
 

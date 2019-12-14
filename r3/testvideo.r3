@@ -28,7 +28,7 @@
 :coso
 	cls home
 	xv 5 >> dup videoshow
-	1? ( "video.mp4" 500 video ) drop
+	1? ( "video.mp4" 500 400 video ) drop
 	xv 5 >> .d print cr
 	xv 1 + $7ff and 'xv !
 
@@ -38,8 +38,8 @@
 :teclado
 	key
 	>esc< =? ( exit )
-	<f1> =? ( "video.mp4" 500 video )
-	<f2> =? ( "salud.mp4" 500 video )
+	<f1> =? ( "video.mp4" 500 400 video )
+	<f2> =? ( "salud.mp4" 500 400 video )
 	<f3> =? ( 0 0 video )
 	<f4> =? ( xv 3 >> 64 + videosize )
 	drop ;
@@ -50,7 +50,7 @@
 
 :
 |	"salud.mp4" 600 video
-	"video.mp4" 600 video
+	"video.mp4" 600 400 video
 	0 'paper !
 	'show onshow
 	|0 dup dup video

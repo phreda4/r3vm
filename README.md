@@ -19,6 +19,8 @@ The language has a BASIC DICTIONARY that is already defined, from which new WORD
 
 ## BASE word list:
 
+We use `|` to indicate comment until the end of the line (the first exception to word separation).
+
 Each word can take and/or leave values of the DATA STACK, this is expressed with a state diagram of the stack before -- and after the word.
 
 for example
@@ -33,9 +35,6 @@ In addition to a modification in the stack, there may also be a lateral action, 
 REDRAW | --
 ```
 It does not consume or produce values in the stack but it updates the graphic screen with the buffer in memory, this is a side effect.
-
-we use "|" to indicate comment until the end of the line (the first exception to word separation).
-
 
 ```
 ;	| End of Word
@@ -52,7 +51,7 @@ EX	| Run a word through your address
 =? >=? 	| Comparison conditions
 <=? <>?	| Comparison conditions
 AN? NA?	| Logical conditioners AND and NOT AND
-BT?		| Conditional between
+BT?	| Conditional between
 ```
 
 ## Words to modify the DATA STACK
@@ -115,21 +114,21 @@ CLZ	| a -- b
 `!` store a value in memory
 
 ```
-@		| a -- [a]
-C@		| a -- b[a]
-Q@		| a -- q[a]
-@+		| a -- b [a]
-C@+		| a -- b b[a]
-Q@+		| a -- b q[a]
-!		| a b --
-C!		| a b --
-Q!		| a b --
-!+		| a b -- c
-C!+		| a b -- c
-Q!+		| a b -- c
-+!		| a b --
-C+!		| a b --
-Q+!		| a b --
+@	| a -- [a]
+C@	| a -- b[a]
+Q@	| a -- q[a]
+@+	| a -- b [a]
+C@+	| a -- b b[a]
+Q@+	| a -- b q[a]
+!	| a b --
+C!	| a b --
+Q!	| a b --
+!+	| a b -- c
+C!+	| a b -- c
+Q!+	| a b -- c
++!	| a b --
+C+!	| a b --
+Q+!	| a b --
 ```
 
 ## Help registers facility
@@ -196,21 +195,21 @@ SYS	| a --
 ## Prefixes in words
 
 * `|` ignored until the end of the line, this is a comment
-* `^` the name of the file to be included is taken until the end of the line, this allows names * with space.
-* `"` the end of quotation marks is searched to delimit the content, if there is a double quotation mark" * "it is taken as a quotation mark included in the string.
+* `^` the name of the file to be included is taken until the end of the line, this allows filenames with spaces.
+* `"` the end of quotation marks is searched to delimit the content, if there is a double quotation mark `""` it is taken as a quotation mark included in the string.
 * `:` define action
 * `::` define action and this definition prevails when a file is included (* exported)
 * `#` define data
 * `##` define exported data
 * `$` define hexadecimal number
-* `%` defines binary number, allows the. like 0
+* `%` defines binary number, allows the `.` like `0`
 * `'` means the direction of a word, this address is pushed to DATA STACK, it should be clarified that the words of the BASIC DICTIONARY have NO address, but those defined by the programmer, yes.
 
 Programming occurs when we define our own words.
 We can define words as actions with the prefix:
 
 ```
-: addmul + * ;
+:addmul + * ;
 ```
 
 or data with the prefix #
@@ -249,4 +248,4 @@ for example:
 	1 + ) drop
 ```
 
-account from 1 to 9, while the conditional is being fulfilled
+account from 1 to 9, while the Top of stack is less 10.

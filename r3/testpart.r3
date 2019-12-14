@@ -44,7 +44,7 @@
 :xypos
 	rand sw mod abs 16 << rand sh mod abs 16 << ;
 :vxypos
-	rand 5.0 mod rand 5.0 mod ;
+	rand 15.0 mod rand 15.0 mod ;
 
 :add
 	100 ( 1? 1 -
