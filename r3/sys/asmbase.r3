@@ -41,21 +41,21 @@
 |----------- movimiento de memoria
 ::sqrt | v -- r
 	0? ( ; )
-	0 $40000000 pick2 clz $fe and >>
-	( 1? 
+	0 $4000000000000000 pick2 clz $1fe and >>
+	( 1?
 		rot pick2 pick2 +	| root bit numb
-		>=? ( pick2 pick2 + - rot 2/ pick2 + )( rot 2/ )
+		>=? ( pick2 pick2 + - rot 1 >> pick2 + )( rot 1 >> )
 		rot 2 >> ) drop nip ;
 
 |v2
 ::sqrt | v -- r
 	0? ( ; )
-	0 $40000000 pick2 clz $fe and >>
+	0 $4000000000000000 pick2 clz $1fe and >>
 	( 1? 					| n res bit
 		2dup or neg pick3 +	| n res bit TMP
 		+? ( >r rot drop r> 	| res bit TMP
-			rot 2/ pick2 or rot | TMP res bit
-			)( drop swap 2/ swap )
+			rot 1 >> pick2 or rot | TMP res bit
+			)( drop swap 1 >> swap )
 		2 >> ) drop nip ;
 
 |---------- GRAFICOS ------------
@@ -201,10 +201,10 @@
 	pick3 pxBPP + pick2 2* - abs
 	pick3 pyBPP + pick2 2* - abs  +
 	4 <? ( 3drop LINE ; ) drop
-	pick3 pick2 + 2/  pick3 pick2 + 2/		| fx fy cx cy c2 c2
+	pick3 pick2 + 1 >>  pick3 pick2 + 1 >>		| fx fy cx cy c2 c2
 	2swap 									| fx fy c2 c2 cx cy
-	py + 2/ swap px + 2/ swap				| fx fy c2 c2 c1 c1
-	pick3 pick2 + 2/  pick3 pick2 + 2/		| fx fy c2 c2 c1 c1 ex ey
+	py + 1 >> swap px + 1 >> swap				| fx fy c2 c2 c1 c1
+	pick3 pick2 + 1 >>  pick3 pick2 + 1 >>		| fx fy c2 c2 c1 c1 ex ey
 	2swap
 	CURVE CURVE ;
 
@@ -212,17 +212,17 @@
 
 |*******************************
 ::CURVE3 | xf yf x2 y2 x1 y1
-	pick3 pick2 + 2/ pick3 pick2 + 2/ 'by ! 'bx !
+	pick3 pick2 + 1 >> pick3 pick2 + 1 >> 'by ! 'bx !
 	'y1 ! 'x1 !
-	pick3 pick2 + 2/ pick3 pick2 + 2/ 2swap
+	pick3 pick2 + 1 >> pick3 pick2 + 1 >> 2swap
 	'y2 ! 'x2 !
-	over bx + 2/ over by + 2/
+	over bx + 1 >> over by + 1 >>
 	over x2 - abs over y2 - abs + >r
-	px x1 + 2/ py y1 + 2/
-	over bx + 2/ over by + 2/
+	px x1 + 1 >> py y1 + 1 >>
+	over bx + 1 >> over by + 1 >>
 	over x1 - abs over y1 - abs + >r
 	2swap >r >r
-	pick3 pick2 + 2/ pick3 pick2 + 2/
+	pick3 pick2 + 1 >> pick3 pick2 + 1 >>
 	2swap r> r>
 	r> 3 <? ( drop 4drop line )( drop CURVE3 )
 	r> 3 <? ( drop 4drop line ; )
@@ -355,7 +355,7 @@
 	'heapseg ! ;
 
 :moveDown | nodo pos --
-	( heapcnt 2/ <?
+	( heapcnt 1 >> <?
 		dup 1 << 1 + 		| val pos ch1
 		dup ]heap @	| val pos ch1 v1
 		over 1 +         | val pos ch1 v1 ch2
@@ -390,7 +390,7 @@
 	rot swap / swap					| x1 t y1
 	-? ( neg over * rot + swap 0 )	| x1 t y1
 	dup 16 << segs> 'segs - 4 >> or heap! | ubica en heap
-	segs> !+ rot pick2 2/ + swap !+ !+
+	segs> !+ rot pick2 1 >> + swap !+ !+
 	r> swap !+ 'segs> !
 	;
 
@@ -559,25 +559,25 @@
 	pick3 pxBPP + pick2 2* - abs
 	pick3 pyBPP + pick2 2* - abs  +
 	TOLERANCE <? ( 3drop PLINEI ; ) drop
-	pick3 pick2 + 2/  pick3 pick2 + 2/		| fx fy cx cy c2 c2
+	pick3 pick2 + 1 >>  pick3 pick2 + 1 >>		| fx fy cx cy c2 c2
 	2swap 									| fx fy c2 c2 cx cy
-	pyBPP + 2/ swap pxBPP + 2/ swap			| fx fy c2 c2 c1 c1
-	pick3 pick2 + 2/  pick3 pick2 + 2/		| fx fy c2 c2 c1 c1 ex ey
+	pyBPP + 1 >> swap pxBPP + 1 >> swap			| fx fy c2 c2 c1 c1
+	pick3 pick2 + 1 >>  pick3 pick2 + 1 >>		| fx fy c2 c2 c1 c1 ex ey
 	2swap PCURVEI PCURVEI ;
 
 |*******************************
 :PCURVE3I | xf yf x2 y2 x1 y1
-	pick3 pick2 + 2/ pick3 pick2 + 2/ 'by ! 'bx !
+	pick3 pick2 + 1 >> pick3 pick2 + 1 >> 'by ! 'bx !
 	'y1 ! 'x1 !
-	pick3 pick2 + 2/ pick3 pick2 + 2/ 2swap
+	pick3 pick2 + 1 >> pick3 pick2 + 1 >> 2swap
 	'y2 ! 'x2 !
-	over bx + 2/ over by + 2/
+	over bx + 1 >> over by + 1 >>
 	over x2 - abs over y2 - abs + >r
-	pxBPP x1 + 2/ pyBPP y1 + 2/
-	over bx + 2/ over by + 2/
+	pxBPP x1 + 1 >> pyBPP y1 + 1 >>
+	over bx + 1 >> over by + 1 >>
 	over x1 - abs over y1 - abs + >r
 	2swap >r >r
-	pick3 pick2 + 2/ pick3 pick2 + 2/
+	pick3 pick2 + 1 >> pick3 pick2 + 1 >>
 	2swap r> r>
 	r> 3 <? ( drop 4drop plineI )( drop PCURVE3I )
 	r> 3 <? ( drop 4drop plineI ; )

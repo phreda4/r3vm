@@ -71,5 +71,12 @@
 	add.inc ;
 
 ::r3-stage-1 | filename str -- err/0
+
+|	here "r3/sys/asmbase.r3"
+|	2dup load
+|	here =? ( "no asmrut" slog ; )
+|	0 swap c!+ 'here !
+|	swap includes
+
 	includes
 	;

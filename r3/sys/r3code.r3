@@ -11,9 +11,6 @@
 ^./r3gencod.r3
 ^./r3gendat.r3
 
-^r3/lib/fontm.r3
-^r3/fntm/droidsans13.fnt
-
 ::r3c | str --
 	r3name
 	here dup 'src !
@@ -50,12 +47,11 @@
 
 :header
 	$555555 'ink ! backline
-    $888888 $ff00 fontmcolor
+    $ff00 'ink !
 	"r3Code " print
-    $444444 $ffffff fontmcolor
+    $ffffff 'ink !
 	filenow 3 << 'inc + @
 	" %l " mprint print
-    $222222 $ffffff fontmcolor
     mark
     defnow ,wordinfo ,eol
     empty
@@ -63,9 +59,13 @@
 	cr
 	;
 
+:wcursor
+	defnow =? ( $ffffff 'ink ! ">" print ; )
+	" " print ;
+
 :wordline | nro --
-    $0 $ffffff fontmcolor
-	defnow =? ( $ffffff 0 fontmcolor )
+	wcursor
+	$ff00 'ink !
 	4 << dicc +
 	@+ "%w " mprint print
 	drop
@@ -80,17 +80,26 @@
 	dup 4 << dicc + 4 +
 	@+ 'iniword !
 	4 + @ 12 >>> 'cntword !
-
 	'defnow !
 	0 'wordpnow !
 	;
 
+:wcursor
+	wordnow =? ( $ffffff 'ink ! ">" print ; )
+	" " print
+	;
 :insline | nro --
 	cntword >=? ( drop ; )
-    $0 $ff00 fontmcolor
-	wordnow =? ( $ff00 $0 fontmcolor )
+	wcursor
+	$ff00 'ink !
 	2 << iniword + @
 	tokenprint
+	;
+
+:infoline | nro --
+	cntword >=? ( drop ; )
+	drop
+	"|" print
 	;
 
 :paglin
@@ -124,6 +133,10 @@
 		14 over 1 + gotoxy
 		dup wordpnow + insline
 		1 + ) drop
+	0 ( cntlines <?
+		28 over 1 + gotoxy
+		dup wordpnow + infoline
+		1 + ) drop
 	keyboard
 	;
 
@@ -134,7 +147,7 @@
 	;
 
 : mark
-	'fontdroidsans13 fontm
+	fonti
 	rows 2 - 'cntlines !
 
 	"r3/test.r3"

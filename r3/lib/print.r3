@@ -6,9 +6,7 @@
 ^r3/lib/str.r3
 
 ^r3/lib/fonti.r3
-
 |^r3/lib/fontpc.r3
-
 
 ##rows 40
 ##cols 80		| filas/columnas texto
@@ -35,9 +33,10 @@
   '_charsize ! '_charemit !
   calcrowcol ;
 
-::fontpc
-	8 'ccw ! 16 'cch !
+::fonti
+|	8 'ccw ! 16 'cch !
 |	'char8pc 'size8pc font!
+	8 'ccw ! 12 'cch !
 	'char8i 'size8i font!
 	calcrowcol ;
 

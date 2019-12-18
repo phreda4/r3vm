@@ -533,7 +533,7 @@ iSYS
 	'bcode ( bcode> <?
 		@+
 
-|		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
+		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 |		"asm/code.asm" savemem | debug
 
 		anastep
