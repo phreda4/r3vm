@@ -6,7 +6,7 @@
 //	SDL graphics windows
 //
 //#define DEBUGWORD
-//#define VIDEOWORD
+#define VIDEOWORD
 
 #include <stdio.h>
 #include <time.h>
@@ -1153,12 +1153,12 @@ while(ip!=0) {
 		continue;
 		
 #ifdef VIDEOWORD
-	case VIDEO:  // "file" w h --
+	case VIDEO:  // "file" w h -- 
         if (TOS==0) { NOS-=2;TOS=*NOS;NOS--;videoclose();continue; }
 		videoopen((char*)*(NOS-1),*NOS,TOS);
 		NOS-=2;TOS=*NOS;NOS--;
 		continue;
-	case VIDEOSHOW: // w h --
+	case VIDEOSHOW: // w h -- v
 		TOS=redrawframe(*NOS,TOS);		
 		NOS--;
 		continue;		
@@ -1222,12 +1222,19 @@ else
 
 if (!r3compile(filename)) return -1;
 
+#ifdef VIDEOWORD
+av_register_all();
+avformat_network_init();
+#endif
+
 gr_init(filename,srcw,srch,scrf);
 SDL_StartTextInput();
 runr3(boot);
 SDL_StopTextInput();
+
 #ifdef VIDEOWORD
 videoclose();
+avformat_network_deinit();
 #endif
 
 gr_fin();

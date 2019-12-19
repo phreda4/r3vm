@@ -125,7 +125,7 @@
 	( 168 <? dup 24 - a!+ 1 + )
 	( 176 <? dup 112 + a!+ 1 + )
 	( 288 <? dup 32 - a!+ 1 + )
-	drop 
+	drop
 	'dyndta >a
 	5 ( 1? 1 - 0 a!+ ) drop
 	32 a!+ 40 a+
@@ -317,7 +317,7 @@
 
 |//RGB with alpha
 :mode68
-	@+ dup $ff and 16 << over $ff0000 and 16 >> or swap $ff00ff00 and or ; 
+	@+ dup $ff and 16 << over $ff0000 and 16 >> or swap $ff00ff00 and or ;
 
 #modec
 
@@ -445,6 +445,6 @@ $1201
 		readchunk ) 2drop
 	emem palsize + dup 'databyte ! 'here !
 	img 2 + inflate
-	ipng 1? ( drop unfilteradam	convertadam7 exitok ; ) drop
-	wpng pxsize * hpng databyte unfilter drop
+	ipng 1? ( drop unfilteradam convertadam7 exitok ; ) drop
+	wpng pxsize * hpng databyte	unfilter drop
 	convert exitok ;

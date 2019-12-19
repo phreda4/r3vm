@@ -6,18 +6,19 @@
 
 ^r3/util/loadimg.r3
 
-#ima
+#ima1
+#ima2
 
 :teclado
 	key >esc< =? ( exit ) drop 	;
 
 :main
 	cls home
-	xypen ima sprite
+	xypen ima1 sprite
 	teclado
 	;
 
 :
 	mark
-	"test.png" loadimg 'ima !
+	"a1a.png" loadimg 'ima1 !
 	'main onshow ;

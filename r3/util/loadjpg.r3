@@ -567,7 +567,9 @@
 
 ::loadjpg | "" -- adr/0
 	here swap load
-	here =? ( drop 0 ; ) 'emem !
+	here =? ( drop 0 ; )
+	dup $3 and +
+	'emem !
 	here
 	get16 $ffd8 <>? ( 2drop 0 ; ) drop
 
@@ -576,8 +578,8 @@
 	buildimg drop
 	here >a
 	imgcols imgrows 12 << or a!+	| size
-	a> emem imgcols imgrows * 2 << dup >r 
-	|moveor
-	move
+	a> emem imgcols imgrows * 2 << dup >r
+	moveor
+|	move
 	here r> 8 + 'here +! ;
 
