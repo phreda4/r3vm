@@ -252,7 +252,7 @@
 |---- imprime celda
 :value 8 >> ;
 
-:mt0 value 2 << 'stkvalue + @ "$%h" ,format ;	|--	0 nro 	33
+:mt0 value 2 << 'stkvalue + @ "%d" ,format ;	|--	0 nro 	33
 
 :mt1 value 'syscons list2str ,s ;	|--	1 cte	XRES
 :mt2 value "str%h" ,format ;			|--	2 str   "hola"

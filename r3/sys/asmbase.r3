@@ -38,26 +38,6 @@
 
 #runlenscan * 2048
 
-|----------- movimiento de memoria
-::sqrt | v -- r
-	0? ( ; )
-	0 $4000000000000000 pick2 clz $1fe and >>
-	( 1?
-		rot pick2 pick2 +	| root bit numb
-		>=? ( pick2 pick2 + - rot 1 >> pick2 + )( rot 1 >> )
-		rot 2 >> ) drop nip ;
-
-|v2
-::sqrt | v -- r
-	0? ( ; )
-	0 $4000000000000000 pick2 clz $1fe and >>
-	( 1? 					| n res bit
-		2dup or neg pick3 +	| n res bit TMP
-		+? ( >r rot drop r> 	| res bit TMP
-			rot 1 >> pick2 or rot | TMP res bit
-			)( drop swap 1 >> swap )
-		2 >> ) drop nip ;
-
 |---------- GRAFICOS ------------
 :setxy | x y -- >a
 	10 << + 2 << framev + >a ;
@@ -115,7 +95,10 @@
  	pick3 pick2 - r@ pick3 - pick4 pick3 - rot */ +
 |	r@ pick2 - pick3 pick2 - * pick4 pick3 - / +
 	nip r> swap
-	sw >=? ( $2 )( dup 31 >> $1 and )
+	dup sw - not $20000000 and
+	over $10000000 and or
+	28 >>
+|	sw >=? ( $2 )( dup 31 >> $1 and )
 	>r 2swap r> ;
 
 :clip2 | y1 x1 y2 x2 c2 -- y1 x1 y2 x2 c2
@@ -123,7 +106,11 @@
 | 		X2+=(V-Y2)*(X2-X1)/(Y2-Y1);Y2=V;
 	over pick4 - over pick4 - r@ pick4 - swap rot */ +
 	nip r> swap
-	sw >=? ( $2 )( dup 31 >> $1 and )
+
+	dup sw - not $20000000 and
+	over $10000000 and or
+	28 >>
+|	sw >=? ( $2 )( dup 31 >> $1 and )
 	;
 
 :clip3 | y1 x1 y2 x2 c2 -- y1 x1 y2 x2 c2
@@ -142,12 +129,23 @@
 	2swap 0 ;
 
 :clipline | x2 y2 x1 y1 -- y1 x1 y2 x2 in
-	sh 1 - >=? ( $8 )( dup 31 >> $4 and ) >r			| y1
-	swap sw >=? ( $2 )( dup 31 >> $1 and ) r> + >r	| x1
-	2swap | y1 x1 x2 y2
-	sh 1 - >=? ( $8 )( dup 31 >> $4 and ) >r  		| y2
-	swap sw >=? ( $2 )( dup 31 >> $1 and ) 			| x2
-	r> + r> 						| y1 x1 y2 x2 c2 c1
+	dup $40000000 and 
+	over sh - 1 + not $80000000 and or
+	pick2 $10000000 and or
+	pick2 sw - not $20000000 and or
+	28 >> >r
+	2swap
+	dup $40000000 and
+	over sh - 1 + not $80000000 and or
+	pick2 $10000000 and or
+	pick2 sw - not $20000000 and or
+	28 >> r>
+|	sh 1 - >=? ( $8 )( dup 31 >> $4 and ) >r			| y1
+|	swap sw >=? ( $2 )( dup 31 >> $1 and ) r> + >r	| x1
+|	2swap | y1 x1 x2 y2
+|	sh 1 - >=? ( $8 )( dup 31 >> $4 and ) >r  		| y2
+|	swap sw >=? ( $2 )( dup 31 >> $1 and ) 			| x2
+|	r> + r> 						| y1 x1 y2 x2 c2 c1
 	2dup and 1? ( drop or ; ) drop
 	2dup or 0? ( drop or ; ) drop
 	>r 12 an? ( clip2 ) r> swap >r 12 an? ( clip1 ) r>
