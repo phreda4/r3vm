@@ -8,9 +8,6 @@
 
 #lastdircode
 
-:2code!+
-	dup 4 - @ code!+ ;
-
 |----- division by constant
 | http://www.flounder.com/multiplicative_inverse.htm
 
@@ -47,12 +44,24 @@
 	swap -? ( drop neg 'divm ! p 'divs ! ; ) drop
 	'divm ! p 'divs ! ;
 
+#TKdup $23
+#TKover $25
+#TKswap $29
+#TKand $35
+#TK+ $38
+#TK- $39
+#TK* $3A
+#TK<< $3C
+#TK>> $3D
+#TK>>> $3E
+#TK*>> $42
+
 |--- ajuste por signo
 :signadj!+ | --
-	$23 code!+ 	| dup
-	31 cte!+ 	| 31
-	$45 code!+ 	| >>
-	$3b code!+ 	| -
+	TKdup code!+
+	63 cte!+
+	TK>> code!+
+	TK- code!+
 	;
 
 |-----------------------------------
@@ -140,10 +149,12 @@
 :i0? :i1? :i+? :i-?
 	2code!+
 	gwhilejmp ;
+
 :i<? :i>? :i=? :i>=? :i<=? :i<>? :iA? :iN?
 	2code!+
 	.drop
 	gwhilejmp ;
+
 :iB?
 	2code!+
 	.2drop
@@ -202,16 +213,16 @@
 | 8 * --> 3 <<
 :*pot
 	31 swap clz - cte!+
-	$4b code!+
+	TK<< code!+
 	;
 
 | 7 * --> dup 3 << swap -
 :*pot-1
-	$23 code!+	| dup
+	TKdup code!+	| dup
 	32 swap clz - cte!+
-	$4b	code!+	| <<
-	$29	code!+	| swap
-	$3a code!+ | -
+	TK<<	code!+	| <<
+	TKswap	code!+	| swap
+	TK- code!+ | -
 	;
 
 :*nro
@@ -233,16 +244,17 @@
 	calcmagic
 	divs cte!+
 	divm cte!+
-	$3e code!+ 		| *>>
+	TK*>> code!+ 		| *>>
 	signadj!+ ;
 
 |----  2 / --> dup 31 >> + 2/
 :/cte2
-	$23 code!+ | dup 31
+	TKdup code!+ | dup 31
 	31 cte!+
-	$4d code!+ | >>>
-	$39	code!+ | +
-	$49	code!+ | 2/
+	TK>>> code!+ | >>>
+	TK+	code!+ | +
+	1 cte!+
+	TK>> code!+ | 2/
 	;
 
 |----  4 / --> dup 31 >> 30 >>> + 2 >>
@@ -253,13 +265,13 @@
 	2 =? ( /cte2 ; )
 	swap
 	31 cte!+
-	$23 code!+
-	$4c code!+ | >>
+	TKdup code!+ | dup
+	TK>> code!+ | >>
 	33 32 pick2 clz - - cte!+ |30
-	$4d code!+ | >>>
-	$39	code!+	| +
+	TK>>> code!+ | >>>
+	TK+	code!+	| +
 	31 swap clz - cte!+ | 2
-	$4c code!+ | >>
+	TK>> code!+ | >>
 	;
 
 :i/
@@ -292,16 +304,16 @@
 :/modcte
 	dup
 	calcmagic
-	$23 code!+		| dup
+	TKdup code!+	| dup
 	divm cte!+
 	divs cte!+
-	$47 code!+ 		| *>>
+	TK*>> code!+ 	| *>>
 	signadj!+
-	$29	code!+	| swap
-	$25	code!+	| over
-	cte!+		| NRO
-	$3B	code!+	| *
-	$3A	code!+	| -
+	TKswap	code!+	| swap
+	TKover	code!+	| over
+	cte!+			| NRO
+	TK*	code!+		| *
+	TK-	code!+		| -
 	;
 
 |----  8 /mod --> dup / swap mod
@@ -310,28 +322,28 @@
 	vTOS
 	dup 1 - an? ( /modcte ; )
 	swap
-    $23 code!+
-	$23 code!+
+    TKdup code!+ 	| dup
+	TKdup code!+	| dup  
     31 cte!+ | 31
-	$4c code!+ | >>
+	TK>> code!+ | >>
 	33 32 pick2 clz - - cte!+ |30
-	$4d code!+ | >>>
-	$39	code!+	| +
+	TK>>> code!+ | >>>
+	TK+	code!+	| +
 	31 over clz - cte!+ 	| 2
-	$4c code!+ | >>
-	$29	code!+	| swap
-	$23 code!+ | dup
+	TK>> code!+ | >>
+	TKswap	code!+	| swap
+	TKdup code!+ | dup
 	31 cte!+ |31
-	$4c code!+ | >>
+	TK>> code!+ | >>
 	33 32 pick2 clz - - cte!+
-	$4d code!+	| >>>
-	$29	code!+	| swap
-	$25	code!+	| over
-	$39	code!+	| +
+	TK>>> code!+	| >>>
+	TKswap	code!+	| swap
+	TKover	code!+	| over
+	TK+	code!+	| +
 	1 - cte!+  | mask
-	$35 code!+	| AND
-	$29	code!+	| swap
-	$3A	code!+	| -
+	TKand code!+	| AND
+	TKswap	code!+	| swap
+	TK-	code!+	| -
 	;
 
 
@@ -346,13 +358,13 @@
 	dup
 	calcmagic
 	divm cte!+
-	$23 code!+
+	TKdup code!+ | dup
 	divs cte!+
-	$3e code!+ 		| *>>
+	TK*>> code!+ 		| *>>
 	signadj!+
 	cte!+	| NRO
-	$3B	code!+	| *
-	$3A	code!+	| -
+	TK*	code!+	| *
+	TK-	code!+	| -
 	;
 
 |----  8 mod --> $7 and
@@ -360,18 +372,18 @@
 :modnro
     code<<
 	dup 1 - an? ( modcte ; )
+	TKdup code!+ | dup 31
 	31 cte!+
-	$23 code!+ | dup 31
-	$4c code!+ | >>
+	TK>> code!+ | >>
 	33 32 pick2 clz - - cte!+
-	$4d code!+	| >>>
-	$29	code!+	| swap
-	$25	code!+	| over
-	$39	code!+	| +
+	TK>>> code!+	| >>>
+	TKswap	code!+	| swap
+	TKover	code!+	| over
+	TK+	code!+	| +
 	1 - cte!+ | mask
-	$35 code!+	| AND
-	$29	code!+	| swap
-	$3A	code!+	| -
+	TKand code!+	| AND
+	TKswap	code!+	| swap
+	TK-	code!+	| -
 	;
 
 
@@ -457,39 +469,19 @@
 	.dup 2code!+ ;
 
 :iSYS
-	2code!+ ;
+	.drop 2code!+ ;
+
 
 #vmc
-0 0 0 0 0 0 0
-idec ihex idec idec istr
-iwor ivar idwor idvar
-i; i( i) i[ i]
-iEX i0? i1? i+? i-?
-i<? i>? i=? i>=? i<=? i<>? iA? iN? iB?
-iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP
-iROT i2DUP i2DROP i3DROP i4DROP i2OVER i2SWAP
-i>R iR> iR@
-iAND iOR iXOR
-i+ i- i* i/
-i<< i>> i>>>
-iMOD i/MOD i*/ i*>> i<</
-iNOT iNEG iABS iSQRT iCLZ
-
-i@ iC@ iQ@ i@+ iC@+ iQ@+
-i! iC! iQ! i!+ iC!+ iQ!+
-i+! iC+! iQ+!
-i>A iA> iA@ iA! iA+ iA@+ iA!+
-i>B iB> iB@ iB! iB+ iB@+ iB!+
-iMOVE iMOVE> iFILL
-iCMOVE iCMOVE> iCFILL
-iQMOVE iQMOVE> iQFILL
-iUPDATE iREDRAW
-iMEM iSW iSH iFRAMEV
-iXYPEN iBPEN iKEY iCHAR
-iMSEC iTIME iDATE
-iLOAD iSAVE iAPPEND
-iFFIRST iFNEXT
-iSYS
+0 0 0 0 0 0 0 idec ihex idec idec istr iwor ivar idwor idvar
+i; i( i) i[ i] iEX i0? i1? i+? i-? i<? i>? i=? i>=? i<=? i<>?
+iA? iN? iB? iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP iROT i2DUP i2DROP i3DROP i4DROP
+i2OVER i2SWAP i>R iR> iR@ iAND iOR iXOR i+ i- i* i/ i<< i>> i>>> iMOD
+i/MOD i*/ i*>> i<</ iNOT iNEG iABS iSQRT iCLZ i@ iC@ iQ@ i@+ iC@+ iQ@+ i!
+iC! iQ! i!+ iC!+ iQ!+ i+! iC+! iQ+! i>A iA> iA@ iA! iA+ iA@+ iA!+ i>B
+iB> iB@ iB! iB+ iB@+ iB!+ iMOVE iMOVE> iFILL iCMOVE iCMOVE> iCFILL iQMOVE iQMOVE> iQFILL iUPDATE
+iREDRAW iMEM iSW iSH iFRAMEV iXYPEN iBPEN iKEY iCHAR iMSEC iTIME iDATE iLOAD iSAVE iAPPEND iFFIRST
+iFNEXT iSYS
 
 0 0 0 0 0 |iINK i'INK iALPHA iOPX iOPY
 0 0 0 0 |iOP iLINE iCURVE iCURVE3
@@ -533,7 +525,7 @@ iSYS
 	'bcode ( bcode> <?
 		@+
 
-		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
+|		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 |		"asm/code.asm" savemem | debug
 
 		anastep

@@ -19,6 +19,9 @@
 ::code!+ | tok --
 	bcode> !+ 'bcode> ! ;
 
+::2code!+ | adr -- adr
+	dup 4 - @ code!+ ;
+
 ::code<< | --
 	-4 'bcode> +! ;
 
