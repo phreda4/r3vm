@@ -117,6 +117,8 @@
 		) 4drop ;
 
 |-----------------------------------------
+::colavg | a b -- c
+	2dup xor $fefefefe and 1 >> >r or r> - ;
 
 ::col50% | c1 c2 -- c
 	$fefefe and swap $fefefe and + 1 >> ;

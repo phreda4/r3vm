@@ -271,9 +271,10 @@
 	+? ( "+" ,s ) ,d
 	"]" ,s ;
 
-#tiposrm mt0 mt1 mt2 mt3 mt4 mt5r mt6 mt0 mt0
+#tiposrm mt0 mt1 mt2 mt3 mt4 mt5 mt6 mt0 mt0
 #tiposrmb mt0 mt1 mt2 mt3 mt4 mt5b mt6 mt0 mt0
 #tiposrmw mt0 mt1 mt2 mt3 mt4 mt5w mt6 mt0 mt0
+#tiposrmq mt0 mt1 mt2 mt3 mt4 mt5r mt6 mt0 mt0
 
 ::,cell | val --
 	dup $f and 2 << 'tiposrm + @ ex ;
@@ -284,19 +285,37 @@
 ::,cellw | nro --
 	dup $f and 2 << 'tiposrmw + @ ex ;
 
+::,cellq | nro --
+	dup $f and 2 << 'tiposrmq + @ ex ;
+
+|---------- ASM
+| "movzx %0,#1" --> movzx rax,ebx ; TOS,NOS
+| "add %-0,%0" --> add rax,rax ; TOS(new),TOS ****
+|
 :,cstack | adr -- adr
-	c@+ $30 -
+	c@+
+|	$2d =? ( ) | next
+
+	$30 -
 	0? ( drop TOS ,cell ; )
 	1 - 2 << NOS swap - @ ,cell ;
 
 :,cstackb | adr -- adr
-	c@+ $30 -
+	c@+
+	$30 -
 	0? ( drop TOS ,cellb ; )
 	1 - 2 << NOS swap - @ ,cellb ;
+
+:,cstackq | adr -- adr
+	c@+
+	$30 -
+	0? ( drop TOS ,cellb ; )
+	1 - 2 << NOS swap - @ ,cellq ;
 
 :,car
 	$23 =? ( drop ,cstack ; ) | # dword reg
 	$24 =? ( drop ,cstackb ; ) | $ byte reg
+	$25 =? ( drop ,cstackq ; ) | % qword reg
 	$3b =? ( drop ,cr ; ) | ;
 	,c ;
 
@@ -304,6 +323,7 @@
 	( c@+ 1? ,car ) 2drop
 	,cr ;
 
+|---------- ASM
 
 ::,printstk
 	"; [ " ,s

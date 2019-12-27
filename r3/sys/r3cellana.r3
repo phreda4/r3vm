@@ -35,13 +35,17 @@
 :cellnew | -- nro
 	ncell
 	0 over 2 << 'cellf + !
+|	dup itok ";ini:%d r:%d" ,format ,cr | DEBUG
 	itok over 2 << 'cellv + ! | inicio de vida
 	dup 1 + 'ncell !
 	;
 
 :cellend | nro ---
+|	dup itok ";end:%d r:%d" ,format ,cr | DEBUG
 	itok 10 <<
-	swap 2 << 'cellv + +!  ;
+	swap 2 << 'cellv +
+	dup @ $ff000fff and
+	rot or swap ! ;
 
 ::cellnewg2 | -- nc
 	ncell dup 1 + 'ncell ! ;
@@ -97,7 +101,7 @@
 	IniStack
 	0 'itok !
 	0 'ncell !
-	( 1? 1 - newREG ) drop ;
+	( 1? 1 - newREG cellW ) drop ;
 
 |------------------------------------------
 
@@ -133,17 +137,17 @@
 	;
 
 |---- pila
-:iDUP 	cellR newreg ;
-:iOVER  newreg ; | nos cellr
-:iPICK2 newreg ; | nos cellr
-:iPICK3 newreg ; | nos cellr
-:iPICK4 newreg ; | nos cellr
-:i2OVER	ipick2 ipick2 ;
+:iDUP 	.dup ;
+:iOVER  .over ;
+:iPICK2 .pick2 ;
+:iPICK3 .pick3 ;
+:iPICK4 .pick4 ;
+:i2OVER	.2over ;
 
 :iSWAP	.swap ;
 :iNIP   .nip ;
-:iROT   .rot
-:i2DUP  iover iover ;
+:iROT   .rot ;
+:i2DUP  .2dup ;
 :i2SWAP .2swap ;
 
 :iDROP  endreg ;
@@ -151,34 +155,34 @@
 :i3DROP idrop
 :i2DROP	idrop idrop ;
 
-:i>R	endREG ;
-:iR>    newreg ;
-:iR@	newreg ;
+:i>R	.>r ;
+:iR>    .r> ;
+:iR@	.r@ ;
 
-:iop2a1	cellR endREG cellW ; | + - * and or xor
-:iop1a1	cellW ; | neg not
+:iop2a1	endREG endREG newreg cellW ; | + - * and or xor
+:iop1a1	endreg newreg cellW ; | neg not
 
 :i/
-	cellR cellA endREG ;
+	endREG endREG newreg cellW ;
 :i*/
-	cellR cellA endREG cellR endREG cellW ;
+	endREG endREG endREG newreg cellW ;
 :i/MOD
-	cellR ;
+	endREG endREG newreg cellW newreg cellW ;
 :iMOD
-	cellR endREG ;
+	endREG endREG newreg cellW ;
 :iABS
-	cellW ;
+	endREG newreg cellW ;
 :iSQRT
-	cellW ;
+	endREG newreg cellW ;
 :iCLZ
-	cellW ;
+	endREG newreg cellW ;
 :i<<
 :i>>
 :i>>>
-	cellR cellC endREG ;
+	endREG endREG newreg cellW ;
 :i*>>
 :i<</
-	cellR cellC endREG cellR endREG cellW cellA ;
+	endREG endREG endREG newreg cellW ;
 
 :i@
 :iC@
@@ -247,23 +251,12 @@
 :i2? cellr endREG cellr endREG cellr gwhilejmp ;
 
 #vmc
-0 0 0 0 0 0 0 		| 0 1 2 3 4 5 6
-idec idec idec idec istr    | 7 8 9 a b
-iwor ivar idwor idvar		| c d e f
-i; i( i) i[ i] iEX			| 10..15
-i0? i0? i0? i0? i1? i1? i1? i1? i1? i1? i1? i1? i2?	
-iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP
-iROT i2DUP i2DROP i3DROP i4DROP i2OVER i2SWAP
-i>R iR> iR@
-iop2a1 iop2a1 iop2a1
-iop2a1 iop2a1 iop2a1 i/
-i<< i>> i>>>
-iMOD i/MOD i*/ i*>> i<</
-iop1a1 iop1a1 iABS iSQRT iCLZ
-
-i@ iC@ iQ@ i@+ iC@+ iQ@+							| 49..4e
-i! iC! iQ! i!+ iC!+ iQ!+							| 4f..54
-i+! iC+! iQ+!										| 55..57
+0 0 0 0 0 0 0 idec idec idec idec istr iwor ivar idwor idvar
+i; i( i) i[ i] iEX i0? i0? i0? i0? i1? i1? i1? i1? i1? i1? 
+i1? i1? i2? iDUP iDROP iOVER iPICK2 iPICK3 iPICK4 iSWAP iNIP iROT i2DUP i2DROP i3DROP i4DROP
+i2OVER i2SWAP i>R iR> iR@ iop2a1 iop2a1 iop2a1 iop2a1 iop2a1 iop2a1 i/ i<< i>> i>>> iMOD 
+i/MOD i*/ i*>> i<</ iop1a1 iop1a1 iABS iSQRT iCLZ i@ iC@ iQ@ i@+ iC@+ iQ@+ i! 
+iC! iQ! i!+ iC!+ iQ!+ i+! iC+! iQ+!
 i>A iA> iA@ iA! iA+ iA@+ iA!+
 i>B iB> iB@ iB! iB+ iB@+ iB!+
 iMOVE iMOVE> iFILL

@@ -59,9 +59,12 @@
 
 :gr_mix | a b al -- c (DWORD col,BYTE alpha)
 	>r
-	dup $ff00ff and pick2 $ff00ff and over - r@ * 8 >> + $ff00ff and
-    rot rot
-    $ff00 and swap $ff00 and over - r> * 8 >> + $ff00 and
+	dup $ff00ff and
+	pick2 $ff00ff and
+	over - r@ * 8 >> + $ff00ff and
+    rot rot $ff00 and
+	swap $ff00 and
+	over - r> * 8 >> + $ff00 and
 	or ;
 
 :mixcolor | niv -- color

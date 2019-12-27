@@ -491,8 +491,7 @@ iFNEXT iSYS
 
 |------------------------------------------
 :tocode | adr token -- adr
-|	"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
-
+|	"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 	$ff and 2 << 'vmc + @ ex ;
 
 :,header | adr -- adr
@@ -525,7 +524,7 @@ iFNEXT iSYS
 	'bcode ( bcode> <?
 		@+
 
-|		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
+		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 |		"asm/code.asm" savemem | debug
 
 		anastep

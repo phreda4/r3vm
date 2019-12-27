@@ -628,6 +628,6 @@ gSYSCALL gSYSMEM
 |		,cr
 
 		codestep
-		"asm/code.asm" savemem | debug
+|		"asm/code.asm" savemem | debug
 
 		) drop ;

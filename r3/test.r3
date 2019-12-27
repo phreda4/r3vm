@@ -4,14 +4,14 @@
 ^r3/lib/sys.r3
 
 :colmix | c1 c2 m -- c
+	>r
+	dup $ff00ff and
 	pick2 $ff00ff and
-	pick2 $ff00ff and
-	over - pick2 * 8 >> +
-	$ff00ff and >r
+	over - r@ * 8 >> + $ff00ff and
+    rot rot $ff00 and
 	swap $ff00 and
-	swap $ff00 and
-	over - rot * 8 >> +
-	$ff00 and r> or ;
+	over - r> * 8 >> + $ff00 and
+	or ;
 
 :patternxor
  vframe >a
