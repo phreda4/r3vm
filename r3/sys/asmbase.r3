@@ -212,6 +212,9 @@
 #x1 #y1 #x2 #y2 #bx #by
 
 |*******************************
+:cc3 | ...
+	3 <? ( drop 4drop LINE ; ) drop
+
 ::CURVE3 | xf yf x2 y2 x1 y1
 	pick3 pick2 + 1 >> pick3 pick2 + 1 >> 'by ! 'bx !
 	'y1 ! 'x1 !
@@ -225,10 +228,9 @@
 	2swap >r >r
 	pick3 pick2 + 1 >> pick3 pick2 + 1 >>
 	2swap r> r>
-	r> 3 <? ( drop 4drop line )( drop CURVE3 )
-	r> 3 <? ( drop 4drop line ; )
-	drop CURVE3 ;
-
+	r> cc3 |3 <? ( drop 4drop line )( drop CURVE3 )
+	r> cc3 |3 <? ( drop 4drop line ; ) drop CURVE3 ;
+	;
 
 |-------------------------------------------------
 | PINTADO DE POLIGONOS
@@ -243,15 +245,20 @@
 |------------------- llenadores
 :solidofill
 	( 1? 1 - ink a!+ ) drop ;
+
 :solidoalpha
 	$ff xor
 	swap ( 1? 1 - over pxa ) 2drop ;
 
+:rlq
+	QFULL =? ( drop solidofill ; )
+	1? ( solidoalpha ; )
+	drop 2 << a+ ;
+
 :runlenSolid
 	'runlenscan
-	( @+ 1? 
-		dup getlen swap getval
-		QFULL =? ( drop solidofill )( 1? ( solidoalpha )( drop 2 << a+ ) )
+	( @+ 1?
+		dup getlen swap getval rlq
 		) 2drop
 	-4 a+ ;
 
@@ -266,12 +273,16 @@
 		over mex 8 >> mixcolor acpx!+
 		ma 'mex +! ) 2drop ;
 
+:rlq
+	QFULL =? ( drop Ldegfill ; )
+	1? ( Ldegalpha ; )
+	drop dup 2 << a+ ma * 'mex +! ;
+
 :runlenLdeg
 	mtx neg ma * over BPP >> mty - mb * - 'mex !
 	'runlenscan
-	( @+ 1? 
-		dup getlen swap getval
-		QFULL =? ( drop Ldegfill )( 1? ( Ldegalpha )( drop dup 2 << a+ ma * 'mex +! ) )
+	( @+ 1?
+		dup getlen swap getval rlq
 		) 2drop
 	-4 a+ ;
 
@@ -294,14 +305,17 @@
 	    mex mey distf 16 >> mixcolor acpx!+
 	    ma 'mex +! mb 'mey +!
 		) 2drop ;
+:rlq
+	QFULL =? ( drop Rdegfill ; )
+	1? ( Rdegalpha ; )
+	drop dup 2 << a+ dup ma * 'mex +! mb * 'mey +! ;
 
 :runlenRdeg
     mtx neg ma * over BPP >> mty - mb * - 'mex !
     mtx neg mb * over BPP >> mty - ma * + 'mey !
 	'runlenscan
-	( @+ 1? 
-		dup getlen swap getval
-		QFULL =? ( drop Rdegfill )( 1? ( Rdegalpha )( drop dup 2 << a+ dup ma * 'mex +! mb * 'mey +!  ) )
+	( @+ 1?
+		dup getlen swap getval rlq
 		) 2drop
 	-4 a+ ;
 
@@ -318,13 +332,17 @@
 	    ma 'mex +! mb 'mey +!
 		) 2drop ;
 
+:rlq
+	QFULL =? ( drop Texfill ; )
+	1? ( Texalpha ; )
+	drop dup 2 << a+ dup ma * 'mex +! mb * 'mey +! ;
+
 :runlenTex
     mtx neg ma * over BPP >> mty - mb * - 'mex !
     mtx neg mb * over BPP >> mty - ma * + 'mey !
 	'runlenscan
-	( @+ 1? 
-		dup getlen swap getval
-		QFULL =? ( drop Texfill )( 1? ( Texalpha )( drop dup 2 << a+ dup ma * 'mex +! mb * 'mey +! ) )
+	( @+ 1?
+		dup getlen swap getval rlq
 		) 2drop
 	-4 a+ ;
 
@@ -567,6 +585,9 @@
 	2swap PCURVEI PCURVEI ;
 
 |*******************************
+:c3 | ..
+	3 <? ( drop 4drop plineI ; ) drop
+
 :PCURVE3I | xf yf x2 y2 x1 y1
 	pick3 pick2 + 1 >> pick3 pick2 + 1 >> 'by ! 'bx !
 	'y1 ! 'x1 !
@@ -580,9 +601,9 @@
 	2swap >r >r
 	pick3 pick2 + 1 >> pick3 pick2 + 1 >>
 	2swap r> r>
-	r> 3 <? ( drop 4drop plineI )( drop PCURVE3I )
-	r> 3 <? ( drop 4drop plineI ; )
-	drop PCURVE3I ;
+	r> c3 |3 <? ( drop 4drop plineI )( drop PCURVE3I )
+	r> c3 |3 <? ( drop 4drop plineI ; ) drop PCURVE3I ;
+	;
 
 ::PLINE | x y --
 	BPP << swap BPP << swap PLINEI ;

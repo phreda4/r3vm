@@ -72,7 +72,7 @@
 	filenow> 4 + files> >=? ( drop reload 'files )
 :inivideos
 	dup 'filenow> !
-	@ "videos/%s" mprint
+	@ "videos/%s" mformat
 	| test file?????
 	512 300 video
 	;
@@ -150,20 +150,20 @@
 	colorbox
 	swap 8 + swap 3 + atxy
 
-	4 + dup print
+	4 + dup emits
 	64 +
 	28 pick2 66 * 158 + atxy
-	dup print
+	dup emits
 	64 + 64 + 4 +
 	;
 
 :turnodraw
 	robotobold 48 fontr!
 	$ffffff 'ink ! 70 76 atxy
-	"TURNOS" print
+	"TURNOS" emits
 
 	$1d242b 'ink ! 330 76 atxy
-	"INFORMACION" print
+	"INFORMACION" emits
 
 	robotobold 40 fontr!
 	'boxtur
@@ -276,10 +276,10 @@
 :debuglline
 	'infotime
 	( infotime> <?
-		"* " print
-		q@+ .h print " " print
-		q@+ .h print " " print
-		@+ print cr
+		"* " emits
+		q@+ .h emits " " emits
+		q@+ .h emits " " emits
+		@+ emits cr
 		) drop ;
 
 :parseline | adr -- adr'
@@ -336,7 +336,7 @@
 :mm
 	mark
 	cls home
-	" cargando..." print
+	" cargando..." emits
 	redraw
 
 |	"img/back-turnero.jpg"
@@ -384,7 +384,7 @@
 	showvideo
 	turnodraw
 
-|	cr nowsdate 'd1 q@ 'd2 q@ "%h %h %h" mprint print
+|	cr nowsdate 'd1 q@ 'd2 q@ "%h %h %h" print
 
 	infodraw
 

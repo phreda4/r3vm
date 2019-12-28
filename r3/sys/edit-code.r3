@@ -241,9 +241,9 @@
 	mark
 	dup c@ 46 =? ( swap 2 + 'path ,s ) drop
 	,w
-|	dup "mem/inc-%w.mem" mprint savemem
+|	dup "mem/inc-%w.mem" mformat savemem
 	empty
-|	"r4/system/inc-%w.txt" mprint run
+|	"r4/system/inc-%w.txt" mformat run
 	drop
 	;
 
@@ -376,7 +376,7 @@
 
 :linenro | lin -- lin
 	$222222 $aaaaaa fontmcolor
-	dup prilinea + .d 3 .r. print sp ;
+	dup prilinea + .d 3 .r. emits sp ;
 
 #ycursor
 #xcursor
@@ -476,7 +476,7 @@
 :findmodekey
 	$0 'ink !
 	|1 linesfill
-	" > " print
+	" > " emits
 
 	key
     <ret> =? ( controlf )
@@ -488,21 +488,21 @@
 	;
 
 :controlkey
-	" F-Find" print
+	" F-Find" emits
 
-|	'controle 18 ?key " E-Edit" print | ctrl-E dit
-||	'controlh 35 ?key " H-Help" print  | ctrl-H elp
-|	'controlz 44 ?key " Z-Undo" print
+|	'controle 18 ?key " E-Edit" emits | ctrl-E dit
+||	'controlh 35 ?key " H-Help" emits  | ctrl-H elp
+|	'controlz 44 ?key " Z-Undo" emits
 
-|	'controlx 45 ?key " X-Cut" print
-|	'controlc 46 ?key " C-Copy" print
-|	'controlv 47 ?key " V-Paste" print
+|	'controlx 45 ?key " X-Cut" emits
+|	'controlc 46 ?key " C-Copy" emits
+|	'controlv 47 ?key " V-Paste" emits
 
-||	'controld 32 ?key " D-Def" print
+||	'controld 32 ?key " D-Def" emits
 
-||	'controln 49 ?key " N-New" print
-||	'controlm 50 ?key " M-Mode" print
-|	'controlf 33 ?key " F-Find" print
+||	'controln 49 ?key " N-New" emits
+||	'controlm 50 ?key " M-Mode" emits
+|	'controlf 33 ?key " F-Find" emits
 
 |	'controla <up>
 |	'controls <dn>
@@ -547,9 +547,9 @@
 	home
 	$555555 'ink ! backline
 	$ff $ffffff fontmcolor
-	" r3 " print
+	" r3 " emits
 	$3f $ffffff fontmcolor
-	" F1.Run " print
+	" F1.Run " emits
 
 |------------------------------
 |	'debugrun dup <f2> "2Debug" $fff37b flink sp
@@ -564,10 +564,10 @@
 	0 rows 1 - gotoxy
 	$555555 'ink ! backline
 	$7f $ffffff fontmcolor sp
-	'name print sp
+	'name emits sp
 	$ff $ffffff fontmcolor sp
-	xcursor 1 + .d print sp
-	ycursor 1 + .d print sp
+	xcursor 1 + .d emits sp
+	ycursor 1 + .d emits sp
 
 	panelcontrol 1? ( drop controlkey ; ) drop
 	findmode 1? ( drop findmodekey ; ) drop

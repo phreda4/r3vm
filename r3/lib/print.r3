@@ -3,7 +3,7 @@
 | PHREDA 2018
 |---------------
 ^r3/lib/sys.r3
-^r3/lib/str.r3
+^r3/lib/mem.r3
 
 ^r3/lib/fonti.r3
 |^r3/lib/fontpc.r3
@@ -71,16 +71,19 @@
 ::home
 	0 'ccx ! 0 'ccy ! ;
 
-::print | "" --
+::emits | "" --
 	( c@+ 1? emit ) 2drop ;
+
+::print | s s "" --
+	mformat emits ;
 
 ::printc | "" --
 	swprint 1 >> sw 1 >> swap - 'ccx !
-	print ;
+	emits ;
 
 ::printr | "" --
 	swprint sw swap - 'ccx !
-	print ;
+	emits ;
 
 ::cntprint | "" cnt --
 	( 1? 1 - swap c@+
@@ -89,7 +92,7 @@
 
 ::cntprintr | "" cnt --
 	swap count swap -
-	nsp print ;
+	nsp emits ;
 
 ::lprint
 	( c@+ 1? $ff and

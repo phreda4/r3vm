@@ -199,7 +199,7 @@
 :printfn | n
 	dup getlvl 1 << nsp
 	dup getinfo $3 and "+- ." + c@ emit
-	sp getname print sp
+	sp getname emits sp
 	;
 
 #filecolor $ff00 $bf00 $bfbfbf $3f00
@@ -235,8 +235,8 @@
 	drop
 
 	mark
-	"r3 " ,s 'path ,s "/" ,s ,s ,eol
-|	"r3v " ,s 'path ,s "/" ,s ,s ,eol
+|	"r3 " ,s 'path ,s "/" ,s ,s ,eol
+	"r3v " ,s 'path ,s "/" ,s ,s ,eol
 	empty here
 	sys drop
 	;
@@ -281,7 +281,7 @@
 	"	key >esc< =? ( exit ) drop" ,ln
 	"	;" ,ln ,cr
 	": 'main onshow ;" ,ln
-|	'name 'path "%s/%s" mprint savemem
+|	'name 'path "%s/%s" mformat savemem
 	empty
 	editfile
 	;
@@ -361,14 +361,14 @@
 	$888888 'ink !
 	0 rows 1 - gotoxy backline
 	$888888 $ffffff fontmcolor
-|	" /" print 'path print
-	" " print 'name print
+|	" /" emits 'path emits
+	" " emits 'name emits
 
 	0 0 gotoxy backline
 	$0 $ff00 fontmcolor
-	" r3" print
+	" r3" emits
 	$0 $ff0000 fontmcolor
-	"d4 " print
+	"d4 " emits
 
 	0 1 gotoxy
 	;

@@ -4,10 +4,10 @@
 ^./r3base.r3
 
 :tok>dicn | nro -- adr
-	8 >>> 4 << dicc + @ "%w" mprint ;
+	8 >>> 4 << dicc + @ "%w" mformat ;
 
 :tok>cte | tok -- nro
-	8 >>> src + "%w" mprint ;
+	8 >>> src + "%w" mformat ;
 
 :tok>str | tok -- str
 	8 >>> src + ;

@@ -43,10 +43,10 @@
 :load.inc | str -- str new ; incluye codigo
     here over		| str here str
 
-|	"." =pre 1? ( drop 2 + 'path "%s%w" mprint )( drop "%w" mprint )
-|	'r3path "%s/%l" mprint
+|	"." =pre 1? ( drop 2 + 'path "%s%w" mformat )( drop "%w" mformat )
+|	'r3path "%s/%l" mformat
 
-	"%l" mprint
+	"%l" mformat
 |	dup slog
 
 	load here =? ( drop 0 "File not found" 'error ! "File not found" slog ; ) | no existe

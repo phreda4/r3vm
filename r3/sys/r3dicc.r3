@@ -86,25 +86,25 @@
 	97 >r
 	dup 16 << 24 >> | usedD
 	neg dup r> ncar >r
-	"--" print
+	"--" emits
 	over 24 << 24 >> + | deltaD
 	r> ncar >r
 	12 << 28 >>
-	0 >? ( dup " R:--" print r> ncar >r )
-	0 <? ( dup " R:" print neg r> ncar >r "--" print )
+	0 >? ( dup " R:--" emits r> ncar >r )
+	0 <? ( dup " R:" emits neg r> ncar >r "--" emits )
 	drop r> drop ;
 
 ::printinfword | inf --
 	dup 12 >> $fff and
-	0? ( "X" print 2drop ; )	| no usada
+	0? ( "X" emits 2drop ; )	| no usada
 	"%d " print
 	1 and? (
-		$4 nand? ( "C" print )	| dato constante
+		$4 nand? ( "C" emits )	| dato constante
 	)(
-		$10 and? ( ";" print )	| varios ;
-		$20 and? ( "R" print )	| recursivo
-		$80 and? ( "." print )	| continuo (sin ;)
-		$200 nand? ( "L" print )
+		$10 and? ( ";" emits )	| varios ;
+		$20 and? ( "R" emits )	| recursivo
+		$80 and? ( "." emits )	| continuo (sin ;)
+		$200 nand? ( "L" emits )
 	)
 	drop ;
 
@@ -142,10 +142,10 @@
 
 ::printinfovar | inf --
 	dup 12 >> $fff and
-	0? ( "X" print 2drop ; )		| no usada
+	0? ( "X" emits 2drop ; )		| no usada
 	drop
-	$4 nand? ( "C " print )	| dato constante
-	6 >> vtype print ;
+	$4 nand? ( "C " emits )	| dato constante
+	6 >> vtype emits ;
 
 ::,printinfovar | inf --
 	dup 12 >> $fff and

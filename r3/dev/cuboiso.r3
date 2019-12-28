@@ -32,6 +32,26 @@
 #x7 #y7 #z7	| centro del cubo
 #n1 #n2 #n3
 
+#xmask * 1024
+#ymask * 1024
+#xmask1 * 512
+#ymask1 * 512
+#xmask2 * 256
+#ymask2 * 256
+#xmask3 * 128
+#ymask3 * 128
+#xmask4 * 64
+#ymask4 * 64
+#xmask5 * 32
+#ymask5 * 32
+#xmask6 * 16
+#ymask6 * 16
+#xmask7 * 8
+#ymask7 * 8
+
+#xmasl xmask xmask1 xmask2 xmask3 xmask4 xmask5 xmask6 xmask7 0
+#ymasl ymask ymask1 ymask2 ymask3 ymask4 ymask5 ymask6 ymask7 0
+
 :2/ 1 >> ;
 :2* 1 << ;
 
@@ -91,16 +111,20 @@
 	;
 
 :calco
-	x0 x1 - x7 * y0 y1 - y7 * + z0 z1 - z7 * + dup 'n1 ! 31 >> $1 and
-	x0 x2 - x7 * y0 y2 - y7 * + z0 z2 - z7 * + dup 'n2 ! 31 >> $2 and or
-	x0 x4 - x7 * y0 y4 - y7 * + z0 z4 - z7 * + dup 'n3 ! 31 >> $4 and or
+	x0 x1 - x7 * y0 y1 - y7 * + z0 z1 - z7 * + dup 'n1 ! 63 >> $1 and
+	x0 x2 - x7 * y0 y2 - y7 * + z0 z2 - z7 * + dup 'n2 ! 63 >> $2 and or
+	x0 x4 - x7 * y0 y4 - y7 * + z0 z4 - z7 * + dup 'n3 ! 63 >> $4 and or
 	$7 xor 'mask ! ;
 
+#xr #yr
+
 :freelook
+	yr xr mrotx mroty
+	bpen 0? ( drop ; ) drop
 	xypen
 	sh 2/ - 7 << swap
 	sw 2/ - neg 7 << swap
-	neg mrotx mroty ;
+	neg 'xr ! 'yr ! ;
 
 |-----------------------------------------
 :getn | id -- z y x
@@ -121,41 +145,80 @@
 
 #vecpos * 512
 
+|-- bitmask to childmask
+|  10110111 -- f0ff0fff
+:b2b
+	dup 12 << $f0000 and swap $f and or
+	dup 6 << $3000300 and swap $30003 and or | 3030303
+	dup 2 << $10101010 and swap $1010101 and or
+	dup 2 << or dup 1 << or
+
+
 :raycast
 	a@ $f0f0f colavg a!+ ;
 
 :draw1
 	minx miny xy>v >a
 	sw lenx - 2 <<
-	0 ( leny <? 
+	0 ( leny <?
 		0 ( lenx <?
 			raycast
 			1 + ) drop
 		over a+
 		1 + ) 2drop ;
 
+|-----------------------------------
+:getyxmask | xy lev norden -- xy lev norden yxmask
+	over 2 <<
+	dup 'ymasl + @ pick4 12 >> $3ff and + c@
+	swap 'xmasl + @ pick4 $3ff and + c@ and ;
 
+|:getyxmask
+|	adrx c@+ swap 'adrx ! precalcy and ;
 
+:raytest | y x --
+	over 12 << over or	| yx
+	0 0 getyxmask
+	0? ( 4drop 4 a+ ; )
+	$7f0000 or
+	a!+
+	3drop ;
+
+:drawf | x y z --
+	minx miny xy>v >a
+	sw lenx - 2 <<
+	0 ( leny <?
+		0 ( lenx <?
+|			rayfull
+			raytest
+			1 + ) drop
+		over a+
+		1 + ) 2drop ;
+
+|-----------------------------------
 |	0 0
 |	xx1 -? ( rot + swap )( + )
 |	xx2 -? ( rot + swap )( + )
 |	xx3 -? ( rot + swap )( + )
 |-- V1
 :sminmax3 | a b c -- sn sx
-	dup dup 31 >> dup not rot and rot rot and		| + -
-	rot dup dup 31 >> dup not rot and rot rot and
+	dup dup 63 >> dup 
+	not rot and rot rot and		| + -
+	rot dup dup 63 >> dup 
+	not rot and rot rot and
 	rot + >r + r>
-	rot dup dup 31 >> dup not rot and rot rot and
+	rot dup dup 63 >> dup 
+	not rot and rot rot and
 	rot + >r + r> swap ;
 
 |-- V2
 :sminmax3 | a b c -- sn sx
-	pick2 dup 31 >> not and
-	pick2 dup 31 >> not and +
-	over dup 31 >> not and + >r
-	dup 31 >> and
-	swap dup 31 >> and +
-	swap dup 31 >> and +
+	pick2 dup 63 >> not and
+	pick2 dup 63 >> not and +
+	over dup 63 >> not and + >r
+	dup 63 >> and
+	swap dup 63 >> and +
+	swap dup 63 >> and +
 	r> ;
 
 :packxyz | x y z -- zyx
@@ -176,25 +239,6 @@
 
 #colores $ffffff $ff0000 $00ff00 $ffff00 $0000ff $ff00ff $00ffff $888888
 
-#xmask * 1024
-#ymask * 1024
-#xmask1 * 512
-#ymask1 * 512
-#xmask2 * 256
-#ymask2 * 256
-#xmask3 * 128
-#ymask3 * 128
-#xmask4 * 64
-#ymask4 * 64
-#xmask5 * 32
-#ymask5 * 32
-#xmask6 * 16
-#ymask6 * 16
-#xmask7 * 8
-#ymask7 * 8
-
-#xmasl xmask xmask1 xmask2 xmask3 xmask4 xmask5 xmask6 xmask7 0
-#ymasl ymask ymask1 ymask2 ymask3 ymask4 ymask5 ymask6 ymask7 0
 |--------------------------------------
 :pix
 	an? ( b@+ ; )
@@ -263,7 +307,7 @@
 		) 3drop
 
 	200 'y !
-	lenx
+	leny
 	'ymasl
 	( @+ 1?
 		10 y xy>v >a 10 'y +!
@@ -279,30 +323,18 @@
 |--------------------------------------
 :fillx | child x --
 	xx0 + minx - 2/ 'xmask +
-	lenx 1 + 2/ ( 1?  1 - | child xmin len
+	lenx 1 + 2/ ( 1? 1 - | child xmin len
 		pick2 pick2 c+!
 		swap 1 + swap ) 3drop ;
 
 :filly | child x --
 	yy0 + miny - 2/ 'ymask +
-	lenx 1 + 2/ ( 1?  1 - | child xmin len
-		pick2 pick2 c+!
-		swap 1 + swap ) 3drop ;
-
-:fillxC | child x --
-	xx0 + minx - 'xmask +
-	lenx 1 + ( 1?  1 - | child xmin len
-		pick2 pick2 c+!
-		swap 1 + swap ) 3drop ;
-
-:fillyC | child x --
-	yy0 + miny - 'ymask +
-	lenx 1 + ( 1?  1 - | child xmin len
+	leny 1 + 2/ ( 1? 1 - | child xmin len
 		pick2 pick2 c+!
 		swap 1 + swap ) 3drop ;
 
 :calclev | len -- a:in b:out
-	( 1?  1 -
+	( 1? 1 -
 		a@+ dup $ff00ff and swap 8 >> or $ff00ff and dup 8 >> or
 		a@+ dup $ff00ff and swap 8 >> or $ff00ff and dup 8 >> or
 		16 << or b!+
@@ -368,22 +400,25 @@
 	$80 yy4 yy2 + yy1 + filly
 
 	calclevel
+
+    drawf
+
 	drawrules
 	drawlevels
 
-|    draw1
-
 	;
+
+;
 
 |----------------------------------------
 :dumpvar
 	$ff00 'ink !
-	minz miny minx "%d %d %d " mprint print cr
-	lenz leny lenx "%d %d %d " mprint print cr
+	minz miny minx "%d %d %d " print cr
+	lenz leny lenx "%d %d %d " print cr
 
-	xx1 "%d " mprint print cr
-	xx1 dup dup 31 >> dup not rot and rot rot and
-	"%d %d" mprint print
+	xx1 "%d " print cr
+	xx1 dup dup 63 >> dup not rot and rot rot and
+	"%d %d" print
 
 |	$ffff 'ink ! 0 getp 1 box
 |	$ffffff 'ink ! mask getp 3 box
@@ -393,7 +428,7 @@
 |-----------------------------------------
 :main
 	cls home
-	over "%d" mprint print cr
+	over "%d" print cr
 
 	Omode
 	freelook
@@ -404,9 +439,8 @@
 	calco
 
 	dumpvar
-	drawire
-
 	algo1
+	drawire
 
 	key
 	<up> =? ( -0.01 'zcam +! )

@@ -139,10 +139,10 @@
 	dic>adr 12 + @ 12 >>> ;
 
 ::adr>dicname | adr -- nadr
-	adr>dic "W%h" mprint ;
+	adr>dic "W%h" mformat ;
 
 ::tok>dicname | nro -- nadr
-	8 >>> "W%h" mprint ;
+	8 >>> "W%h" mformat ;
 
 ::dic>toklen | nro -- adr len
 	dic>adr 4 + @+ swap 4 + @ 12 >>> ;
@@ -268,10 +268,10 @@
 		,c )
 	2drop ;
 
-:tn val src + "%w" mprint ,s ;
+:tn val src + "%w" mformat ,s ;
 :ts """" ,s valstr """" ,s ;
-:tw val dic>adr @ "%w" mprint ,s ;
-:taw val dic>adr @ "'%w" mprint ,s ;
+:tw val dic>adr @ "%w" mformat ,s ;
+:taw val dic>adr @ "'%w" mformat ,s ;
 
 #ltok 0 0 0 0 0 0 0 tn tn tn tn ts tw tw taw taw
 
@@ -290,16 +290,16 @@
 		emit )
 	2drop ;
 
-:tn val src + "%w" mprint print ;
-:ts """" print valstr """" print ;
-:tw val dic>adr @ "%w" mprint print ;
-:taw val dic>adr @ "'%w" mprint print ;
+:tn val src + "%w" print ;
+:ts """" emits valstr """" emits ;
+:tw val dic>adr @ "%w" print ;
+:taw val dic>adr @ "'%w" print ;
 
 #ltok 0 0 0 0 0 0 0 tn tn tn tn ts tw tw taw taw
 
 ::tokenprint | nro --
 	dup $ff and
-	15 >? ( 16 - r3basename print drop ; )
+	15 >? ( 16 - r3basename emits drop ; )
 	2 << 'ltok + @ ex
 	;
 

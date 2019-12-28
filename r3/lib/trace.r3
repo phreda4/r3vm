@@ -7,10 +7,10 @@
 	0 'ink !
 	backline
 	$ff00 'ink !
-	over .d print sp
-	pick2 .d print sp
-	pick3 .d print sp
-	pick4 .d print sp
+	over .d emits sp
+	pick2 .d emits sp
+	pick3 .d emits sp
+	pick4 .d emits sp
 	key >esc< =? ( exit ) drop
 	;
 
@@ -39,7 +39,7 @@
 ::dumpd | adr --
 	16 ( 1?
 		8 ( 1?
-			rot @+ .d print sp
+			rot @+ .d emits sp
 			rot rot 1 - ) drop
 		cr 1 - ) 2drop
 	waitesc ;
@@ -52,7 +52,7 @@
 	;
 
 ::slog | ... --
-	mprint print cr
+	print cr
 	ccy cch + sh >=? ( scroll ) drop
 	redraw	;
 

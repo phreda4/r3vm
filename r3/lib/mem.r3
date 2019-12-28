@@ -92,9 +92,9 @@
 ::,format | p p .. "" --
 	( c@+ 1? ,emit ) 2drop ;
 
-::mprint | p p .. "" -- adr
+::mformat | p p .. "" -- adr
 	mark
-	here 4096 + 
+	here 4096 +
 	over =? ( 4096 + )
 	dup 'here ! >r
 	,format ,eol

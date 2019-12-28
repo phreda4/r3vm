@@ -48,26 +48,26 @@
 :header
 	$555555 'ink ! backline
     $ff00 'ink !
-	"r3Code " print
+	"r3Code " emits
     $ffffff 'ink !
 	filenow 3 << 'inc + @
-	" %l " mprint print
+	" %l " emits
     mark
     defnow ,wordinfo ,eol
     empty
-    here print
+    here emits
 	cr
 	;
 
 :wcursor
-	defnow =? ( $ffffff 'ink ! ">" print ; )
-	" " print ;
+	defnow =? ( $ffffff 'ink ! ">" emits ; )
+	" " emits ;
 
 :wordline | nro --
 	wcursor
 	$ff00 'ink !
 	4 << dicc +
-	@+ "%w " mprint print
+	@+ "%w " print
 	drop
 	cr
 	;
@@ -85,8 +85,8 @@
 	;
 
 :wcursor
-	wordnow =? ( $ffffff 'ink ! ">" print ; )
-	" " print
+	wordnow =? ( $ffffff 'ink ! ">" emits ; )
+	" " emits
 	;
 :insline | nro --
 	cntword >=? ( drop ; )
@@ -99,7 +99,7 @@
 :infoline | nro --
 	cntword >=? ( drop ; )
 	drop
-	"|" print
+	"|" emits
 	;
 
 :paglin

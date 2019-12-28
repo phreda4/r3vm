@@ -12,8 +12,8 @@
 
 :test
 	cls home
-	cc "%h" mprint print cr
-	cc "%l" mprint print
+	cc "%h" print cr
+	cc "%l" print
 
 	key
 	>esc< =? ( exit )

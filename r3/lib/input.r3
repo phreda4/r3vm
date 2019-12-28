@@ -120,7 +120,7 @@
 	'proinputa 'iniinput w/foco
 |	'clickfoco onClick
 	drop
-	print ;
+	emits ;
 
 
 |************************************

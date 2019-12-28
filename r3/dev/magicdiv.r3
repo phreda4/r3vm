@@ -54,17 +54,17 @@
 :main
 	cls home
 	3 calcmagic
-	sn mn "%h %h *>> " mprint print cr
+	sn mn "%h %h *>> " print cr
 	cr
 		-7 ( 7 <? 1 +
-			dup "%d/5=" mprint print
-			dup 3 / "%d " mprint print
-			dup divc "%d " mprint print
+			dup "%d/5=" print
+			dup 3 / "%d " print
+			dup divc "%d " print
 			cr ) drop
 		cr
 		1 ( 1024 <?
-			dup "%d " mprint print
-			32 over clz - "%d " mprint print
+			dup "%d " print
+			32 over clz - "%d " print
 			cr
 			1 << ) drop
 
