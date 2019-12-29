@@ -31,6 +31,11 @@
 	xr2 >? ( drop 0 ; )
 	drop -1 ;
 
+::guiAll
+	0 'xr1 ! 0 'yr1 !
+	sw 'xr2 ! sh 'yr2 !
+	;
+
 ::guiBox | x y w h --
 	pick2 + 'yr2 ! pick2 + 'xr2 !
 	'yr1 ! 'xr1 !
@@ -40,6 +45,7 @@
 ::gui
 	idf 'idl ! hot 'hotnow !
 	0 'id ! 0 'idf ! 0 'hot !
+	guiAll
 	;
 
 ::guidump
