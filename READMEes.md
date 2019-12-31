@@ -244,5 +244,74 @@ por ejemplo:
 
 cuenta de 1 a 9, mientras se cumple el condicional
 
+Hay que notar algunos detalles:
+
+No existe la construccion IF-ELSE, esta es una de las diferencias con :r4, por otra parte, ColorForth tampoco permite esta construccion, aunque parezca limitante, esto obliga a factorizar la parte del codigo que necesite esta construccion, o reformular el codigo para que esto no sea necesario.
+
+Lo que en :r4 podia construirse de la siguiente manera
+
+```
+...
+1? ( nocero )( cero )
+sigue
+```
+
+debe transformase en:
+
+```
+:eleccion 1? ( nocero ; ) cero ;
+
+...
+eleccion
+sigue
+```
+
+A veces ocurre que repensar la logica del codigo evita el ELSE sin necesidad de hacer esta factorizacion. Igulmente existen trucos con bit que permiten evitar los condicionales completamente pero esto ya no depende del lenguaje.
+
+Otra caracteristica a notar que es posible realizar un WHILE con multiples condiciones de salidas en disintos puntos, no conozco que exista esta construccion en otro lenguaje, de hecho surgio cuando quedo definida la forma de detectar el IF y el WHILE
+
+```
+'list ( c@+
+	1?
+	13 <>?
+	emit ) drop
+```
+
+Esta repeticion cumplir que el byte obtenido no sea 0 ` 1? ` y que no sea 13 ` 13 <>? `, en cualquiera de las dos condiciones termina el WHILE
+
+Otra construccion posible, que si esta en otros FORTH, es la definicion que continua en la siguiente.
+Por ejemplo, define1 suma 3 a la pila mientras que define2 suma 2.
+
+```
+:define1
+    1 +
+:define2
+	2 + ;
+```
+
+## Recursion
+
+La recursion se da naturlamente, cuando se define la palabra con ` : ` aparece en el diccionario y es posible llamarla aun cuando esta definicion no este cerrada.
+
+```
+:fibonacci | n -- f
+	2 <? ( 1 nip ; )
+	1 - dup 1 - fibonacci swap fibonacci + ;
+```
+
+## Optimizacion de llamadas
+
+Cuando la ultima palabras antes de un ` ; ` es una palabra definica por el programador, tanto en el interprete como en el compilador, esta llamada se realiza mediante un JMP o salto y no con un CALL o llamada con retorno, esto se lo llama comunmente TAIL CALL y ahorra un retorno en la cadena de palabras llamadas.
+
+Esta caracteristica puede convertir un recursion en un bucle sin costo de retorno de llamadas, la siguiente definicion no tiene impacto en la pila de retorno.
+
+```
+:buclerecursivo | n -- 0
+	0? ( ; )
+	1 -
+	buclerecursivo ;
+```
+
+
 
 

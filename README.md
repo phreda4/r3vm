@@ -249,3 +249,71 @@ for example:
 ```
 
 account from 1 to 9, while the Top of stack is less 10.
+
+You have to notice some details:
+
+There is no IF-ELSE construction, this is one of the differences with: r4, on the other hand, ColorForth also does not allow this construction, although it seems limiting, this forces to factor the part of the code that needs this construction, or reformulate the code.
+
+In: r4 could be constructed as follows
+
+```
+...
+one? ( nocero )( zero )
+follow
+```
+
+It must become:
+
+```
+:choice 1? ( nocero ; ) zero ;
+
+...
+choice
+follow
+```
+
+Sometimes it happens that rethinking code logic avoids ELSE without the need to do this factoring. There are also tricks with bit that allow you to avoid conditionals completely but this no longer depends on the language.
+
+Another feature to note that it is possible to perform a WHILE with multiple output conditions at different points, I do not know that this construction exists in another language, in fact it emerged when the way to detect the IF and WHILE was defined
+
+```
+'list ( c@+
+	one?
+	13 <>?
+	emit ) 2drop
+```
+
+Does this repetition meet that the byte obtained is not 0 ` 1? ` and that is not 13 ` 13 <>? `, in any of the two conditions the WHILE ends
+
+Another possible construction, that if it is in other FORTH, is the definition that continues in the following.
+For example, define1 sum 3 to the stack while defining2 sum 2.
+
+```
+:define1 | n -- n+3
+    1 +
+:define2 | n -- n+2
+	2 + ;
+```
+
+## Recursion
+
+The recursion occurs naturally, when the word is defined with ` : ` it appears in the dictionary and it is possible to call it even when this definition is not closed.
+
+```
+:fibonacci | n -- f
+	2 <? ( 1 nip ;)
+	1 - dup 1 - fibonacci swap fibonacci + ;
+```
+
+## Call Optimization
+
+When the last words before a `;` It is a word defined by the programmer, both in the interpreter and in the compiler, this call is translate to JMP or jump and not with a CALL or call with return, this is commonly called TAIL CALL and saves a return in the chain of words called.
+
+This feature can convert a recursion into a loop with no callback cost, the following definition has no impact on the return stack.
+
+```
+:loopback | n -- 0
+	0? ( ; )
+	1 -
+	loopback;
+```

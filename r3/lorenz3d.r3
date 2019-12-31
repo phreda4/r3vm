@@ -7,7 +7,6 @@
 ^r3/lib/3d.r3
 
 #xcam 0 #ycam 0 #zcam -100.0
-#xr 0.20 #yr 0.25
 
 :fcircle | xc yc r --
 	>r over r@ - over op
