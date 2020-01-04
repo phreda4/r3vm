@@ -258,7 +258,7 @@ In: r4 could be constructed as follows
 
 ```
 ...
-one? ( nocero )( zero )
+1? ( nocero )( zero )
 follow
 ```
 
@@ -278,7 +278,7 @@ Another feature to note that it is possible to perform a WHILE with multiple out
 
 ```
 'list ( c@+
-	one?
+	1?
 	13 <>?
 	emit ) 2drop
 ```
@@ -290,7 +290,7 @@ For example, define1 sum 3 to the stack while defining2 sum 2.
 
 ```
 :define1 | n -- n+3
-    1 +
+	1 +
 :define2 | n -- n+2
 	2 + ;
 ```

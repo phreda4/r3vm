@@ -34,20 +34,20 @@
 #x7 #y7 #z7	| centro del cubo
 #n1 #n2 #n3
 
-#xmask * 1024
-#ymask * 1024
+#xmask * 512
+#ymask * 512
 
 |---------------
 :fillstart | --
 	'octvert >b
-	1.0 1.0 1.0 transform b!+ b!+ b!+ | 111
-	1.0 1.0 -1.0 transform b!+ b!+ b!+ | 110
-	1.0 -1.0 1.0 transform b!+ b!+ b!+ | 101
-	1.0 -1.0 -1.0 transform b!+ b!+ b!+ | 100
-	-1.0 1.0 1.0 transform b!+ b!+ b!+ | 011
-	-1.0 1.0 -1.0 transform b!+ b!+ b!+ | 010
-	-1.0 -1.0 1.0 transform b!+ b!+ b!+ | 001
-	-1.0 -1.0 -1.0 transform b!+ b!+ b!+ | 000
+	1.5 1.5 1.5 transform b!+ b!+ b!+ | 111
+	1.5 1.5 -1.5 transform b!+ b!+ b!+ | 110
+	1.5 -1.5 1.5 transform b!+ b!+ b!+ | 101
+	1.5 -1.5 -1.5 transform b!+ b!+ b!+ | 100
+	-1.5 1.5 1.5 transform b!+ b!+ b!+ | 011
+	-1.5 1.5 -1.5 transform b!+ b!+ b!+ | 010
+	-1.5 -1.5 1.5 transform b!+ b!+ b!+ | 001
+	-1.5 -1.5 -1.5 transform b!+ b!+ b!+ | 000
 	b> 'octvert> !
 	$ff $ff $ff transform 'x0 ! 'y0 ! 'z0 !
 	$ff $ff -$ff transform 'x1 ! 'y1 ! 'z1 !
@@ -128,6 +128,19 @@
 :octcolor | oct -- color
     $octree - $pixels + @ ;
 
+#tpopcnt (
+    0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4
+    1 2 2 3 2 3 3 4 2 3 3 4 3 4 4 5
+    1 2 2 3 2 3 3 4 2 3 3 4 3 4 4 5
+    2 3 3 4 3 4 4 5 3 4 4 5 4 5 5 6
+    1 2 2 3 2 3 3 4 2 3 3 4 3 4 4 5
+    2 3 3 4 3 4 4 5 3 4 4 5 4 5 5 6
+    2 3 3 4 3 4 4 5 3 4 4 5 4 5 5 6
+    3 4 4 5 4 5 5 6 4 5 5 6 5 6 6 7 )
+
+:popcnt | nro -- cnt
+	'tpopcnt + c@ ;
+
 |-----------------------------------------
 #xx0 #yy0 #zz0
 #xx1 #yy1 #zz1
@@ -143,17 +156,15 @@
 #stacko * 128	| stack octree+nchildrens
 #stacko> 'stacko
 
-:stack@ | -- top
-	-4 'stacko> +! stacko> @ ;
-
 :stack2@ | -- a b
-	stacko> 8 - dup 'stacko> ! @+ swap @ ;
-
-:stack! | top --
-	stacko> !+ 'stacko> ! ;
+	stacko> 8 - dup 'stacko> !
+	@+ swap @ ;
 
 :stack2! | a b --
 	stacko> !+ !+ 'stacko> ! ;
+
+:stack4! | a b c d --
+	stacko> !+ !+ !+ !+ 'stacko> ! ;
 
 
 :addchild | bm 0 mask -- bm ch mask
@@ -175,98 +186,41 @@
 	;
 
 :getyxmakl | len -- len bm
-	'ymask sumy + dup c@ swap pick2	+ 1 - c@ or
-	'xmask sumx + dup c@ swap pick3 + 1 - c@ or
+	'ymask sumy + dup c@ swap pick2	1 >> + 1 - c@ or
+	'xmask sumx + dup c@ swap pick3 1 >> + 1 - c@ or
+	and $ff and ;
+
+:getyxmakl2 | len -- len bm
+	'ymask sumy + c@
+	'xmask sumx + c@
 	and $ff and ;
 
 :getyxmask0 | y x -- y x mask
-	over 1 << 'ymask + c@
-	over 1 << 'xmask + c@
+	over 'ymask + c@
+	over 'xmask + c@
 	and $ff and	;
-
-|-----------------------------------
-:prevchild | y x len -- y x ordenn len
-	1 >> 0? ( dup ; )
-	stack@
-	dup $7 and 4 << 'vecpos +
-	@+ sumx 1 >> + 'sumx !
-	@ sumy 1 >> + 'sumy !
-	4 >>> 0? ( drop prevchild ; )
-	swap ;
-
-:nextchild | y x norden len -- y x norden len
-	1 << swap
-	dup $7 and 4 << 'vecpos +
-	@+ neg sumx + 1 << 'sumx !
-	@ neg sumy + 1 << 'sumy !
-	stack!	| y x len
-	getyxmakl 0? ( drop prevchild ; )
-	fillchild  |  y x len norden
-	swap ;
-
-:rayfull2 | y x -- y x
-	getyxmask0 0? ( drop 4 a+ ; )
-	fillchild	| y x norden
-	over 1 << 'sumx !
-	pick2 1 << 'sumy !
-	'stacko 'stacko> !
-	1 ( len <?		| y x norden len
-		nextchild	| y x norden len
-		0? ( 2drop 4 a+ ; )
-		) 2drop
-	$ff00 a!+ ;
-
-
-|-----------------------------------
-:raytest | y x --
-	getyxmask0 0? ( drop 4 a+ ; )
-	 a!+ ;
-|-----------------------------------
-
-:drawf | x y z --
-	minx miny xy>v >a
-	sw lenx - 2 <<
-	0 ( leny <?
-		0 ( lenx <?
-			rayfull2
-|			raytest
-			1 + ) drop
-		over a+
-		1 + ) 2drop ;
 
 |--------------------------------------
 | with octree
 |--------------------------------------
+:stack4@2 | -- a b
+	stacko> 16 - dup 'stacko> !
+	@+ 'sumy ! @+ 'sumx !
+	@+ swap @ ;
+
 :prevchild | len -- ordenn len
 	1 >> 0? ( dup ; )
-	stack2@	| len octree orden
-	dup $7 and 4 << 'vecpos +
-	@+ sumx 1 >> + 'sumx !
-	@ sumy 1 >> + 'sumy !
+	stack4@2
 	4 >>> 0? ( 2drop prevchild ; )
 	swap >b swap ;
 
-#tpopcnt (
-    0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4
-    1 2 2 3 2 3 3 4 2 3 3 4 3 4 4 5
-    1 2 2 3 2 3 3 4 2 3 3 4 3 4 4 5
-    2 3 3 4 3 4 4 5 3 4 4 5 4 5 5 6
-    1 2 2 3 2 3 3 4 2 3 3 4 3 4 4 5
-    2 3 3 4 3 4 4 5 3 4 4 5 4 5 5 6
-    2 3 3 4 3 4 4 5 3 4 4 5 4 5 5 6
-    3 4 4 5 4 5 5 6 4 5 5 6 5 6 6 7 )
-
-:popcnt | nro -- cnt
-	'tpopcnt + c@ ;
-
 :nextchild | norden len -- norden len
 	1 << swap		| len norden
-	dup $7 and
-	1 over << 1 - >r
+	dup b> sumx sumy stack4!
+	$7 and 1 over << 1 - >r
 	4 << 'vecpos +
-	@+ neg sumx + 1 << 'sumx !
-	@ neg sumy + 1 << 'sumy !
-	b> stack2!	| len
+	@+ neg sumx + clamp0 1 << 'sumx !
+	@ neg sumy + clamp0 1 << 'sumy !
     b@+ dup r> and popcnt swap 8 >> + 2 << b+
 	getyxmakl	| len bm
 	b@ and 0? ( drop prevchild ; )
@@ -276,8 +230,8 @@
 :rayoctree | octree s y x -- octree s y x
 	getyxmask0 0? ( drop 4 a+ ; )
 	pick4 >b b@ and 0? ( drop 4 a+ ; )
-	over 1 << 'sumx !
-	pick2 1 << 'sumy !
+	over 'sumx !
+	pick2 'sumy !
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?		| norden len
@@ -300,6 +254,18 @@
 |--------------------------------------
 |--------------------------------------
 :sminmax3 | a b c -- sn sx
+	dup dup 63 >> dup
+	not rot and rot rot and		| + -
+	rot
+	dup dup 63 >> dup
+	not rot and rot rot and
+	rot + >r + r>
+	rot
+	dup dup 63 >> dup
+	not rot and rot rot and
+	rot + >r + r> swap ;
+
+:sminmax3 | a b c -- sn sx
 	pick2 dup 63 >> not and
 	pick2 dup 63 >> not and +
 	over dup 63 >> not and + >r
@@ -309,22 +275,20 @@
 	r> ;
 
 :packxyza!+ | x y z -- xyz0
-	rot xx0 + minx - a!+
-	swap yy0 + miny - a!+
+	rot xx0 + minx - 1 >> a!+
+	swap yy0 + miny - 1 >> a!+
 	zz0 + minz - a!+
 	0 a!+ ;
 
 :fillx | child x --
-	xx0 + minx - 'xmask +
-	lenx |1 +
-	( 1? 1 - | child xmin len
+	xx0 + minx - 1 >> 'xmask +
+	lenx 1 >> ( 1? 1 - | child xmin len
 		pick2 pick2 c+!
 		swap 1 + swap ) 3drop ;
 
 :filly | child x --
-	yy0 + miny - 'ymask +
-	leny |1 +
-	( 1? 1 - | child xmin len
+	yy0 + miny - 1 >> 'ymask +
+	leny 1 >> ( 1? 1 - | child xmin len
 		pick2 pick2 c+!
 		swap 1 + swap ) 3drop ;
 
@@ -347,7 +311,7 @@
 	xx4 xx2 + yy4 yy2 + zz4 zz2 + packxyza!+
 	xx4 xx1 + xx2 + yy4 yy1 + yy2 + zz4 zz1 + zz2 + packxyza!+
 
-	'xmask 0 256 fill
+	'xmask 0 128 fill
 	$1 0 fillx
 	$2 xx1 fillx
 	$4 xx2 fillx
@@ -357,7 +321,7 @@
 	$40 xx4 xx2 + fillx
 	$80 xx4 xx2 + xx1 + fillx
 
-	'ymask 0 256 fill
+	'ymask 0 128 fill
 	$1 0 filly
 	$2 yy1 filly
 	$4 yy2 filly
@@ -376,6 +340,11 @@
 	$ff00 'ink !
 	minz miny minx "%d %d %d " print cr
 	lenz leny lenx "%d %d %d " print cr
+
+|	'vecpos
+|	8 ( 1? 1 - swap
+|		@+ "xy:%h " print @+ "z:%h " print cr
+|		swap ) 2drop
 
 |	$ffff 'ink ! 0 getp 1 box
 |	$ffffff 'ink ! mask getp 3 box
@@ -408,7 +377,7 @@
 	calco
 
 	dumpvar
-	drawire
+|	drawire
 
 	isodraw
 
@@ -430,7 +399,8 @@
 	34
 	33
 	mark
-	"3do/tie fighter.3do" load3do 'octree !
-|	"3do/mario.3do" load3do 'octree !
-|	"3do/ldhorse.3do" load3do 'octree !
+|	"3do/tie fighter.3do"
+|	"3do/mario.3do"
+	"3do/ldhorse.3do"
+	load3do 'octree !
 	'main onshow ;
