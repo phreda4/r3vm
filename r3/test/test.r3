@@ -2,6 +2,7 @@
 | Example 1
 
 ^r3/lib/sys.r3
+^r3/lib/trace.r3
 
 :colmix | c1 c2 m -- c
 	>r
@@ -36,6 +37,7 @@
 		) drop
 	) drop
 	key 27 =? ( exit ) drop
+	-? ( trace )
 	;
 
 :

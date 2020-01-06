@@ -6,7 +6,7 @@
 //	SDL graphics windows
 //
 //#define DEBUGWORD
-#define VIDEOWORD
+//#define VIDEOWORD
 
 #include <stdio.h>
 #include <time.h>
@@ -60,6 +60,7 @@ Indice dicc[8192];
 int level;
 int cntstacka;
 int stacka[256];
+int lastblock;
 
 void iniA(void) { cntstacka=0; }
 void pushA(int n) { stacka[cntstacka++]=n; }
@@ -503,6 +504,7 @@ if (solvejmp(from,memc)) { // salta
 		}
 	}
 level--;	
+lastblock=memc;
 }
 
 // start anonymous definition (adress only word)
@@ -538,7 +540,7 @@ void compilaMAC(int n)
 if (modo>1) { dataMAC(n);return; }
 if (n==0) { 					// ;
 	if (level==0) modo=0; 
-	if ((memcode[memc-1]&0xff)==CALL) {
+	if ((memcode[memc-1]&0xff)==CALL && lastblock!=memc) { // avoid jmp to block
 		memcode[memc-1]=(memcode[memc-1]^CALL)|JMP; // call->jmp avoid ret
 		return;
 		}

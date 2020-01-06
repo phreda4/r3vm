@@ -1,3 +1,4 @@
+|MEM 32768
 | octree rasterization
 | PHREDA 2020
 |---------------------
@@ -101,7 +102,8 @@
 	pick3 x1 * pick3 y1 * + pick2 z1 * + 31 >> 1 and
 	pick4 x2 * pick4 y2 * + pick3 z2 * + 31 >> 2 and or
 	pick4 x4 * pick4 y4 * + pick3 z4 * + 31 >> 4 and or
-	$7 xor ;
+	$7 xor
+	;
 
 :oct++ | adr -- adr bitmask
 	@+ dup 8 >> 2 << rot + swap ; |$ff and ;
@@ -155,18 +157,79 @@
 #xx2 #yy2 #zz2
 #xx4 #yy4 #zz4
 
-#minx #miny #minz
-#lenx #leny #lenz
 #xy #zz
 #len
 
-#vecpos * 128	| child vectors
+#xmask * 256
+#ymask * 256
+
+#vecpos * 64	| child vectors | 8*8
 #stacko * 256	| stack octree+nchildrens
 #stacko> 'stacko
 
 :stack4! | a b c d --
 	stacko> !+ !+ !+ !+ 'stacko> ! ;
 
+:getyxmaskl | len -- len bm
+	xy dup 16 >> 'ymask + c@
+	swap $ffff and 'xmask + c@
+	and $ff and ;
+
+:getyxmask0 | y x -- y x mask
+	over 'ymask + c@
+	over 'xmask + c@
+	and $ff and	;
+
+|--------------------------------------
+:stack4@2 | -- a b
+	stacko> 16 - dup 'stacko> !
+	@+ 'zz ! @+ 'xy !
+	@+ swap @ ;
+
+:prevchild | len -- ordenn len
+	1 >> 0? ( dup ; )
+	stack4@2
+	4 >>> 0? ( 2drop prevchild ; )
+	swap >b swap ;
+
+:nextchild | norden len -- norden len
+	1 << swap		| len norden
+	dup b> xy zz stack4!
+	$7 and 1 over << 1 - >r
+	3 << 'vecpos +
+	@+ xy swap - 1 << 'xy !
+	@ neg 'zz +!
+    b@+ dup r> and popcnt swap 8 >> + 2 << b+
+	getyxmaskl	| len bm
+	b@ and 0? ( drop prevchild ; )
+	fillchild	| len norden
+	swap ;
+
+:rayoctree | octree s y x -- octree s y x
+	getyxmask0 0? ( drop 4 a+ ; )
+	pick4 >b b@ and 0? ( drop 4 a+ ; )
+	pick2 16 << pick2 or 'xy !
+	minz 'zz !
+	'stacko 'stacko> !
+	fillchild	| norden
+	1 ( len <?		| norden len
+		b> $pixels >=? ( octcolor a!+ 2drop ; ) drop
+		nextchild	| norden len
+		0? ( 2drop 4 a+ ; )
+		) 2drop
+	b> octcolor a!+ ;
+
+:drawiso | octree --
+	minx miny xy>v >a
+	sw lenx - 2 <<
+	0 ( leny <?
+		0 ( lenx <?
+			rayoctree
+			1 + ) drop
+		over a+
+		1 + ) 3drop ;
+
+|---------------------------------------------
 :sminmax3 | a b c -- sn sx
 	pick2 dup 63 >> not and
 	pick2 dup 63 >> not and +
@@ -176,7 +239,24 @@
 	swap dup 63 >> and +
 	r> ;
 
-:testiso
+:packxyza!+ | x y z -- xyz0
+	rot xx0 + 1 >>
+	rot yy0 + 1 >> 16 << or a!+
+	zz0 + a!+ ;
+
+:fillx | child x --
+	xx0 + 1 >> 'xmask +
+	lenx 1 >> ( 1? 1 - | child xmin len
+		pick2 pick2 c+!
+		swap 1 + swap ) 3drop ;
+
+:filly | child x --
+	yy0 + 1 >> 'ymask +
+	leny 1 >> ( 1? 1 - | child xmin len
+		pick2 pick2 c+!
+		swap 1 + swap ) 3drop ;
+
+:isodraw | x y z node --
 	>r
 	0 getn p3di 'xx0 ! 'yy0 ! 'zz0 !
 	1 getn p3di xx0 - 'xx1 ! yy0 - 'yy1 ! zz0 - 'zz1 !
@@ -188,7 +268,58 @@
     yy1 yy2 yy4 sminmax3 over - 1 + 'leny ! yy0 + 'miny !
     zz1 zz2 zz4 sminmax3 over - 1 + 'lenz ! zz0 + 'minz !
 
-	r> 
+    minx neg 'xx0 +!
+    miny neg 'yy0 +!
+	minz neg 'zz0 +!
+
+	lenx leny max 4 >> 'len !
+	'vecpos >a
+	0 0 0 packxyza!+
+	xx1 yy1 zz1 packxyza!+
+	xx2 yy2 zz2 packxyza!+
+	xx1 xx2 + yy1 yy2 + zz1 zz2 + packxyza!+
+	xx4 yy4 zz4 packxyza!+
+	xx4 xx1 + yy4 yy1 + zz4 zz1 + packxyza!+
+	xx4 xx2 + yy4 yy2 + zz4 zz2 + packxyza!+
+	xx4 xx1 + xx2 + yy4 yy1 + yy2 + zz4 zz1 + zz2 + packxyza!+
+
+	'xmask 0 64 fill
+	$1 0 fillx
+	$2 xx1 fillx
+	$4 xx2 fillx
+	$8 xx1 xx2 + fillx
+	$10 xx4 fillx
+	$20 xx4 xx1 + fillx
+	$40 xx4 xx2 + fillx
+	$80 xx4 xx2 + xx1 + fillx
+
+	'ymask 0 64 fill
+	$1 0 filly
+	$2 yy1 filly
+	$4 yy2 filly
+	$8 yy1 yy2 + filly
+	$10 yy4 filly
+	$20 yy4 yy1 + filly
+	$40 yy4 yy2 + filly
+	$80 yy4 yy2 + yy1 + filly
+
+	r> drawiso
+	vec-
+	;
+
+:testiso | x y z node --
+	>r
+	0 getn p3di 'xx0 ! 'yy0 ! 'zz0 !
+	1 getn p3di xx0 - 'xx1 ! yy0 - 'yy1 ! zz0 - 'zz1 !
+	2 getn p3di xx0 - 'xx2 ! yy0 - 'yy2 ! zz0 - 'zz2 !
+	4 getn p3di xx0 - 'xx4 ! yy0 - 'yy4 ! zz0 - 'zz4 !
+	3drop
+
+    xx1 xx2 xx4 sminmax3 over - 1 + 'lenx ! xx0 + 'minx !
+    yy1 yy2 yy4 sminmax3 over - 1 + 'leny ! yy0 + 'miny !
+    zz1 zz2 zz4 sminmax3 over - 1 + 'lenz ! zz0 + 'minz !
+
+	r>
 	octcolor 'ink !
 	lenx leny minx miny fillrect
 	vec- ;
@@ -200,14 +331,16 @@
 	;
 
 |---------------- search iso ratio
-:viewrentry | x y z node bm norden
+:viewrentry | x y z node bm norden -- x y z node
 	1 over << pick2 na? ( 2drop ; )
 	child-oct
 :viewr | x y z node --
 	calco 'nminz !
 	over clz zlen <=? ( drop
-|		isonow
-		testiso
+
+		isodraw
+|		testiso
+
 		; ) drop
 	$pixels >=? ( testiso ; ) |vecr exec ; )
 	1 'zlen +!
@@ -233,7 +366,7 @@
 :culling | x y z -- cull
 	dup 2 - 59 >> $10 and >a | 1 <? ( $10 )( 0 ) >a
 	swap hocc *. cullz a+
-	swap wocc *. cullz a+
+	swap wocc *. cullz 2 << a+
 	drop a> ;
 
 :cull1 | x y z -- cull
@@ -256,7 +389,7 @@
 
 
 |----------------------
-:vieworetry
+:vieworetry | x y z node bm norden -- x y z node
 	1 over << pick2 na? ( 2drop ; )
 	child-oct
 :viewo | x y z node --
@@ -281,11 +414,14 @@
 	vec- ;
 
 |-------- octree in octree
-:vecis	|drawcube veci- ; |drawbox veci- ; |drawboxi veci- ;
+:vecis	
+	|drawcube veci- ; |drawbox veci- ; |drawboxi veci- ;
 	; | no mas?
-:vecrs	|drawrealcube
+:vecrs
+	|drawrealcube
 	vec- ; | no iso
-:vecos	4drop |drawborde
+:vecos
+	4drop |drawborde
 	vec- ;
 
 #vecsim	'vecis 'vecrs 'vecos 0 0 0 0 0
@@ -369,8 +505,8 @@
 	$7fffffff <>? ( drop b> zbo + @ a!+ ; )
 	drop 4 a+ ;
 
-|$7fffffff =? ( drop 1 px+! )( $ff and px!+ )	| zbuffer
-|	;
+|	$7fffffff =? ( drop 1 px+! ; )
+|	$ff and px!+ ;
 
 ::zdraw | x y --
 	xy>v >a
@@ -436,6 +572,7 @@
 #mseca
 
 :everysec
+	1 'fpsc +!
 	msec mseca <? ( drop ; )
 	1000 + 'mseca !
 	fpsc 'fps ! 0 'fpsc !
@@ -449,18 +586,17 @@
 	freelook
 	xcam ycam zcam mtrans
 
-	zb.clear
+|	zb.clear
 	Omario drawoctree
-	0 0 zdraw
+|	0 0 zdraw
 
-	1 'fpsc +!
-
-	$ff00 'ink ! fonti
-	dup "%d " print cr
-	msec fps over mseca - "%d ms fps:%d" print cr 'mseca !
+	$ff00 'ink !
+	over "%d " print cr
+	fps "fps:%d" print cr
 	zcam ycam xcam "%f %f %f" print cr
 	hocc wocc "%f %f" print cr
-	h3do w3do 16 <</ 1 << "%f" print cr
+	h3do w3do 16 <</
+	1 << "%f" print cr
 	minz "%d " print cr
 	lenz leny lenx "%d %d %d" print cr
 
@@ -471,13 +607,12 @@
 :
 	msec 'mseca !
 	mark
-
 	sw sh ini3do
 
-|	"media/3do/horse.3do"
-|	"media/3do/sibenika.3do"
-|	"media/3do/tree1.3do"
-	"media/3do/mario.3do"
+|	"3do/horse.3do"
+|	"3do/sibenika.3do"
+|	"3do/tree1.3do"
+	"3do/mario.3do"
 	load3do 'Omario !
 	33
 	'main onshow

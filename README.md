@@ -301,7 +301,7 @@ The recursion occurs naturally, when the word is defined with ` : ` it appears i
 
 ```
 :fibonacci | n -- f
-	2 <? ( 1 nip ;)
+	2 <? ( 1 nip ; )
 	1 - dup 1 - fibonacci swap fibonacci + ;
 ```
 
@@ -315,5 +315,5 @@ This feature can convert a recursion into a loop with no callback cost, the foll
 :loopback | n -- 0
 	0? ( ; )
 	1 -
-	loopback;
+	loopback ;
 ```

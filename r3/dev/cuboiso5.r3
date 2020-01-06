@@ -152,7 +152,7 @@
 #xy #zz
 #len
 
-#vecpos * 128	| child vectors
+#vecpos * 64	| child vectors
 #stacko * 256	| stack octree+nchildrens
 #stacko> 'stacko
 
@@ -179,8 +179,8 @@
 	;
 
 :getyxmaskl | len -- len bm
-	'ymask xy 16 >> + dup c@ swap pick2	1 >> + 1 - c@ or
-	'xmask xy $ffff and + dup c@ swap pick3 1 >> + 1 - c@ or
+	'ymask xy 16 >> + dup c@ swap pick2	0 >> + 1 - c@ or
+	'xmask xy $ffff and + dup c@ swap pick3 0 >> + 1 - c@ or
 	and $ff and ;
 
 :getyxmaskl | len -- len bm
@@ -233,9 +233,9 @@
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?		| norden len
+		b> $pixels >=? ( octcolor a!+ 2drop ; ) drop
 		nextchild	| norden len
 		0? ( 2drop 4 a+ ; )
-		b> $pixels >=? ( octcolor a!+ 2drop ; ) drop
 		) 2drop
 	b> octcolor a!+ ;
 
@@ -290,7 +290,7 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny min 2 >> 'len !
+	lenx leny max 4 >> 'len !
 	'vecpos >a
 	0 0 0 packxyza!+
 	xx1 yy1 zz1 packxyza!+
@@ -321,7 +321,6 @@
 	$40 yy4 yy2 + filly
 	$80 yy4 yy2 + yy1 + filly
 
-	octree 3do!
 	$octree drawiso
 	;
 
@@ -391,6 +390,8 @@
 	mark
 |	"3do/tie fighter.3do"
 |	"3do/mario.3do"
-	"3do/ldhorse.3do"
+|	"3do/ldhorse.3do"
+	"3do/ovni31.3do"
 	load3do 'octree !
+	octree 3do!
 	'main onshow ;
