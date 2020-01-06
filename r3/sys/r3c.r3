@@ -48,8 +48,8 @@
 	$ffffff 'ink !
 	redraw
 
-	"r3/test.r3"
-|	"r3/testgui.r3"
+	"r3/test/test.r3"
+|	"r3/test/testgui.r3"
 	r3c
 
 |    "asm\fasm.exe asm\r3fasm.asm > log.asm" sys

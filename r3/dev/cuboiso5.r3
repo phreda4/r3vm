@@ -210,7 +210,14 @@
 	dup b> xy zz stack4!
 	$7 and 1 over << 1 - >r
 	3 << 'vecpos +
+
 	@+ xy swap - 1 << 'xy !
+
+|	@+ xy
+|	dup $ffff and pick2 $ffff and - clamp0
+|	swap $ffff0000 and rot $ffff0000 and - clamp0
+|	or 1 << 'xy !
+
 	@ neg 'zz +!
     b@+ dup r> and popcnt swap 8 >> + 2 << b+
 	getyxmaskl	| len bm
@@ -384,6 +391,6 @@
 	mark
 |	"3do/tie fighter.3do"
 |	"3do/mario.3do"
-	"3do/horse.3do"
+	"3do/ldhorse.3do"
 	load3do 'octree !
 	'main onshow ;

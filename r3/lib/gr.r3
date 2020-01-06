@@ -54,7 +54,7 @@
 ::op | x y --
   'ya ! 'xa ! ;
 
-::rect  | w h x y --
+::fillrect  | w h x y --
   xy>v >a
   ( 1? 1 -
     a> ink pick3 fill

@@ -1,5 +1,6 @@
+|MEM 8192
 | cubo isometrico
-| PHREDA 2017
+| PHREDA 2020
 |-------------------
 ^r3/lib/gui.r3
 ^r3/lib/3d.r3
