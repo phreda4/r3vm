@@ -199,10 +199,15 @@
 	@+ 'zz ! @+ 'xy !
 	@+ swap @ ;
 
+:stack4@ | -- a b
+	stacko> 16 - dup 'stacko> !
+	@+ swap @+ swap	@+ swap @ ;
+
 :prevchild | len -- ordenn len
 	1 >> 0? ( dup ; )
 	stack4@2
 	4 >>> 0? ( 2drop prevchild ; )
+|	2swap 'xy ! 'zz !
 	swap >b swap ;
 
 :nextchild | norden len -- norden len
@@ -290,7 +295,7 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny max 4 >> 'len !
+	lenx leny max 3 >> 'len !
 	'vecpos >a
 	0 0 0 packxyza!+
 	xx1 yy1 zz1 packxyza!+
@@ -352,11 +357,15 @@
 	xm over 'xm ! - 7 << neg 'ry +!  ;
 
 #ani 0
+
+#mseca
+
 |-----------------------------------------
 :main
 	cls home gui
 	pick2 pick2 "%d %d" print cr
-	octree "%h" print cr
+	msec dup mseca - "%d msec" print cr 'mseca !
+
 	Omode
 	rx mrotx ry mroty
 	xcam ycam zcam mtrans
@@ -389,9 +398,9 @@
 	33
 	mark
 |	"3do/tie fighter.3do"
-|	"3do/mario.3do"
+	"3do/mario.3do"
 |	"3do/ldhorse.3do"
-	"3do/ovni31.3do"
+|	"3do/ovni31.3do"
 	load3do 'octree !
 	octree 3do!
 	'main onshow ;

@@ -102,7 +102,7 @@
 	pick3 x1 * pick3 y1 * + pick2 z1 * + 31 >> 1 and
 	pick4 x2 * pick4 y2 * + pick3 z2 * + 31 >> 2 and or
 	pick4 x4 * pick4 y4 * + pick3 z4 * + 31 >> 4 and or
-	$7 xor
+|	$7 xor
 	;
 
 :oct++ | adr -- adr bitmask
@@ -193,6 +193,7 @@
 	swap >b swap ;
 
 :nextchild | norden len -- norden len
+	a@ zz <? ( drop nip prevchild ; ) drop
 	1 << swap		| len norden
 	dup b> xy zz stack4!
 	$7 and 1 over << 1 - >r
@@ -206,22 +207,27 @@
 	swap ;
 
 :rayoctree | octree s y x -- octree s y x
-	getyxmask0 0? ( drop 4 a+ ; )
-	pick4 >b b@ and 0? ( drop 4 a+ ; )
+	getyxmask0 0? ( drop 8 a+ ; )
+	pick4 >b b@ and 0? ( drop 8 a+ ; )
+	minz a@ >? ( 2drop 8 a+ ; ) 'zz !
 	pick2 16 << pick2 or 'xy !
-	minz 'zz !
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?		| norden len
-		b> $pixels >=? ( octcolor a!+ 2drop ; ) drop
+		b> $pixels >=? ( zz minz + a!+ octcolor a!+ 2drop ; ) drop
 		nextchild	| norden len
-		0? ( 2drop 4 a+ ; )
+		0? ( 2drop 8 a+ ; )
 		) 2drop
+	zz minz + a!+
 	b> octcolor a!+ ;
 
 :drawiso | octree --
-	minx miny xy>v >a
-	sw lenx - 2 <<
+|	minx miny xy>v >a
+	minx miny zb.adr >a
+
+|	sw lenx - 2 <<
+	zbw lenx - 3 <<
+
 	0 ( leny <?
 		0 ( lenx <?
 			rayoctree
@@ -272,7 +278,7 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny max 4 >> 'len !
+	lenx leny max 3 >> 'len !
 	'vecpos >a
 	0 0 0 packxyza!+
 	xx1 yy1 zz1 packxyza!+
@@ -307,6 +313,7 @@
 	vec-
 	;
 
+|----------------------------
 :testiso | x y z node --
 	>r
 	0 getn p3di 'xx0 ! 'yy0 ! 'zz0 !
@@ -323,6 +330,7 @@
 	octcolor 'ink !
 	lenx leny minx miny fillrect
 	vec- ;
+|----------------------------
 
 :nchild | x y z node ordenn -- x y z node ordenn xn yn zn noct
 	1 over $7 and << 1 -
@@ -337,12 +345,10 @@
 :viewr | x y z node --
 	calco 'nminz !
 	over clz zlen <=? ( drop
-
 		isodraw
 |		testiso
-
 		; ) drop
-	$pixels >=? ( testiso ; ) |vecr exec ; )
+	$pixels >=? ( isodraw ; ) |testiso ; ) |vecr exec ; )
 	1 'zlen +!
 	oct++		| x y z node+ bm
 	nminz >r
@@ -397,7 +403,7 @@
 	0? ( drop viewr ; )
 	$ff00 na? ( nip 4drop vec- ; )
 	drop
-	$pixels >=? ( veco ex ; )
+	$pixels >=? ( viewr ; ) |veco ex ; )
 	calco swap >r
 	1 'zlen +!
 	oct++
@@ -414,7 +420,7 @@
 	vec- ;
 
 |-------- octree in octree
-:vecis	
+:vecis
 	|drawcube veci- ; |drawbox veci- ; |drawboxi veci- ;
 	; | no mas?
 :vecrs
@@ -461,7 +467,7 @@
 |--------- exportadas
 ::drawsoctree | size moctree --
 	adjustmem
-	dup 1 << clz 6 - 'zlen !
+	dup 1 << clz 5 - 'zlen !
 
 	0 0 0 transform 'sz ! 'sy ! 'sx !
 	'isovec >b
@@ -498,39 +504,11 @@
     ;
 
 |-------------
-| TEST LIB...
-|-------------
-:pix
-	b@+
-	$7fffffff <>? ( drop b> zbo + @ a!+ ; )
-	drop 4 a+ ;
-
-|	$7fffffff =? ( drop 1 px+! ; )
-|	$ff and px!+ ;
-
-::zdraw | x y --
-	xy>v >a
-	zb >b
-	sw w3do - 2 <<
-	h3do ( 1? 1 -
-		w3do ( 1? 1 - pix ) drop
-		over a+
-		) 2drop ;
-
-|-------------
 #xcam 0 #ycam 0 #zcam 2.0
 
 |-------------
 :3dop transform p3d op ;
 :3dline transform p3d line ;
-
-|-------------
-:freelook
-	xypen
-	sh 1 >> - 7 << swap
-	sw 1 >> - neg 7 << swap
-	neg mrotx mroty
-	;
 
 #sizx #sizy #sizz
 
@@ -567,32 +545,39 @@
 	>esc< =? ( exit )
 	drop ;
 
-#fps
-#fpsc
-#mseca
 
-:everysec
-	1 'fpsc +!
-	msec mseca <? ( drop ; )
-	1000 + 'mseca !
-	fpsc 'fps ! 0 'fpsc !
-	;
+#mseca
 
 #Omario
 
+|------ vista
+#xm #ym
+#rx #ry
+:dnlook
+	xypen 'ym ! 'xm ! ;
+
+:movelook
+	xypen
+	ym over 'ym ! - neg 7 << 'rx +!
+	xm over 'xm ! - 7 << neg 'ry +!  ;
+
 :main
-	cls home
+	cls home gui
 	matini
-	freelook
+
+	rx mrotx ry mroty
 	xcam ycam zcam mtrans
 
-|	zb.clear
+    'dnlook 'movelook onDnMove
+
+	zb.clear
 	Omario drawoctree
-|	0 0 zdraw
+	0 0 zdraw
 
 	$ff00 'ink !
 	over "%d " print cr
-	fps "fps:%d" print cr
+	msec dup mseca - "%d msec" print cr 'mseca !
+
 	zcam ycam xcam "%f %f %f" print cr
 	hocc wocc "%f %f" print cr
 	h3do w3do 16 <</
@@ -601,7 +586,7 @@
 	lenz leny lenx "%d %d %d" print cr
 
 	tecla
-	everysec
+	acursor
 	;
 
 :
@@ -609,7 +594,7 @@
 	mark
 	sw sh ini3do
 
-|	"3do/horse.3do"
+|	"3do/ldhorse1.3do"
 |	"3do/sibenika.3do"
 |	"3do/tree1.3do"
 	"3do/mario.3do"
