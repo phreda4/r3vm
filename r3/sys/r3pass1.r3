@@ -3,26 +3,27 @@
 | PHREDA 2018
 |----------------
 ^r3/lib/str.r3
+^r3/lib/parse.r3
 ^r3/lib/trace.r3
 
 ^./r3base.r3
 
 |----------- comments / configuration
-:setgraf | adr -- adr
-	3 + trim
-|	"F" =pre 1? ( fullscreen ) drop
-|	"W" =pre 1? ( size ) drop
-	>>cr ;
-
 :escom
-	"|WIN|" =pre 1? ( drop 5 + ; ) drop | Compila para WINDOWS
-|	"||G" =pre 1? ( setgraf ; ) drop | GRAPHIC (F/Ww,h)(x2/x3/x4)
-	| MOUSE/PEN
-	| SOCKET
-	| JOYSTICK
-	| CAMERA
-	| STREAM
-	| CONSOLE
+	"WIN|" =pre 1? ( drop 4 + ; ) drop | Compila para WINDOWS
+
+	"FULL" =pre 1? ( drop				| FULL
+		1 'switchfull !
+		>>cr ; ) drop
+	"SCR" =pre 1? ( drop				| SCR 640 480
+		4 +
+		trim str>nro 'switchresx !
+		trim str>nro 'switchresy !
+		>>cr ; ) drop
+	"MEM" =pre 1? ( drop				| MEM 640
+		4 +
+		trim str>nro 'switchmem !
+		>>cr ; ) drop
     >>cr ;
 
 
@@ -71,6 +72,10 @@
 	add.inc ;
 
 ::r3-stage-1 | filename str -- err/0
+	0 'switchfull !
+	640 'switchresx	!
+	480 'switchresy !
+	$100000 'switchmem !
 
 |	here "r3/sys/asmbase.r3"
 |	2dup load

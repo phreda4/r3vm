@@ -1,4 +1,4 @@
-| r3-gencode
+| r3-gendat
 | PHREDA 2018
 |
 ^./r3base.r3
@@ -31,7 +31,7 @@
 
 :dfin
 	instr 1? ( drop pasoinstr ; ) drop
-	dini 1? ( dtipo ,s drop 0 'dini ! ; ) 
+	dini 1? ( dtipo ,s drop 0 'dini ! ; )
 	"," ,s drop 0 'dini ! ;
 :dfins
 	dini 0? ( drop stringdd ; ) "db " ,s drop 0 'dini ! ;

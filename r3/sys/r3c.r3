@@ -10,6 +10,18 @@
 ^./r3gencod.r3
 ^./r3gendat.r3
 
+:r3-genset
+	mark
+	";---r3 setings" ,ln
+	switchresx "XRES equ %d" ,format ,cr
+	switchresy "YRES equ %d" ,format ,cr
+	switchfull "FULL equ %d" ,format ,cr
+	switchmem "MEMSIZE equ 0x%h" ,format ,cr
+	0 ,c
+	"asm/set.asm"
+	savemem
+	empty ;
+
 ::r3c | str --
 	r3name
 	here dup 'src !
@@ -37,6 +49,7 @@
 	" pass4" slog
 	r3-stage-4
 	" gencode" slog
+	r3-genset
 	r3-gencode
 	r3-gendata
 	;

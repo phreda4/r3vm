@@ -3,8 +3,8 @@
 |
 ^./r3base.r3
 ^./r3cellana.r3
-^./r3asm1.r3
-|^./r3asm.r3
+|^./r3asm1.r3
+^./r3asm.r3
 
 #lastdircode
 
@@ -524,14 +524,14 @@ iFNEXT iSYS
 	'bcode ( bcode> <?
 		@+
 
-		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
-|		"asm/code.asm" savemem | debug
+|		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
+		"asm/code.asm" savemem | debug
 
 		anastep
 		) drop
     anaend
 
-	cellinfo
+|	cellinfo
 
 |    ";---------GEN" ,ln |----- generate code
 	12 + @ $f and	| use
@@ -556,6 +556,10 @@ iFNEXT iSYS
 ::r3-gencode
 	mark
 	";---r3 compiler code.asm" ,ln
+|	switchfull "; full=%d" ,format ,cr
+|	switchresy switchresx "; resx=%d resy=%d" ,format ,cr
+|	switchmem "; mem=$%h" ,format ,cr
+
 |	debugblok
 
 	dicc ( dicc> <?

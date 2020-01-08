@@ -1,5 +1,5 @@
-| generate x86 code
-| PHREDA 2018
+| generate amd64 code
+| PHREDA 2020
 |-------------
 ^./r3base.r3
 ^./r3stack.r3
@@ -71,15 +71,11 @@
 
 :gwor
 	stk.normal
-
 	dup @ $ff and
 	16 =? ( drop getval "jmp w%h" ,format ,cr ; ) drop | ret?
-
 	getval
 	dup "call w%h" ,format ,cr
-
 	dic>du stk.gennormal
-
 	;
 
 
@@ -102,7 +98,7 @@
 
 :g)
 	dup 8 - @ $ff and
-	16 <>? ( 
+	16 <>? (
 |		stk.conv
 		stk.normal
 		)
@@ -126,39 +122,38 @@
 	;
 
 :gEX
-
-|	lastdircode
-|	dic>du
-|	"; u:%d d:%d" ,format ,cr
-|	dup ( 1? 1 - .drop ) drop
-|	+ ( 1? 1 - dup push.reg ) drop
-
+	"mov rcx,#0" ,asm
+	.drop
 	stk.normal | TOS in eax or something
-
 	over @ $ff and
-	16 <>? ( drop "call #0" ,asm ; ) drop
-	"jmp #0" ,asm ;
+	16 <>? ( drop "call rcx" ,asm ; ) drop
+	"jmp rcx" ,asm
+	;
 
 :g0?
 	gwhilejmp
+	'TOS needREG
 	"or #0,#0" ,asm
 	getval "jnz _o%h" ,format ,cr
 	;
 
 :g1?
 	gwhilejmp
+	'TOS needREG
 	"or #0,#0" ,asm
 	getval "jz _o%h" ,format ,cr
 	;
 
 :g+?
 	gwhilejmp
+	'TOS needREG
 	"or #0,#0" ,asm
 	getval "js _o%h" ,format ,cr
 	;
 
 :g-?
 	gwhilejmp
+	'TOS needREG
 	"or #0,#0" ,asm
 	getval "jns _o%h" ,format ,cr
 	;
@@ -404,9 +399,9 @@
 :gC@
 	'TOS needREG
 	"movsx #0,byte[#0]" ,asm ;
-:gD@
+:gQ@
 	'TOS needREG
-	"mov #0,word[#0]" ,asm ;
+	"mov #0,qword[#0]" ,asm ;
 
 :g@+
 	.dup checkvreg
@@ -418,11 +413,11 @@
 	'TOS needREG
 	NOS needREG
 	"movsx #0,byte[#1];add #1,1" ,asm  ;
-:gD@+
+:gQ@+
 	.dup checkvreg
 	'TOS needREG
 	NOS needREG
-	"mov #0,word[#1];add #1,2" ,asm	;
+	"mov #0,qword[#1];add #1,8" ,asm	;
 
 :g!
 	'TOS needMEMREG
@@ -432,9 +427,9 @@
 	'TOS needMEMREG
 	"mov byte[#0],#1" ,asm
 	.2drop ;
-:gD!
+:gQ!
 	'TOS needMEMREG
-	"mov word[#0],#1" ,asm
+	"mov qword[#0],#1" ,asm
 	.2drop ;
 
 :g!+
@@ -445,9 +440,9 @@
 	'TOS needMEMREG
 	"mov byte[#0],#1;add #0,1" ,asm
 	.drop ;
-:gD!+
+:gQ!+
 	'TOS needMEMREG
-	"mov word[#0],#1;add #0,2" ,asm
+	"mov qword[#0],#1;add #0,8" ,asm
 	.drop ;
 
 :g+!
@@ -458,9 +453,9 @@
 	'TOS needMEMREG
 	"add byte[#0],#1" ,asm
 	.2drop ;
-:gD+!
+:gQ+!
 	'TOS needMEMREG
-	"add word[#0],#1" ,asm
+	"add qword[#0],#1" ,asm
 	.2drop ;
 
 :g>A
@@ -525,54 +520,59 @@
 :gCFILL
 	needEDIECXEAX
 	"rep stosb" ,asm ;
-:gDMOVE
+:gQMOVE
 	needESIEDIECX
-	"rep movsd" ,asm ;
-:gDMOVE>
+	"rep movsq" ,asm ;
+:gQMOVE>
 	needESIEDIECX
-	"lea rsi,[esi+ecx*4-4];lea edi,[edi+ecx*4-4];std;rep movsd;cld" ,asm ;
-:gDFILL
+	"lea rsi,[rsi+rcx*8-8];lea rdi,[rdi+rcx*8-8];std;rep movsq;cld" ,asm ;
+:gQFILL
 	needEDIECXEAX
-	"rep stosd" ,asm ;
-
-
-:gSYSCALLc
-	vTOS 2 <<
-	"call [SYSCALL+%d]" ,format ,cr
-	;
-
-:gSYSCALL
-	nro1stk 0? ( drop gSYSCALLc ; ) drop
-	"call [SYSCALL+#0*4]" ,asm
-	;
+	"rep stosq" ,asm ;
 
 :gUPDATE
+	"call SYSREDRAW" ,asm
+	;
 :gREDRAW
+	"call SYSUPDATE" ,asm
+	;
 :gMEM
-:gSW 
-:gSH 
+	0 PUSH.CTEM ;
+:gSW
+	0 PUSH.CTE ;
+:gSH
+	1 PUSH.CTE ;
 :gFRAMEV
-:gXYPEN 
-:gBPEN 
+	1 PUSH.CTEM ;
+
+:gXYPEN
+	2 PUSH.CTEM 3 PUSH.CTEM ;
+:gBPEN
+	4 PUSH.CTEM ;
 :gKEY
-:gMSEC 
-:gTIME 
+	5 PUSH.CTEM ;
+:gCHAR
+	6 PUSH.CTEM ;
+
+:gMSEC
+	"call SYSMSEC" ,asm ;
+:gTIME
+	"call SYSTIME" ,asm ;
 :gDATE
-:gLOAD 
-:gSAVE 
+	"call SYSDATE" ,asm ;
+:gLOAD
+	"call SYSLOAD" ,asm ;
+:gSAVE
+	"call SYSSAVE" ,asm ;
 :gAPPEND
-:gFFIRST 
+	"call SYSAPPEND" ,asm ;
+
+:gFFIRST
 :gFNEXT
 	;
-:gSYSMEMc
-	vTOS 2 <<
-	"mov eax,[SYSMEM+%d]" ,format ,cr
+:gSYS
 	;
 
-:gSYSMEM
-	nro1stk 0? ( drop gSYSMEMc ; ) drop
-	"mov eax,[#0]" ,asm
-	;
 
 |---- opt instruction
 :g@* | *248 reg -- val
@@ -599,35 +599,16 @@
 |----
 
 #vmc
-g0 g: g:: g# g: g| g^		| 0 1 2 3 4 5 6
-gdec ghex gbin gfix gstr    | 7 8 9 a b
-gwor gvar gdwor gdvar		| c d e f
-g; g( g) g[ g] gEX			| 10..15
-g0? g1? g+? g-? g<? g>? g=? g>=? g<=? g<>? gA? gN? gB?	| 16..22
-gDUP gDROP gOVER gPICK2 gPICK3 gPICK4 gSWAP gNIP		| 23..2A
-gROT g2DUP g2DROP g3DROP g4DROP g2OVER g2SWAP			| 2B..31
-g>R gR> gR@                                             | 32..34
-gAND gOR gXOR gNOT gNEG									| 35..39
-g+ g- g* g/ g*/                                         | 3A..3E
-g/MOD gMOD gABS gSQRT gCLZ                              | 3F..43
-g<< g>> g>>> g*>> g<</									| 44..48
-g@ gC@ gD@ g@+ gC@+ gD@+
-g! gC! gD! g!+ gC!+ gD!+
-g+! gC+! gD+!
-g>A gA> gA@ gA! gA+ gA@+ gA!+
-g>B gB> gB@ gB! gB+ gB@+ gB!+
-gMOVE gMOVE> gFILL
-gCMOVE gCMOVE> gCFILL
-gDMOVE gDMOVE> gDFILL
-gUPDATE
-gREDRAW
-gMEM
-gSW gSH gFRAMEV
-gXYPEN gBPEN gKEY
-gMSEC gTIME gDATE
-gLOAD gSAVE gAPPEND
-gFFIRST gFNEXT
-gSYSCALL gSYSMEM
+0 0 0 0 0 0 0 gdec ghex gdec gdec gstr gwor gvar gdwor gdvar
+g; g( g) g[ g] gEX g0? g1? g+? g-? g<? g>? g=? g>=? g<=? g<>?
+gA? gN? gB? gDUP gDROP gOVER gPICK2 gPICK3 gPICK4 gSWAP gNIP gROT g2DUP g2DROP g3DROP g4DROP
+g2OVER g2SWAP g>R gR> gR@ gAND gOR gXOR g+ g- g* g/ g<< g>> g>>> gMOD
+g/MOD g*/ g*>> g<</ gNOT gNEG gABS gSQRT gCLZ g@ gC@ gQ@ g@+ gC@+ gQ@+ g!
+gC! gQ! g!+ gC!+ gQ!+ g+! gC+! gQ+! g>A gA> gA@ gA! gA+ gA@+ gA!+ g>B
+gB> gB@ gB! gB+ gB@+ gB!+ gMOVE gMOVE> gFILL gCMOVE gCMOVE> gCFILL gQMOVE gQMOVE> gQFILL gUPDATE
+gREDRAW gMEM gSW gSH gFRAMEV gXYPEN gBPEN gKEY gCHAR gMSEC gTIME gDATE gLOAD gSAVE gAPPEND gFFIRST
+gFNEXT gSYS
+
 
 :codestep | token --
 	$ff and
@@ -636,22 +617,12 @@ gSYSCALL gSYSMEM
 
 
 ::genasmcode | duse --
-	cellinfo
 |	dup cellinig
 	stk.start
-
 	cellstart
-
 	'bcode ( bcode> <?
 		@+
-
-        ,printstk
-|		dup $ff and r3tokenname " %s " ,format
-|		dup 8 >> 1? ( "%h " ,format )( drop )
-		,cr
-
+		"; " ,s dup ,tokenprint 9 ,c ,printstk ,cr
 		codestep
-	
-		"asm/code.asm" savemem | debug
-		
+|		"asm/code.asm" savemem | debug
 		) drop ;

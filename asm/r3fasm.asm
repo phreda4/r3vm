@@ -4,8 +4,9 @@ format PE64 GUI 5.0
 
 entry start
 
-XRES equ 1024
-YRES equ 600
+;----- SETINGS -----
+include 'set.asm'
+;----- SETINGS -----
 
 include 'include/win64w.inc'
 include 'sdl2.inc'
@@ -35,39 +36,45 @@ common
 
 ;===============================================
 start:
-  sub     rsp,40
+  sub rsp,40
+;  cinvoke SDL_Init,SDL_INIT_AUDIO or SDL_INIT_VIDEO ;****
   cinvoke SDL_CreateWindow,_title,\
     SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,\
-    XRES,YRES,SDL_WINDOW_SHOWN
-  mov     [window],eax
+    XRES,YRES,0
+  mov [window],eax
   cinvoke SDL_ShowCursor,0
+;  cinvoke SDL_SetWindowFullscreen,[window],SDL_WINDOW_FULLSCREEN
   cinvoke SDL_GetWindowSurface,[window]
-  mov     rbx,rax
-  mov     [screen],eax
-  mov     rdi,[rbx+SDL_Surface.pixels]
-  mov     [SYSFRAME],rdi
+  mov rbx,rax
+  mov [screen],eax
+  mov rdi,[rbx+SDL_Surface.pixels]
+  mov [SYSFRAME],rdi
+  cinvoke SDL_StartTextInput
+; cinvoke malloc,MEMSIZE
+; mov [FREE_MEM],eax
 
   mov rbp,DATASTK
   xor rax,rax
   call INICIO
-  jmp SYSEND
 
-;----- CODE -----
-include 'code.asm'
-;----- CODE -----
-
-;===============================================
-align 16
 SYSEND:
+  cinvoke SDL_StopTextInput
   cinvoke SDL_DestroyWindow,[window]
   cinvoke SDL_Quit
   add rsp,40
   ret
 
+;----- CODE -----
+include 'code.asm'
+;----- CODE -----
+  ret
+
 ;===============================================
 align 16
 SYSREDRAW:
+;  push rax rbp
   cinvoke SDL_UpdateWindowSurface,[window]
+;  pop rbp rax
   ret
 
 ;===============================================
@@ -96,7 +103,7 @@ SYSUPDATE:
   cmp eax,SDL_QUIT
   je SYSEND
 .endr:
-        ret
+  ret
 upkeyd: ;key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
         mov eax,[evt.key.keysym.sym]
         and eax,0xffff
@@ -136,17 +143,11 @@ uptext: ;keychar=*(int*)evt.text.text;break;
 
 ;===============================================
 SYSMSEC: ;  ( -- msec )
-  add rbp,8
-  mov [rbp],rax
-  invoke GetTickCount
-  ret
-
-;----------------------------------
-;SYSMSEC:
 ;  add rbp,8
 ;  mov [rbp],rax
+  invoke GetTickCount
 ;  cinvoke64 SDL_GetTicks
-;  ret
+  ret
 
 ;===============================================
 align 16
@@ -190,8 +191,8 @@ SYSLOAD: ; ( 'from "filename" -- 'to )
   mov rax,[rsp+16]
   mov [afile],rax
   invoke ReadFile,[hdir],[afile],$ffffff,cntr,0 ; hasta 16MB
-  cmp rax, 0
-  jne     .loadend
+  cmp rax,0
+  jne .loadend
   invoke CloseHandle,[hdir]
   mov rax,[afile]
   add rax,[cntr]
@@ -215,6 +216,7 @@ SYSSAVE: ; ( 'from cnt "filename" -- )
   invoke CloseHandle,[hdir]
 .saveend:
   sub rbp,24
+  mov rax,[rbp+8]
   ret
 
 ;===============================================
@@ -235,6 +237,7 @@ SYSAPPEND: ; ( 'from cnt "filename" -- )
   invoke CloseHandle,[hdir]
 .append:
   sub rbp,24
+  mov rax,[rbp+8]
   ret
 
 
@@ -253,9 +256,9 @@ section '.data' data readable writeable
   SYSBM          dd ?
   SYSKEY         dd ?
   SYSCHAR        dd ?
+  SYSFRAME       dq ? ;rd XRES*YRES
   FREE_MEM       dq ?
   DATASTK        rq 256
-  SYSFRAME       dq ? ;rd XRES*YRES
 
   _title db "r3d",0
   _error db "err",0

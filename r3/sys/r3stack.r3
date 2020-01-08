@@ -48,12 +48,14 @@
 | format cell
 | type-- $0000000f
 | $0 nro	33
-| $1 cte    FREEMEM
+| $1 cte    XRES
 | $2 str    s01
 | $3 wrd    w32
 | $4 [wrd]	[w33]
-| $5 reg	eax ebx
-| $6 stk	[ebp] [ebp+4] ...
+| $5 reg	rax rbx
+| $6 stk	[rbp] [rbp+8] ...
+
+| $7 [cte]	[FREEMEM]
 
 |--Pila
 ::.DUP		4 'NOS +! TOS NOS ! ;
@@ -83,6 +85,9 @@
 	.DUP 8 << 5 or 'TOS ! ;
 ::PUSH.STK	| stk --
 	.DUP 8 << 6 or 'TOS ! ;
+::PUSH.CTEM	| ncte --
+	.DUP 8 << 7 or 'TOS ! ;
+
 
 ::.POP | -- nro
 	TOS NOS @ 'TOS ! -4 'NOS +! ;
@@ -242,12 +247,13 @@
 
 
 |-------- constantes del sistema
-#syscons "XRES" "YRES" "FREE_MEM" "SYSFRAME" "dword[SYSXYM]" "dword[SYSBM]" "dword[SYSKEY]"
+#syscons "XRES" "YRES"
+#sysconm "[FREE_MEM]" "[SYSFRAME]" "dword[SYSXM]" "dword[SYSYM]" "dword[SYSBM]" "dword[SYSKEY]" "dword[SYSCHAR]"
 
-#sysregr "rax" "rbx" "rcx" "rdx" "rdi" "rsi" "r8" "r9" "r10" "r11" "r12" "r13" "r14" "r15"
-#sysregs "eax" "ebx" "ecx" "edx" "edi" "esi" "r8d" "r9d" "r10d" "r11d" "r12d" "r13d" "r14d" "r15d"
-#sysregw  "ax"  "bx"  "cx"  "dx"  "di"  "si" "r8w" "r9w" "r10w" "r11w" "r12w" "r13w" "r14w" "r15w"
-#sysregb  "al"  "bl"  "cl"  "dl" "dil" "sil" "r8b" "r9b" "r10b" "r11b" "r12b" "r13b" "r14b" "r15b"
+#sysregr "rax" "rbx" "rcx" "rdx" "r8" "r9" "r10" "r11" "r12" "r13" "r14" "r15" "rdi" "rsi"
+#sysregs "eax" "ebx" "ecx" "edx" "r8d" "r9d" "r10d" "r11d" "r12d" "r13d" "r14d" "r15d" "edi" "esi"
+#sysregw  "ax"  "bx"  "cx"  "dx" "r8w" "r9w" "r10w" "r11w" "r12w" "r13w" "r14w" "r15w" "di" "si"
+#sysregb  "al"  "bl"  "cl"  "dl" "r8b" "r9b" "r10b" "r11b" "r12b" "r13b" "r14b" "r15b" "dil" "sil"
 
 :list2str | nro 'list -- str
 	swap ( 1? 1 - swap >>0 swap ) drop ;
@@ -258,6 +264,8 @@
 :mt0 value 2 << 'stkvalue + @ "%d" ,format ;	|--	0 nro 	33
 
 :mt1 value 'syscons list2str ,s ;	|--	1 cte	XRES
+:mt7 value 'sysconm list2str ,s ;	|--	7 ctem [FREE_MEM]
+
 :mt2 value "str%h" ,format ;			|--	2 str   "hola"
 :mt3 value "w%h" ,format ;			|--	3 word  'word
 :mt4 value "dword[w%h]" ,format ;	|--	4 var   [var]
@@ -266,18 +274,20 @@
 :mt5w value 'sysregw list2str ,s ;	|-- 5 regw 	ax
 :mt5r value 'sysregr list2str ,s ;	|-- 5 reg 	rax
 
-:mt6 value 2 << "qword[ebp" ,s
+:mt6 value 2 << "qword[rbp" ,s
 	0? ( drop "]" ,s ; )
 	+? ( "+" ,s ) ,d
 	"]" ,s ;
 
-#tiposrm mt0 mt1 mt2 mt3 mt4 mt5 mt6 mt0 mt0
-#tiposrmb mt0 mt1 mt2 mt3 mt4 mt5b mt6 mt0 mt0
-#tiposrmw mt0 mt1 mt2 mt3 mt4 mt5w mt6 mt0 mt0
-#tiposrmq mt0 mt1 mt2 mt3 mt4 mt5r mt6 mt0 mt0
+
+
+#tiposrm mt0 mt1 mt2 mt3 mt4 mt5 mt6 mt7 mt0
+#tiposrmb mt0 mt1 mt2 mt3 mt4 mt5b mt6 mt7 mt0
+#tiposrmw mt0 mt1 mt2 mt3 mt4 mt5w mt6 mt7 mt0
+#tiposrmq mt0 mt1 mt2 mt3 mt4 mt5r mt6 mt7 mt0
 
 ::,cell | val --
-	dup $f and 2 << 'tiposrm + @ ex ;
+	dup $f and 2 << 'tiposrmq + @ ex ;
 
 ::,cellb | nro --
 	dup $f and 2 << 'tiposrmb + @ ex ;
@@ -285,8 +295,8 @@
 ::,cellw | nro --
 	dup $f and 2 << 'tiposrmw + @ ex ;
 
-::,cellq | nro --
-	dup $f and 2 << 'tiposrmq + @ ex ;
+::,celld | nro --
+	dup $f and 2 << 'tiposrm + @ ex ;
 
 |---------- ASM
 | "movzx %0,#1" --> movzx rax,ebx ; TOS,NOS
@@ -306,16 +316,16 @@
 	0? ( drop TOS ,cellb ; )
 	1 - 2 << NOS swap - @ ,cellb ;
 
-:,cstackq | adr -- adr
+:,cstackd | adr -- adr
 	c@+
 	$30 -
 	0? ( drop TOS ,cellb ; )
-	1 - 2 << NOS swap - @ ,cellq ;
+	1 - 2 << NOS swap - @ ,celld ;
 
 :,car
-	$23 =? ( drop ,cstack ; ) | # dword reg
+	$23 =? ( drop ,cstack ; ) | # qword reg
 	$24 =? ( drop ,cstackb ; ) | $ byte reg
-	$25 =? ( drop ,cstackq ; ) | % qword reg
+	$25 =? ( drop ,cstackd ; ) | % dword reg
 	$3b =? ( drop ,cr ; ) | ;
 	,c ;
 
@@ -443,7 +453,7 @@
 :shiftEBP | deltap --	; corre ebp a nuevo lugar
 	0? ( drop ; )
 	dup neg
-	"lea ebp,[ebp" ,s +? ( "+" ,s ) 2 << ,d "]" ,ln
+	"lea rbp,[rbp" ,s +? ( "+" ,s ) 3 << ,d "]" ,ln
     'cellEBP stackmap
 	drop ;
 
@@ -552,7 +562,7 @@
 		drop )
 	2drop ;
 
-|------- ini stack in ; ... [ebp-4] eax
+|------- ini stack in ; ... [rbp-8] rax
 ::stk.start | deep --
 	IniStack
 	dup 'stacknow !
@@ -567,7 +577,7 @@
 	'RSP 'RTOS !
 	dup 'stacknow !
 	0? ( drop ; )
-	1 - ( 1? 
+	1 - ( 1?
 		dup neg push.stk
 		1 - )
 	push.reg ;
@@ -576,7 +586,6 @@
 	stacknow stack.cnt - shiftEBP 	| corre ebp a nuevo lugar
 	stack.cnt fillnormal
 	'stacknormal stk.cnv
-
 	stack.cnt stk.setnormal
 	;
 
@@ -584,7 +593,7 @@
 	dup ( 1? 1 - .drop ) drop
 	+
 	0? ( drop ; )
-	1 - ( 1? 
+	1 - ( 1?
 		dup neg push.stk
 		1 - )
 	push.reg
@@ -593,7 +602,8 @@
 
 |--------------------------------
 | $0 nro	33
-| $1 cte    FREEMEM
+| $1 cte    RESX
+| $7 ctem   [FREEMEM]
 | $2 str    s01
 | $3 wrd    w32
 | $4 [wrd]	[w33]
@@ -700,6 +710,7 @@
 	2 << 'stkvalue + @ "%d" print ;			|--	0 nro 	33
 
 :mt1 value 'syscons list2str print ;	|--	1 cte	XRES
+:mt7 value 'sysconm list2str print ;	|--	1 cte	[FREEMEM]
 :mt2 value "str%h" print ;			|--	2 str   "hola"
 :mt3 value "w%h" print ;			|--	3 cod  'func		4 dat  'var
 
@@ -707,11 +718,11 @@
 :mt5b value 'sysregb list2str print ;	|-- 5 regb 	al
 :mt5w value 'sysregw list2str print ;	|-- 5 regw 	ax
 
-:mt6 value 2 << "qword[ebp" print 1? ( +? ( "+" print ) "%d" print "]" print ; ) drop "]" print ; |-- 6 stack
+:mt6 value 2 << "qword[ebr" print 1? ( +? ( "+" print ) "%d" print "]" print ; ) drop "]" print ; |-- 6 stack
 
-#tiposrm mt0 mt1 mt2 mt3 mt3 mt5 mt6 mt0 mt0
-#tiposrmb mt0 mt1 mt2 mt3 mt3 mt5b mt6 mt0 mt0
-#tiposrmw mt0 mt1 mt2 mt3 mt3 mt5w mt6 mt0 mt0
+#tiposrm mt0 mt1 mt2 mt3 mt3 mt5 mt6 mt7 mt0
+#tiposrmb mt0 mt1 mt2 mt3 mt3 mt5b mt6 mt7 mt0
+#tiposrmw mt0 mt1 mt2 mt3 mt3 mt5w mt6 mt7 mt0
 
 :cell | val -- str
 	dup $f and 2 << 'tiposrm + @ ex ;

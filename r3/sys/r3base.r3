@@ -7,6 +7,7 @@
 ^./r3parse.r3
 ^./r3stack.r3
 
+
 ##r3filename * 256
 ##r3path * 256
 
@@ -15,6 +16,11 @@
 
 ##error
 ##modo
+
+##switchfull	| FULL			set fullscreen mode
+##switchresx	| SCR 640 480	set screen size
+##switchresy
+##switchmem		| MEM 640 		set data memory size (in kb) min 1kb
 
 |---- includes
 | 'string|'mem
@@ -28,7 +34,6 @@
 |...		#code>
 |---------	#blok
 | blok info
-
 
 ##src
 ##code
@@ -59,7 +64,6 @@
 | mov
 | $fffff000 -- 20 bits token len
 | $1ff - movs delta -16..15 uso:0..15
-
 
 ##dicc
 ##dicc>
@@ -139,10 +143,10 @@
 	dic>adr 12 + @ 12 >>> ;
 
 ::adr>dicname | adr -- nadr
-	adr>dic "W%h" mformat ;
+	adr>dic "w%h" mformat ;
 
 ::tok>dicname | nro -- nadr
-	8 >>> "W%h" mformat ;
+	8 >>> "w%h" mformat ;
 
 ::dic>toklen | nro -- adr len
 	dic>adr 4 + @+ swap 4 + @ 12 >>> ;
