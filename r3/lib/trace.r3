@@ -56,3 +56,6 @@
 	ccy cch + sh >=? ( scroll ) drop
 	redraw	;
 
+::waitkey
+	update
+	key 0? ( drop waitkey ; ) drop ;

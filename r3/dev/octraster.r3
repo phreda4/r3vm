@@ -188,13 +188,13 @@
 
 :prevchild | len -- ordenn len
 	1 >> 0? ( dup ; )
-	stack4@2
+	stack4@2 $ffffffff and
 	4 >>> 0? ( 2drop prevchild ; )
 	swap >b swap ;
 
 :nextchild | norden len -- norden len
-	a@ zz <? ( drop nip prevchild ; ) drop
 	1 << swap		| len norden
+	a@ zz <? ( 2drop prevchild ; ) drop
 	dup b> xy zz stack4!
 	$7 and 1 over << 1 - >r
 	3 << 'vecpos +
@@ -222,12 +222,8 @@
 	b> octcolor a!+ ;
 
 :drawiso | octree --
-|	minx miny xy>v >a
 	minx miny zb.adr >a
-
-|	sw lenx - 2 <<
 	zbw lenx - 3 <<
-
 	0 ( leny <?
 		0 ( lenx <?
 			rayoctree
@@ -278,7 +274,7 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny max 3 >> 'len !
+	lenx leny max 2 >> 'len !
 	'vecpos >a
 	0 0 0 packxyza!+
 	xx1 yy1 zz1 packxyza!+
@@ -467,7 +463,7 @@
 |--------- exportadas
 ::drawsoctree | size moctree --
 	adjustmem
-	dup 1 << clz 5 - 'zlen !
+	dup clz 7 - 'zlen !
 
 	0 0 0 transform 'sz ! 'sy ! 'sx !
 	'isovec >b
