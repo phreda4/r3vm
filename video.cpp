@@ -160,6 +160,8 @@ for (;;) {
 return -1;
 }
 
+//int videovolumen=SDL_MIX_MAXVOLUME;
+
 void AudioCallback(void *userdata,uint8_t *stream, int len)
 {
 int len1, audioSize;
@@ -177,6 +179,9 @@ while (len>0) {
 	len1=is.audioBufSize-is.audioBufIndex;
 	if (len1>len) len1=len;
 	memcpy(stream,(uint8_t *)is.audioBuf+is.audioBufIndex,len1);
+	
+//	SDL_MixAudio(stream,(uint8_t *)is.audioBuf+is.audioBufIndex,len1, videovolumen);
+	
 	len -= len1;
 	stream += len1;
 	is.audioBufIndex += len1;
@@ -198,7 +203,7 @@ while (!is.quit&&PacketQueueGet(&is.videoq, &is.videoPkt,1)>0) {
 //			}
 		}
 	while (SDL_GetTicks()<ms1) Sleep(10);
-	ms1=SDL_GetTicks()+sleepfps;		
+	ms1=SDL_GetTicks()+sleepfps-(SDL_GetTicks()-ms1);	
 	}
 av_frame_free(&pFrame);
 return 0;
@@ -217,7 +222,8 @@ if (videoh>vh) {
 	}
 videostride=gr_ancho-vw;
 
-av_free(is.pFrameBuffer);is.pFrameBuffer=NULL;
+av_free(is.pFrameBuffer);
+is.pFrameBuffer=NULL;
 av_frame_unref(is.pFrameRGB);
 av_frame_free(&is.pFrameRGB);
 sws_freeContext(is.pSwsCtx);

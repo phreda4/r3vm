@@ -6,7 +6,7 @@
 //	SDL graphics windows
 //
 //#define DEBUGWORD
-//#define VIDEOWORD
+#define VIDEOWORD
 
 #include <stdio.h>
 #include <time.h>
