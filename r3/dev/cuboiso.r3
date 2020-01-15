@@ -170,7 +170,7 @@
 	over 12 << over or	| yx
 	0 0 getyxmask
 	0? ( 4drop 4 a+ ; )
-	$7f0000 or
+	$7f0000 nip
 	a!+
 	3drop ;
 
@@ -268,52 +268,6 @@
 		swap 1 + ) 2drop
 	;
 
-#col0 0 $ffffff
-#col1 0 $ff0000
-#col2 0 $00ff00
-#col3 0 $ffff00
-#col4 0 $0000ff
-#col5 0 $ff00ff
-#col6 0 $00ffff
-#col7 0 $888888
-
-:8lin | bit
-	dup 1 and 2 << 'col0 + @ a!+ sw 1 - 2 << a+
-	dup 2 and 1 << 'col1 + @ a!+ sw 1 - 2 << a+
-	dup 4 and 'col2 + @ a!+ sw 1 - 2 << a+
-	dup 8 and 1 >> 'col3 + @ a!+ sw 1 - 2 << a+
-	dup 16 and 2 >> 'col4 + @ a!+ sw 1 - 2 << a+
-	dup 32 and 3 >> 'col5 + @ a!+ sw 1 - 2 << a+
-	dup 64 and 4 >> 'col6 + @ a!+ sw 1 - 2 << a+
-	128 and 5 >> 'col7 + @ a!+ sw 1 - 2 << a+
-	sw 3 << neg 1 + 2 << a+
-	;
-
-#y
-:drawlevels
-
-	100 'y !
-	lenx
-	'xmasl
-	( @+ 1?
-		10 y xy>v >a 10 'y +!
-		pick2 ( 1? 1 - swap
-			c@+ 8lin
-			swap ) 2drop
-		swap 1 >> swap
-		) 3drop
-
-	200 'y !
-	leny
-	'ymasl
-	( @+ 1?
-		10 y xy>v >a 10 'y +!
-		pick2 ( 1? 1 - swap
-			c@+ 8lin
-			swap ) 2drop
-		swap 1 >> swap
-		) 3drop
-	;
 
 |--------------------------------------
 :fillx | child x --
@@ -405,7 +359,6 @@
 	calclevel
     drawf
 	drawrules
-	drawlevels
 	;
 
 ;

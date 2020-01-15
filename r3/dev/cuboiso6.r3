@@ -8,7 +8,7 @@
 ^r3/lib/gr.r3
 
 |------------------------------
-#xcam 0 #ycam 0 #zcam 0
+#xcam 0 #ycam 0 #zcam 1.0
 
 #octree
 
@@ -17,14 +17,6 @@
 
 #rotsum * 2048		| 32 niveles de 2 valores*8 vert
 #rotsum> 'rotsum
-
-#ymin #nymin
-#xmin #nxmin
-#zmin #nzmin
-
-#ymax #nymax
-#xmax #nxmax
-#zmax
 
 #mask
 
@@ -62,7 +54,7 @@
 	p3d ;
 
 | ISOMETRICO
-:id3d
+:id3d1  | x y z -- u v
 	pick2 over - 0.03 / ox + >r
 	rot + 1 >> + 0.03 / oy + r> swap ;
 
@@ -273,7 +265,16 @@
 	swap dup 63 >> and +
 	r> ;
 
+#maskz
+#nmask
+
+:inim
+	0 'nmask ! 0 'maskz ! ;
+
 :packxyza!+ | x y z -- xyz0
+|	maskz <? ( nmask 'mask ! dup 'maskz ! )
+|	1 'nmask +!
+
 	swap yy0 + a!+
 	swap xx0 + a!+
 	zz0 + a!+
@@ -293,8 +294,9 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny max 3 >> 'len !
+	lenx leny min 1 >> 'len !
 
+	inim
 	'vecpos >a
 	0 0 0 packxyza!+
 	xx1 yy1 zz1 packxyza!+
@@ -320,12 +322,12 @@
 
 :dumpvar
 	$ff00 'ink !
+
 	minz miny minx "%d %d %d " print cr
 	lenz leny lenx "%d %d %d " print cr
 
-|	$ffff 'ink ! 0 getp 1 box
-|	$ffffff 'ink ! mask getp 3 box
-|	minx miny op minx lenx + miny leny + line
+	$ffff 'ink ! 0 getp 2 box
+	$ffffff 'ink ! mask getp 3 box
 	;
 
 |------ vista
@@ -355,12 +357,13 @@
 
 	fillstart
 	fillveciso
-	calco
+|	calco
 
 	dumpvar
-	drawire
 
 	isodraw
+
+|	drawire
 
 	ani 1? ( 0.005 'ry +! ) drop
     'dnlook 'movelook onDnMove

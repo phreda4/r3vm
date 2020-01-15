@@ -18,14 +18,6 @@
 #rotsum * 2048		| 32 niveles de 2 valores*8 vert
 #rotsum> 'rotsum
 
-#ymin #nymin
-#xmin #nxmin
-#zmin #nzmin
-
-#ymax #nymax
-#xmax #nxmax
-#zmax
-
 #mask
 
 #x0 #y0 #z0
@@ -98,7 +90,7 @@
 	x0 x1 - x7 * y0 y1 - y7 * + z0 z1 - z7 * + 63 >> $1 and
 	x0 x2 - x7 * y0 y2 - y7 * + z0 z2 - z7 * + 63 >> $2 and or
 	x0 x4 - x7 * y0 y4 - y7 * + z0 z4 - z7 * + 63 >> $4 and or
-	|$7 xor
+	$7 xor
 	'mask ! ;
 
 :getn | id -- z y x
@@ -156,25 +148,15 @@
 #stacko * 256	| stack octree+nchildrens
 #stacko> 'stacko
 
-:stack2! | a b --
-	stacko> !+ !+ 'stacko> ! ;
-
-:stack2@ | -- a b
-	stacko> 8 - dup 'stacko> !
-	@+ swap @ ;
-
 :stack4! | a b c d --
 	stacko> !+ !+ !+ !+ 'stacko> ! ;
 
-:stack4@ | -- a b
+:stack2@2 | -- a b
 	stacko> 16 - dup 'stacko> !
-	@+ swap @+ swap	@+ swap @ ;
+	8 + @+ swap @ ;
 
-:stack4@2 | -- a b
-	stacko> 16 - dup 'stacko> !
-	@+ 'zz ! @+ 'xy !
-	@+ swap @ ;
-
+:stackvar
+	stacko> @+ 'zz ! @ 'xy ! ;
 
 :addchild | bm 0 mask -- bm ch mask
 	1 over <<
@@ -207,30 +189,22 @@
 |--------------------------------------
 :prevchild | len -- ordenn len
 	1 >> 0? ( dup ; )
-
-|	stack2@
-|	dup $7 and 3 << 'vecpos + @+ xy 1 >> + 'xy ! @ 'zz +!
-
-	stack4@2
-	$ffffffff and
+	stack2@2 $ffffffff and
 	4 >>> 0? ( 2drop prevchild ; )
+	stackvar
 	swap >b swap ;
 
 :nextchild | norden len -- norden len
 	1 << swap		| len norden
-	dup b>
-
-|	stack2!
-	xy zz stack4!
-
+	dup b> xy zz stack4!
 	$7 and 1 over << 1 - >r
 	3 << 'vecpos +
-	@+ xy swap - 1 << 'xy !
-	@ neg 'zz +!
+	@+ xy swap - 1 << 'xy ! @ neg 'zz +!
     b@+ dup r> and popcnt swap 8 >> + 2 << b+
-	getyxmaskl	| len bm
+	b> $pixels >=? ( octcolor a! 0 ; ) drop
+	getyxmaskl		| len bm
 	b@ and 0? ( drop prevchild ; )
-	fillchild	| len norden
+	fillchild		| len norden
 	swap ;
 
 :rayoctree | octree s y x -- octree s y x
@@ -241,7 +215,6 @@
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?		| norden len
-		b> $pixels >=? ( octcolor a!+ 2drop ; ) drop
 		nextchild	| norden len
 		0? ( 2drop 4 a+ ; )
 		) 2drop
@@ -275,13 +248,13 @@
 
 :fillx | child x --
 	xx0 + 1 >> 'xmask +
-	lenx 1 >> ( 1? 1 - | child xmin len
+	lenx 1 + 1 >> ( 1? 1 - | child xmin len
 		pick2 pick2 c+!
 		swap 1 + swap ) 3drop ;
 
 :filly | child x --
 	yy0 + 1 >> 'ymask +
-	leny 1 >> ( 1? 1 - | child xmin len
+	leny 1 + 1 >> ( 1? 1 - | child xmin len
 		pick2 pick2 c+!
 		swap 1 + swap ) 3drop ;
 
@@ -298,7 +271,7 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny max 2 >> 'len !
+	lenx leny min 1 >> 'len !
 
 	'vecpos >a
 	0 0 0 packxyza!+
@@ -346,20 +319,17 @@
 :dumpvar
 	$ff00 'ink !
 	z0 y0 x0 "x0 %f %f %f " print cr
+	z1 y1 x1 "x1 %f %f %f " print cr
+	z2 y2 x2 "x2 %f %f %f " print cr
+	z4 y4 x4 "x4 %f %f %f " print cr
 	z7 y7 x7 "x7 %f %f %f " print cr
 	mask "%d " print cr
 
 	minz miny minx "%d %d %d " print cr
 	lenz leny lenx "%d %d %d " print cr
 
-|	'vecpos
-|	8 ( 1? 1 - swap
-|		@+ "xy:%h " print @+ "z:%h " print cr
-|		swap ) 2drop
-
 	$ffff 'ink ! 0 getp 1 box
 	$ffffff 'ink ! mask getp 3 box
-|	minx miny op minx lenx + miny leny + line
 	;
 
 |------ vista
@@ -391,10 +361,11 @@
 	fillveciso
 	calco
 
+	isodraw
+
 	dumpvar
 	drawire
 
-	isodraw
 
 	ani 1? ( 0.005 'ry +! ) drop
     'dnlook 'movelook onDnMove
@@ -415,8 +386,8 @@
 	33
 	mark
 |	"3do/tie fighter.3do"
-	"3do/mario.3do"
-|	"3do/ldhorse.3do"
+|	"3do/mario.3do"
+	"3do/ldhorse.3do"
 |	"3do/ovni31.3do"
 	load3do 'octree !
 	octree 3do!

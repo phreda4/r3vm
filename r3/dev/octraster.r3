@@ -274,7 +274,7 @@
     miny neg 'yy0 +!
 	minz neg 'zz0 +!
 
-	lenx leny max 2 >> 'len !
+	lenx leny min 1 >> 'len !
 	'vecpos >a
 	0 0 0 packxyza!+
 	xx1 yy1 zz1 packxyza!+
