@@ -114,7 +114,7 @@ inline int abs(int a) { return (a+(a>>31))^(a>>31); }
 //---- inicio
 int gr_init(char *title,int XRES,int YRES,int f)
 {
-if (SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_TIMER)) return -1;
+if (SDL_Init(SDL_INIT_EVERYTHING)) return -1;
 
 window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XRES,YRES,0);if (!window) return -1;
 //renderer=SDL_CreateRenderer(window, -1, 0);if (!renderer) return -1;

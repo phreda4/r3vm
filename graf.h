@@ -13,6 +13,7 @@ extern "C" {
 #include <SDL2/SDL_syswm.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_audio.h>
+#include <SDL2/SDL_mixer.h>
 #ifdef __cplusplus
 }
 #endif

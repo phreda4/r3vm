@@ -7,6 +7,7 @@
 //
 //#define DEBUGWORD
 #define VIDEOWORD
+#define SOUNDWORD
 
 #include <stdio.h>
 #include <time.h>
@@ -109,6 +110,10 @@ const char *r3bas[]={
 "VIDEO","VIDEOSHOW","VIDEOSIZE",
 #endif
 
+#ifdef SOUNDWORD
+"SLOAD","SPLAY",
+#endif
+
 #ifdef DEBUGWORD
 "DEBUG","TDEBUG",	// DEBUG
 #endif
@@ -158,6 +163,10 @@ OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
 SYS,
 #ifdef VIDEOWORD
 VIDEO,VIDEOSHOW,VIDEOSIZE,
+#endif
+
+#ifdef SOUNDWORD
+SLOAD,SPLAY,
 #endif
 
 #ifdef DEBUGWORD
@@ -1171,6 +1180,27 @@ while(ip!=0) {
 		
 #endif
 
+#ifdef SOUNDWORD
+    case SLOAD: // "" -- pp
+        TOS=(int)Mix_LoadWAV((char *)TOS);
+        continue;
+    case SPLAY: // pp --
+        if (TOS!=0) Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
+//        else FSOUND_StopSound(FSOUND_ALL);
+        TOS=*NOS;NOS--;
+        continue;
+/*
+    case SINFO: // "" -- mm
+         TOS=0;
+         for(int i=0;i<FSOUND_GetMaxChannels();i++) TOS|=FSOUND_IsPlaying(i); 
+         continue;
+    case SSET: // pan vol frec mm --
+         if (TOS!=0) FSOUND_Sample_SetDefaults((FSOUND_SAMPLE *)TOS,int(*NOS),int(*(NOS-1)),int(*(NOS-2)),-1);
+        TOS=*(NOS-3);NOS-=4;continue;
+*/
+
+#endif
+
 #ifdef DEBUGWORD //----------------- DEBUG
 	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;
 	case TDEBUG:printf("%d ",TOS);continue;	
@@ -1229,10 +1259,18 @@ av_register_all();
 avformat_network_init();
 #endif
 
+#ifdef SOUNDWORD
+Mix_OpenAudio(22050,MIX_DEFAULT_FORMAT,2,4096);
+#endif
+
 gr_init(filename,srcw,srch,scrf);
 SDL_StartTextInput();
 runr3(boot);
 SDL_StopTextInput();
+
+#ifdef SOUNDWORD
+Mix_CloseAudio();
+#endif
 
 #ifdef VIDEOWORD
 videoclose();
