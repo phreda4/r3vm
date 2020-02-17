@@ -235,8 +235,8 @@
 	drop
 
 	mark
-|	"r3 " ,s 'path ,s "/" ,s ,s ,eol
-	"r3v " ,s 'path ,s "/" ,s ,s ,eol
+	"r3 " ,s 'path ,s "/" ,s ,s ,eol
+|	"r3v " ,s 'path ,s "/" ,s ,s ,eol
 	empty here
 	sys drop
 	;

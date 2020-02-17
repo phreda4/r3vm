@@ -105,6 +105,7 @@
 #$magic
 #$octree
 #$pixels
+#$diff
 #$paleta
 
 :load3do | "" -- moctree
@@ -115,10 +116,11 @@
 	dup 28 + '$octree !
 	@+ '$magic !
 	@ $octree + '$pixels !
+	$pixels $octree - '$diff !
 	;
 
 :octcolor | oct -- color
-    $octree - $pixels + @ ;
+    $diff + @ ;
 
 #tpopcnt (
  0 1 1 2 1 2 2 3 1 2 2 3 2 3 3 4
@@ -350,7 +352,6 @@
 |-----------------------------------------
 :main
 	cls home gui
-	pick2 pick2 "%d %d" print cr
 	msec dup mseca - "%d msec" print cr 'mseca !
 
 	Omode
@@ -382,8 +383,6 @@
 	acursor ;
 
 :
-	34
-	33
 	mark
 |	"3do/tie fighter.3do"
 |	"3do/mario.3do"

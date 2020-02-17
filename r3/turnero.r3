@@ -4,13 +4,9 @@
 |
 | Turnero ABEL
 
-|#fileinfo "C:\WinNMP\WWW\turnero\nn.txt"
-|#fileinfof "C:\WinNMP\WWW\turnero\info.txt"
-|#filealerta "C:\WinNMP\WWW\turnero\oo.txt"
-
-#fileinfo "D:\WinNMP\WWW\turnero\nn.txt"
-#fileinfof "D:\WinNMP\WWW\turnero\info.txt"
-#filealerta "D:\WinNMP\WWW\turnero\oo.txt"
+#fileinfo "C:\WinNMP\WWW\turnero\nn.txt"
+#fileinfof "C:\WinNMP\WWW\turnero\info.txt"
+#filealerta "C:\WinNMP\WWW\turnero\oo.txt"
 
 ^r3/lib/sys.r3
 ^r3/lib/str.r3
@@ -29,15 +25,10 @@
 
 ^r3/rft/robotobold.rft
 ^r3/rft/robotoregular.rft
-^r3/rft/droidsansbold.rft
-^r3/rft/comfortaa_bold.rft
-^r3/rft/archivoblackregular.rft
-^r3/rft/dejavusans.rft
-^r3/rft/dejavuserifbold.rft
-^r3/rft/opensanslight.rft
-^r3/rft/opensansregular.rft
 
-#backimg
+#backimg 0
+#listaimg 0 0
+#ding 0
 
 |----------------------
 #nfiles
@@ -66,7 +57,7 @@
 	;
 
 :showvideo
-	268 128 videoshow
+	269 114 videoshow
 	0? ( drop ; ) drop
 :nextvideo
 	filenow> 4 + files> >=? ( drop reload 'files )
@@ -74,7 +65,7 @@
 	dup 'filenow> !
 	@ "videos/%s" mformat
 	| test file?????
-	512 300 video
+	528 300 video
 	;
 
 |------------- lista de turnos
@@ -119,108 +110,85 @@
 		dup next} swap 'medtur strcpy
 		dup next{ swap 'esptur strcpy
 		+stackt
-		) 2drop ;
+		) 2drop 
+	ding splay ;
+
+#xb1 #yb1
 
 :fillbb
-	20 pick2 66 * 128 +
-	2dup 260 over 64 +
+	$495560 'ink !
+	xb1 yb1 268 over 67 +
 	fillbox ;
 
 :colorbox | adr --
 	dup 196 + @
 	msec swap -
-
 	1800000 >? ( -1 'nbox +! )
-	30000 >? ( drop 0 'ink ! fillbb $ffffff 'ink ! ; )
-
-|	10000 >? ( -1 'nbox +! )
-|	2000 >? ( drop $333333 'ink ! fillbb $ffffff 'ink ! ; )
-
-	8 >> 1 an? ( drop
-		0 'ink !
-		fillbb
-		$ffffff 'ink ! ; )
+	120000 >? ( drop ; )
 	drop
-	0 'ink !
-	fillbb
-	$ffff00 'ink ! ;
+	xb1 220 + yb1 20 +
+	msec 8 >> 1 and 2 << 'listaimg + @
+	sprite
+	;
 
 :drawboxt |
-
+	fillbb
 	colorbox
-	swap 8 + swap 3 + atxy
 
+	$ffffff 'ink !
+	xb1 10 + yb1 6 + atxy
 	4 + dup emits
-	64 +
-	28 pick2 66 * 158 + atxy
-	dup emits
+	xb1 10 + yb1 34 + atxy
+	64 + dup emits
 	64 + 64 + 4 +
 	;
 
 :turnodraw
 	robotobold 48 fontr!
-	$ffffff 'ink ! 70 76 atxy
-	"TURNOS" emits
-
-	$1d242b 'ink ! 330 76 atxy
+	$1d242b 'ink ! 330 70 atxy
 	"INFORMACION" emits
 
-	robotobold 40 fontr!
+	robotobold 36 fontr!
+	$ffffff 'ink ! 330 423 atxy
+	"NOTICIAS" emits
+
+	robotobold 34 fontr!
+	4 'xb1 ! 115 'yb1 !
 	'boxtur
 	0 ( nbox <? swap
 		drawboxt
+		69 'yb1 +!
 		swap 1 + ) 2drop ;
 
 |-------------------------------------
-#x1 270 #y1 420 #x2 780 #y2 580
+#x1 282 #y1 465 #x2 780 #y2 580
 
-#consola * 4096
-#consola> 'consola
+#cline * $800
+#lastcl $500
 
-#conline
-
-:crc
-	x1 'ccx ! cch 'ccy +!
-	conline 1? ( drop ; ) drop
-	dup 'conline !
-	;
-
-:emitc | car --
-|	10 =? ( 3 + )
-	13 =? ( drop crc ; )
-	| color
-	| fondo
-	emit
-	ccx x2 >? ( drop crc ; ) drop
-	;
-
-:scrolly
-	'consola conline count 1 + cmove ;
+:bprint | "" --
+	c@+ 0? ( 2drop ; )
+	1 =? ( robotoregular 32 fontr! )
+	2 =? ( robotobold 40 fontr! )
+	drop
+	dup c@ 0? ( 2drop ; ) drop
+	$ffffff 'ink !
+	swprint ccx 8 - ccy rot pick2 + 16 + over cch + fillbox
+	$0 'ink !
+	emits ;
 
 :infodraw
-|	$ffffff 'ink ! x1 y1 x2 y2 fillbox
-	robotoregular 36 fontr!
-|	robotobold 36 fontr!
-
-	$0 'ink !
 	x1 y1 atxy
-	0 'conline !
-    'consola ( c@+ 1? emitc ) 2drop
-	ccy y2 >? ( scrolly ) drop ;
+	'cline 5 ( 1?
+		over bprint
+		1 - swap $100 + swap
+		x1 'ccx ! cch 'ccy +!
+		) 2drop ;
 
-#buffconsola * 8192
-
-:loadinfo
-	'buffconsola
-	'consola strcat
-	;
-
-#nl ( 13 0 )
-
-:+info
-	'nl 'consola strcat
-	'consola strcat
-	;
+:addline | "" t --
+    'cline dup $100 + $800 cmove
+	'cline lastcl + c!+
+	strcpy ;
 
 |-------------------------------------
 :loadoo
@@ -277,8 +245,9 @@
 	'infotime
 	( infotime> <?
 		"* " emits
-		q@+ .h emits " " emits
-		q@+ .h emits " " emits
+		q@+ "%h " print
+		q@+ "%h " print
+		@+ emits cr
 		@+ emits cr
 		) drop ;
 
@@ -287,6 +256,10 @@
 	>>sep 0? ( ; )
 	dup strsdate ,itq
 	>>sep 0? ( ; )
+	dup >>sep 0? ( drop ; )
+	0 over 1 - c!
+	infolines> ,it
+    swap infolines> strcpyl 'infolines> !
 	dup >>sep 0? ( drop ; )
 	0 over 1 - c!
 	infolines> ,it
@@ -306,21 +279,87 @@
 
 #d1 0 0
 #d2 0 0
+#ti 0
 #sd 0
 
+#ttnex 0
+#tnext 0
+
 :nextline
-	infonow> infotime> >=? ( drop 'infotime )
+	infonow>
 	q@+ 'd1 q!
 	q@+ 'd2 q!
+	@+ 'ti ! |+info
 	@+ 'sd ! |+info
+	infotime> >=? ( drop 'infotime )
 	'infonow> !
 	;
 
-:nextinfocon
-	nextline
-	nowsdate 'd1 q@ 'd2 q@ bt? ( drop sd +info ; ) drop
-	nextinfocon
+:buscavalido | solamente lo que este en fecha
+	infonow>
+	( nextline
+	  nowsdate 'd1 q@ 'd2 q@ bt? ( 2drop ; ) drop
+	  infonow> <>? ) drop
+	0 'ti ! ;
+
+:addcr
+	"" 0 addline ;
+
+#auxtt * 1024
+#auxt 0
+
+:toprint | s "" -- str'
+	0 swap ( c@+ 1?
+|		10 =? ( 3 + )
+		13 =? ( drop nip nip 1 - ; )
+		emitsize rot + | s "" cnt
+		pick2 >? ( drop nip 1 - ; )
+		swap ) drop nip nip 1 - ;
+
+:ttcut
+	ttnex
+	1 =? ( robotoregular 32 fontr! )
+	2 =? ( robotobold 40 fontr! )
+	drop
+	x2 x1 - tnext toprint
+    ( dup c@ $ff and 32 >? drop 1 - ) drop
+	0 swap c!
 	;
+
+:nuevainfo
+	buscavalido
+    ti 0? ( drop addcr ; )
+	'auxtt dup 'tnext ! strcpyl 0 swap !
+	2 'ttnex !
+	ttcut
+	addcr ;
+
+:nextcut
+	tnext
+	( c@+ 1? drop ) drop
+	trim
+	dup c@
+	0? ( 'tnext ! drop ; ) drop
+	'tnext !
+	ttcut ;
+
+:nextcut2
+	tnext
+	( c@+ 1? drop ) drop
+	trim
+	dup c@
+	0? ( 2drop 1 'ttnex ! 1 'tnext ! ; ) drop
+	'tnext !
+	ttcut ;
+
+| proxima linea
+:nextinfocon
+	tnext
+	0? ( drop nuevainfo ; )
+	1 =? ( drop sd 'auxtt dup 'tnext ! strcpyl 0 swap ! ttcut ; )
+	ttnex addline
+	ttnex 1 =? ( drop nextcut ; ) drop
+	nextcut2 ;
 
 :loadin
 	'ooa 'fileinfo load
@@ -338,11 +377,10 @@
 	cls home
 	" cargando..." emits
 	redraw
-
-|	"img/back-turnero.jpg"
-	"img/back-turnero.png"
-	loadimg 'backimg !
-
+	"img/a1.png" loadimg 'listaimg !
+	"img/a2.png" loadimg 'listaimg 4 + !
+	"img/back-turnero.png" loadimg 'backimg !
+	"media/dingdong.wav" sload 'ding !
 	loadinfo
 
 	msec 'nextms !
@@ -350,14 +388,20 @@
 	;
 
 |-------------------------------------
-:teclado
+#aux * 1024
 
+:+tt
+	'aux strcpy
+	'aux +turno
+	;
+|-------------------------------------
+
+:teclado
 	key
 	>esc< =? ( exit )
 	<f1> =? ( nextvideo )
-|	<f2> =? ( 'textof +info )
-|	<f3> =? ( "266649{Reda, Pablo{Alfaro Yamil Adrian{Oftalmologia}" +tt )
-|	<f4> =? ( "266642{Quique, Tito{Alfaro Yamil Adrian{Oftalmologia}" +tt )
+	<f3> =? ( "266649{Del Prete, Juan Carlos{Oftalmologia - Dr. Gutierrez{Oftalmologia}" +tt )
+	<f4> =? ( "266642{Quique, Tito{Alfaro Yamil Adrian{Oftalmologia}" +tt )
 	drop ;
 
 :background
@@ -372,9 +416,12 @@
 
 :nextinfo
 	msec nextin <? ( drop ; )
-	5000 + 'nextin !
-	loadin
+	3000 + 'nextin !	| 3 seg por linea
 	nextinfocon
+	loadin
+	nfiles 1? ( drop ; ) drop | hay videos
+	reload
+	'files inivideos
 	;
 
 
@@ -384,13 +431,15 @@
 	showvideo
 	turnodraw
 
-|	cr nowsdate 'd1 q@ 'd2 q@ "%h %h %h" print
+|	cr $ff0000 'ink !
+|	nowsdate 'd1 q@ 'd2 q@ "%h %h %h" print
+|	nfiles "%d " print
 
 	infodraw
 
 	teclado
 	nextmsec
-|	nextinfo
+	nextinfo
 	;
 
 :
