@@ -1182,11 +1182,13 @@ while(ip!=0) {
 
 #ifdef SOUNDWORD
     case SLOAD: // "" -- pp
-        TOS=(int)Mix_LoadWAV((char *)TOS);
+        TOS=(int64_t)Mix_LoadWAV((char *)TOS);
         continue;
     case SPLAY: // pp --
-        if (TOS!=0) Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
-//        else FSOUND_StopSound(FSOUND_ALL);
+        if (TOS!=0) 
+			Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
+        else 
+			Mix_HaltMusic();
         TOS=*NOS;NOS--;
         continue;
 /*
@@ -1195,6 +1197,10 @@ while(ip!=0) {
          for(int i=0;i<FSOUND_GetMaxChannels();i++) TOS|=FSOUND_IsPlaying(i); 
          continue;
     case SSET: // pan vol frec mm --
+    
+     Mix_Volume(int channel, int volume);
+     
+     
          if (TOS!=0) FSOUND_Sample_SetDefaults((FSOUND_SAMPLE *)TOS,int(*NOS),int(*(NOS-1)),int(*(NOS-2)),-1);
         TOS=*(NOS-3);NOS-=4;continue;
 */
@@ -1260,7 +1266,7 @@ avformat_network_init();
 #endif
 
 #ifdef SOUNDWORD
-Mix_OpenAudio(22050,MIX_DEFAULT_FORMAT,2,4096);
+Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,2048);
 #endif
 
 gr_init(filename,srcw,srch,scrf);
