@@ -24,5 +24,6 @@ void videoopen(char *filename,int vw,int vh);
 void videoclose();
 void videoresize(int vw,int vh);
 int redrawframe(int x,int y);
+void initsoundffmpeg(void);
 
 #endif

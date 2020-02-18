@@ -7,8 +7,6 @@
 #define SDL_AUDIO_BUFFER_SIZE 1024
 #define AVCODEC_MAX_AUDIO_FRAME_SIZE 192000
 
-static SDL_AudioDeviceID audio_dev;
-
 typedef struct _PacketQueue {
 	AVPacketList *first, *last;
 	int nb_packets, size;
@@ -48,7 +46,10 @@ int videow,videoh,videostride;
 int sleepfps;
 int videoa=0;
 
-int mem1;
+Uint8 chunk_buffer[SDL_AUDIO_BUFFER_SIZE];
+void *is_audio;
+int mix_movie_channel;
+Mix_Chunk *chunk_movie;
 
 ////////////////////////////////////////////////////////////////
 void PacketQueueInit(PacketQueue * pq)
@@ -160,8 +161,6 @@ for (;;) {
 return -1;
 }
 
-//int videovolumen=SDL_MIX_MAXVOLUME;
-
 void AudioCallback(void *userdata,uint8_t *stream, int len)
 {
 int len1, audioSize;
@@ -179,15 +178,12 @@ while (len>0) {
 	len1=is.audioBufSize-is.audioBufIndex;
 	if (len1>len) len1=len;
 	memcpy(stream,(uint8_t *)is.audioBuf+is.audioBufIndex,len1);
-	
-//	SDL_MixAudio(stream,(uint8_t *)is.audioBuf+is.audioBufIndex,len1, videovolumen);
-	
 	len -= len1;
 	stream += len1;
 	is.audioBufIndex += len1;
 	}
 }
-
+	
 int VideoThread(void* pUserData)
 {
 AVFrame *pFrame=av_frame_alloc();
@@ -264,40 +260,34 @@ is.quit=1;
 
 SDL_WaitThread(hParseThread, NULL);
 if (is.audioStream!=-1) {
+	Mix_Pause(mix_movie_channel);
 //	printf("CloseA\n");	
-	uint8_t data[1024] = {0};
-
-    AVPacket *pktAudio=(AVPacket*)av_malloc(sizeof(AVPacket));
-    av_init_packet(pktAudio);
-    pktAudio->data = data;
-    pktAudio->size = 1024;
-    PacketQueuePut(&is.audioq, pktAudio);    
-    SDL_CloseAudioDevice(audio_dev);    
-    
-	PacketQueueFree(&is.audioq);		
+	PacketQueueFree(&is.audioq);
 //	av_packet_unref(pktAudio);
 //av_packet_free(is.audioPkt);
+	av_freep(&is.pAudioFrame);//-&
 	swr_free(&is.pSwrCtx);	
-	av_frame_unref(is.pAudioFrame);
-	av_frame_free(&is.pAudioFrame);
+	//av_frame_unref(is.pAudioFrame);
+	//av_frame_free(&is.pAudioFrame);
 	avcodec_free_context(&is.audioCtx);
 	}
 	
 if (is.videoStream!=-1) {
 //	printf("CloseV\n");		
-	SDL_WaitThread(hVideoThread,NULL);
+	//SDL_WaitThread(hVideoThread,NULL);
 	PacketQueueFree(&is.videoq);	
 	av_packet_unref(&is.videoPkt);
 	//av_packet_free(&is.videoPkt);	
 	
-	av_free(is.pFrameBuffer);
+	av_freep(&is.pFrameBuffer);//-&
 	
-	av_frame_unref(is.pFrameRGB);	
-	av_frame_free(&is.pFrameRGB);
+//	av_frame_unref(is.pFrameRGB);	
+//	av_frame_free(&is.pFrameRGB);
+	av_freep(&is.pFrameRGB);
+
 	sws_freeContext(is.pSwsCtx);
 	avcodec_free_context(&is.videoCtx);
 	}
-
 avformat_close_input(&is.pFormatCtx);
 //avformat_free_context(is.pFormatCtx);	
 //avformat_network_deinit();
@@ -311,7 +301,6 @@ int StreamComponentAOpen(int streamIndex)
 {
 //if (streamIndex < 0 || streamIndex >= is.pFormatCtx->nb_streams) return -1;
 	
-SDL_AudioSpec wantedSpec={0},audioSpec={0};
 int rv;
 
 AVCodecContext *codecCtx;
@@ -336,21 +325,19 @@ memset(&is.audioPkt, 0, sizeof(is.audioPkt));
 is.pAudioFrame = av_frame_alloc();//if (!is.pAudioFrame) return -1;
 is.pSwrCtx = swr_alloc();//if (!is.pSwrCtx) return -1;
 av_opt_set_channel_layout(is.pSwrCtx, "in_channel_layout", codecCtx->channel_layout, 0);
-av_opt_set_channel_layout(is.pSwrCtx, "out_channel_layout", codecCtx->channel_layout, 0);
+//av_opt_set_channel_layout(is.pSwrCtx, "out_channel_layout", codecCtx->channel_layout, 0);
+av_opt_set_channel_layout(is.pSwrCtx, "out_channel_layout",AV_CH_LAYOUT_STEREO, 0);
+
 av_opt_set_int(is.pSwrCtx, "in_sample_rate", codecCtx->sample_rate, 0);
-av_opt_set_int(is.pSwrCtx, "out_sample_rate", codecCtx->sample_rate, 0);
+//av_opt_set_int(is.pSwrCtx, "out_sample_rate", codecCtx->sample_rate, 0);
+av_opt_set_int(is.pSwrCtx, "out_sample_rate", 48000, 0);
+
 av_opt_set_sample_fmt(is.pSwrCtx, "in_sample_fmt", codecCtx->sample_fmt, 0);
 av_opt_set_sample_fmt(is.pSwrCtx, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
+//av_opt_set_sample_fmt(is.pSwrCtx, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
 rv = swr_init(is.pSwrCtx);if (rv<0) return rv;
-wantedSpec.channels = codecCtx->channels;
-wantedSpec.freq = codecCtx->sample_rate;
-wantedSpec.format = AUDIO_F32;
-wantedSpec.silence = 0;
-wantedSpec.samples = SDL_AUDIO_BUFFER_SIZE;
-wantedSpec.callback = AudioCallback;
-audio_dev=SDL_OpenAudioDevice(NULL,0,&wantedSpec,&audioSpec,0); //if (SDL_OpenAudio(&wantedSpec, &audioSpec) < 0) { return -1; }
 PacketQueueInit(&is.audioq);
-SDL_PauseAudioDevice(audio_dev, 0); //SDL_PauseAudio(0);
+Mix_Resume(mix_movie_channel);
 return 0;	
 }
 
@@ -403,9 +390,6 @@ if (videoa==1) { //printf("-");
 videow=vw;videoh=vh;
 videostride=gr_ancho-videow;
 
-//	av_register_all();
-//	avformat_network_init();
-
 memset((void*)&is,0,sizeof(is));
 is.audioStream=is.videoStream=-1;
 is.pFormatCtx=avformat_alloc_context();
@@ -449,5 +433,18 @@ for (i=0;i<videoh;i++,d+=videostride)
 	for(j=0;j<videow;j++) *d++=*s++;
 	
 return 0;
+}
+
+void mixer_effect_ffmpeg_cb(int chan, void *stream,int len,void *udata) { AudioCallback(udata, stream, len); }
+void mixer_effectdone_ffmpeg_cb(int chan, void *udata) { }
+
+void initsoundffmpeg(void)
+{
+Mix_OpenAudio(48000,AUDIO_F32,2,SDL_AUDIO_BUFFER_SIZE);
+memset(chunk_buffer, 0, sizeof(chunk_buffer));
+chunk_movie = Mix_QuickLoad_RAW(chunk_buffer,SDL_AUDIO_BUFFER_SIZE);
+mix_movie_channel = Mix_PlayChannel(-1, chunk_movie, -1);
+Mix_RegisterEffect(mix_movie_channel, mixer_effect_ffmpeg_cb, mixer_effectdone_ffmpeg_cb, &is_audio);
+Mix_Pause(mix_movie_channel);
 }
 

@@ -7,7 +7,6 @@
 //
 //#define DEBUGWORD
 #define VIDEOWORD
-#define SOUNDWORD
 
 #include <stdio.h>
 #include <time.h>
@@ -108,9 +107,6 @@ const char *r3bas[]={
 
 #ifdef VIDEOWORD
 "VIDEO","VIDEOSHOW","VIDEOSIZE",
-#endif
-
-#ifdef SOUNDWORD
 "SLOAD","SPLAY",
 #endif
 
@@ -163,9 +159,6 @@ OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
 SYS,
 #ifdef VIDEOWORD
 VIDEO,VIDEOSHOW,VIDEOSIZE,
-#endif
-
-#ifdef SOUNDWORD
 SLOAD,SPLAY,
 #endif
 
@@ -1177,10 +1170,6 @@ while(ip!=0) {
 		videoresize(*NOS,TOS);
 		NOS--;TOS=*NOS;NOS--;
 		continue;		
-		
-#endif
-
-#ifdef SOUNDWORD
     case SLOAD: // "" -- pp
         TOS=(int64_t)Mix_LoadWAV((char *)TOS);
         continue;
@@ -1188,7 +1177,7 @@ while(ip!=0) {
         if (TOS!=0) 
 			Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
         else 
-			Mix_HaltMusic();
+			Mix_HaltChannel(-1);
         TOS=*NOS;NOS--;
         continue;
 /*
@@ -1197,10 +1186,9 @@ while(ip!=0) {
          for(int i=0;i<FSOUND_GetMaxChannels();i++) TOS|=FSOUND_IsPlaying(i); 
          continue;
     case SSET: // pan vol frec mm --
-    
+ 
      Mix_Volume(int channel, int volume);
-     
-     
+
          if (TOS!=0) FSOUND_Sample_SetDefaults((FSOUND_SAMPLE *)TOS,int(*NOS),int(*(NOS-1)),int(*(NOS-2)),-1);
         TOS=*(NOS-3);NOS-=4;continue;
 */
@@ -1263,10 +1251,7 @@ if (!r3compile(filename)) return -1;
 #ifdef VIDEOWORD
 av_register_all();
 avformat_network_init();
-#endif
-
-#ifdef SOUNDWORD
-Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,2048);
+initsoundffmpeg();
 #endif
 
 gr_init(filename,srcw,srch,scrf);
@@ -1274,12 +1259,9 @@ SDL_StartTextInput();
 runr3(boot);
 SDL_StopTextInput();
 
-#ifdef SOUNDWORD
-Mix_CloseAudio();
-#endif
-
 #ifdef VIDEOWORD
 videoclose();
+Mix_CloseAudio();
 avformat_network_deinit();
 #endif
 
