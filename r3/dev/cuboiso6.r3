@@ -216,6 +216,7 @@
 
 	1 <<			| len
 	b@+ dup r> and popcnt swap 8 >> + 2 << b+
+	b> $pixels >=? ( octcolor a! 0 ; ) drop
 	b@ $ff and 0? ( drop prevchild ; )
 	fillchild
 	swap ;
@@ -233,7 +234,6 @@
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?	| norden len
-		b> $pixels >=? ( octcolor a!+ 2drop ; ) drop
 		nextchild	| norden len
 		0? ( 2drop 4 a+ ; )
 		) 2drop

@@ -150,15 +150,15 @@
 #stacko * 256	| stack octree+nchildrens
 #stacko> 'stacko
 
-:stack4! | a b c d --
-	stacko> !+ !+ !+ !+ 'stacko> ! ;
+:stack3! | a b c  --
+	stacko> !+ !+ !+ 'stacko> ! ;
 
-:stack2@2 | -- a b
-	stacko> 16 - dup 'stacko> !
-	8 + @+ swap @ ;
+:stack1@2 | -- a b
+	stacko> 12 - dup 'stacko> !
+	4 + @+ swap @ ;
 
 :stackvar
-	stacko> @+ 'zz ! @ 'xy ! ;
+	stacko> @ 'xy ! ;
 
 :addchild | bm 0 mask -- bm ch mask
 	1 over <<
@@ -191,18 +191,17 @@
 |--------------------------------------
 :prevchild | len -- ordenn len
 	1 >> 0? ( dup ; )
-	stack2@2 $ffffffff and
+	stack1@2 $ffffffff and
 	4 >>> 0? ( 2drop prevchild ; )
 	stackvar
 	swap >b swap ;
 
 :nextchild | norden len -- norden len
 	1 << swap		| len norden
-	dup b> xy zz stack4!
-	$7 and 1 over << 1 - >r
-	3 << 'vecpos +
-	@+ xy swap - 1 << 'xy ! @ neg 'zz +!
-    b@+ dup r> and popcnt swap 8 >> + 2 << b+
+	dup b> xy stack3!
+	$7 and 1 over << 1 -
+    b@+ dup rot and popcnt swap 8 >> + 2 << b+
+	3 << 'vecpos + @ xy swap - 1 << 'xy !
 	b> $pixels >=? ( octcolor a! 0 ; ) drop
 	getyxmaskl		| len bm
 	b@ and 0? ( drop prevchild ; )
@@ -210,10 +209,9 @@
 	swap ;
 
 :rayoctree | octree s y x -- octree s y x
-	getyxmask0 0? ( drop 4 a+ ; )
+	getyxmask0 |0? ( drop 4 a+ ; )
 	pick4 >b b@ and 0? ( drop 4 a+ ; )
 	pick2 16 << pick2 or 'xy !
-	minz 'zz !
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?		| norden len

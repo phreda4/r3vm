@@ -8,7 +8,7 @@
 ^r3/lib/gr.r3
 
 |------------------------------
-#xcam 0 #ycam 0 #zcam 0.4
+#xcam 0 #ycam 0 #zcam 0.5
 
 #octvert * 3072 	| 32 niveles de 3 valores*8 vert
 #octvert> 'octvert
@@ -88,7 +88,7 @@
 
 :noct | n -- x y
 	dup 1 << + 2 << 'octvert +
-	@+ swap @+ swap @ project3d ;
+	@+ swap @+ swap @ p3d ;
 
 :noct3 | n1 n2 -- x y z
 	dup 1 << + 2 << 'octvert + >a
@@ -100,14 +100,14 @@
 :fillveciso | --
 	octvert> 96 - >b
 	'rotsum >a
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@+ project3d a!+ a!+
-	b@+ b@+ b@ project3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@+ p3d a!+ a!+
+	b@+ b@+ b@ p3d a!+ a!+
 	a> 'rotsum> ! ;
 
 :getn | n --
@@ -131,8 +131,8 @@
 	7 xor 'mask !
 	;
 
-:3dop project3d op ;
-:3dline project3d line ;
+:3dop p3d op ;
+:3dline p3d line ;
 
 :box | x y r --
 	>r
@@ -268,7 +268,7 @@
 		a@+ b@+ + 1 >>
 		a@+ b@+ + 1 >>
 		a@+ b@+ + 1 >>
-        project3d
+        p3d
         4 box
 		1 + ) 2drop ;
 
@@ -280,7 +280,7 @@
 	a@+ b@+ + 1 >>
 	a@+ b@+ + 1 >>
 	a@+ b@+ + 1 >>
-    project3d ;
+    p3d ;
 
 :recchild | n --
 	0 getxy
@@ -397,8 +397,8 @@
 
 	|isodraw
 
-        fillall
-        drawrules
+	fillall
+	drawrules
 
     'listch 8 ( 1?  swap
        	@+ dup 16 >> "%d " print
