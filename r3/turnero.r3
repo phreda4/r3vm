@@ -110,7 +110,7 @@
 		dup next} swap 'medtur strcpy
 		dup next{ swap 'esptur strcpy
 		+stackt
-		) 2drop 
+		) 2drop
 	ding splay ;
 
 #xb1 #yb1
@@ -430,13 +430,7 @@
 	background
 	showvideo
 	turnodraw
-
-|	cr $ff0000 'ink !
-|	nowsdate 'd1 q@ 'd2 q@ "%h %h %h" print
-|	nfiles "%d " print
-
 	infodraw
-
 	teclado
 	nextmsec
 	nextinfo
@@ -448,5 +442,6 @@
 	$0 'ink !
 	reload
 	'files inivideos
+	33
 	'show onshow
 	;

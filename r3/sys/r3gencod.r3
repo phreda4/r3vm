@@ -512,28 +512,28 @@ iFNEXT iSYS
 	,header
 	dup 12 + @ $f and
 	DeepStack
-|    ";---------OPT" ,ln |----- generate buffer
+    ";---------OPT" ,ln |----- generate buffer
 	dup adr>toklen
 	( 1? 1 - swap
 		@+ tocode
 		swap ) 2drop
 
-|    ";---------ANA" ,ln |----- cell analisys
+    ";---------ANA" ,ln |----- cell analisys
 	dup 12 + @ $f and
 	anaDeepStack
 	'bcode ( bcode> <?
 		@+
 
-|		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
+		"; " ,s dup ,tokenprint 9 ,c ,printstka ,cr
 		"asm/code.asm" savemem | debug
 
 		anastep
 		) drop
     anaend
 
-|	cellinfo
+	cellinfo
 
-|    ";---------GEN" ,ln |----- generate code
+    ";---------GEN" ,ln |----- generate code
 	12 + @ $f and	| use
 	genasmcode
 
