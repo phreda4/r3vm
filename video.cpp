@@ -29,7 +29,6 @@ typedef struct _VideoState {
 	unsigned int audioBufSize,audioBufIndex;
 	AVPacket audioPkt;
 	AVPacket videoPkt;
-	int hasAudioFrames;
 	AVFrame *pAudioFrame;
 	AVFrame *pFrameRGB;
 	uint8_t *pFrameBuffer;
@@ -83,7 +82,7 @@ SDL_UnlockMutex(pq->cs);
 return 0;
 }
 
-static int PacketQueueGet(PacketQueue *q, AVPacket *pkt, int block)
+static int PacketQueueGet(PacketQueue *q, AVPacket *pkt)
 {
 AVPacketList *pkt1;
 int ret=-1;
@@ -99,12 +98,6 @@ for (;;) {
         *pkt=pkt1->pkt;
 		av_free(pkt1);
         ret=1;break;
-/*    } else if (!block) {
-        ret=0;break;
-    } else {
-        SDL_CondWait(q->cv, q->cs);
-		}
-*/
 	} else { 
 		ret=0;break; 
 		}
@@ -140,7 +133,7 @@ int DecodeAudioFrame(void)
 {
 int len2,dataSize=0,outSize=0,hasPacket=0;
 uint8_t *converted=&is.audioConvertedData[0];
-if (PacketQueueGet(&is.audioq, &is.audioPkt,0)<=0) return -1;
+if (PacketQueueGet(&is.audioq, &is.audioPkt)<=0) return -1;
 if (avcodec_send_packet(is.audioCtx, &is.audioPkt)) return -1;
 av_packet_unref(&is.audioPkt);
 if (avcodec_receive_frame(is.audioCtx, is.pAudioFrame)) return -1;
@@ -175,13 +168,16 @@ while (len>0) {
 	is.audioBufIndex += len1;
 	}
 }
+
+void mixer_effect_ffmpeg_cb(int chan,void *stream,int len,void *udata) { AudioCallback(udata, stream, len); }
+void mixer_effectdone_ffmpeg_cb(int chan, void *udata) { }
 	
 int VideoThread(void* pUserData)
 {
 AVFrame *pFrame=av_frame_alloc();
 int re,acc=sleepfr,ms1=SDL_GetTicks()+sleepfps;
 while (!is.quit) { 
-	re=PacketQueueGet(&is.videoq, &is.videoPkt,0);
+	re=PacketQueueGet(&is.videoq, &is.videoPkt);
 	if (re==0) continue;
 	if (re<0) break;
 	if (avcodec_send_packet(is.videoCtx, &is.videoPkt)<0) continue;
@@ -238,7 +234,6 @@ while(!is.quit) {
 	av_packet_unref(&pkt);
 	} 
 while (!is.quit) { Sleep(100); }	
-//av_free_packet(&pkt);
 return 0;
 }
 
@@ -246,14 +241,15 @@ return 0;
 ////////////////////////////////////////////////////////////////////////////
 void videoclose()
 {
-//printf("close");
 if (videoa==0) return;
+videoa=0;
 is.quit=1;
 Sleep(100);
-//SDL_WaitThread(hParseThread, NULL);
-SDL_DetachThread(hParseThread);
+SDL_WaitThread(hParseThread, NULL);
 if (is.audioStream!=-1) {
-	Mix_Pause(mix_movie_channel);
+//	Mix_Pause(mix_movie_channel);	
+	Mix_HaltChannel(mix_movie_channel);	
+	
 	PacketQueueFree(&is.audioq);
 	swr_free(&is.pSwrCtx);	
 	av_frame_unref(is.pAudioFrame);
@@ -262,8 +258,7 @@ if (is.audioStream!=-1) {
 	}
 	
 if (is.videoStream!=-1) {
-	//SDL_WaitThread(hVideoThread,NULL);
-	SDL_DetachThread(hVideoThread);
+	SDL_WaitThread(hVideoThread,NULL);
 	PacketQueueFree(&is.videoq);	
 	av_freep(&is.videoPkt);	
 	av_free(is.pFrameBuffer);//-&
@@ -274,28 +269,23 @@ if (is.videoStream!=-1) {
 	}
 avformat_close_input(&is.pFormatCtx);
 //memset((void*)&is,0,sizeof(is));
-videoa=0;
-//printf("end\n");
 }
 
 ////////////////////////////////////////////////////////////////////////////
 int StreamComponentAOpen(int streamIndex)
 {
 int rv;
-
 AVCodecContext *codecCtx;
 
 AVCodecParameters *codecPar= is.pFormatCtx->streams[streamIndex]->codecpar;
 AVCodec *codec=avcodec_find_decoder(codecPar->codec_id);
 if (!codec) return -1;
-
 codecCtx = avcodec_alloc_context3(codec);
 if (!codecCtx) return -1;
 rv=avcodec_parameters_to_context(codecCtx,codecPar);
 if (rv<0) { avcodec_free_context(&codecCtx);return rv;	}
 rv=avcodec_open2(codecCtx, codec, NULL);
 if (rv<0) { avcodec_free_context(&codecCtx);return rv; }
-
 is.audioCtx = codecCtx;
 is.audioStream = streamIndex;
 is.audioBufSize = 0;
@@ -312,7 +302,13 @@ av_opt_set_sample_fmt(is.pSwrCtx, "in_sample_fmt", codecCtx->sample_fmt, 0);
 av_opt_set_sample_fmt(is.pSwrCtx, "out_sample_fmt", SDL_FORMAT, 0);
 rv = swr_init(is.pSwrCtx);if (rv<0) return rv;
 PacketQueueInit(&is.audioq);
-Mix_Resume(mix_movie_channel);
+//printf("r");
+//Mix_Resume(mix_movie_channel);	
+
+mix_movie_channel = Mix_PlayChannel(-1, chunk_movie, -1);
+Mix_RegisterEffect(mix_movie_channel, mixer_effect_ffmpeg_cb, mixer_effectdone_ffmpeg_cb, &is_audio);
+
+//printf("e\n");
 return 0;	
 }
 
@@ -358,7 +354,6 @@ void videoopen(char *filename,int vw,int vh)
 {
 if (videoa==1) { videoclose(); }
 
-//printf("opens");
 videow=vw;videoh=vh;
 videostride=gr_ancho-videow;
 
@@ -373,7 +368,6 @@ for (int s=0;s<is.pFormatCtx->nb_streams;++s) {
 	else if (is.pFormatCtx->streams[s]->codecpar->codec_type==AVMEDIA_TYPE_VIDEO && is.videoStream<0) 
 		{ is.videoStream=s; }
 	}
-
 if (is.audioStream>=0) {
 	StreamComponentAOpen(is.audioStream);
 	sleepfps=40;
@@ -386,7 +380,6 @@ if (is.videoStream>=0) {
 	}
 hParseThread=SDL_CreateThread(DecodeThread,NULL,&is);
 videoa=1;
-//printf("end\n");
 return;
 }
 
@@ -404,18 +397,17 @@ for(i=0;i<videoh;i++,d+=videostride)
 return 0;
 }
 
-void mixer_effect_ffmpeg_cb(int chan,void *stream,int len,void *udata) { AudioCallback(udata, stream, len); }
-void mixer_effectdone_ffmpeg_cb(int chan, void *udata) { }
-
 void initsoundffmpeg(void)
 {
 //Mix_OpenAudio(SDL_AUDIO_FREC,AUDIO_F32,2,SDL_AUDIO_BUFFER_SIZE);
 Mix_OpenAudio(SDL_AUDIO_FREC,AUDIO_S16SYS,2,SDL_AUDIO_BUFFER_SIZE);
 memset(chunk_buffer, 0, sizeof(chunk_buffer));
 chunk_movie = Mix_QuickLoad_RAW(chunk_buffer,SDL_AUDIO_BUFFER_SIZE);
+/*
 mix_movie_channel = Mix_PlayChannel(-1, chunk_movie, -1);
 Mix_RegisterEffect(mix_movie_channel, mixer_effect_ffmpeg_cb, mixer_effectdone_ffmpeg_cb, &is_audio);
 Mix_Pause(mix_movie_channel);
+*/
 SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 }
 

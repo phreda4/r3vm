@@ -1252,6 +1252,7 @@ if (!r3compile(filename)) return -1;
 av_register_all();
 avformat_network_init();
 initsoundffmpeg();
+if (scrf==1) scrf=2;
 #endif
 
 gr_init(filename,srcw,srch,scrf);

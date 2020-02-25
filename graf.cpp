@@ -116,15 +116,24 @@ int gr_init(char *title,int XRES,int YRES,int f)
 {
 if (SDL_Init(SDL_INIT_EVERYTHING)) return -1;
 
-window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XRES,YRES,0);if (!window) return -1;
+if (f==2) {
+	int displays=SDL_GetNumVideoDisplays();
+	window=SDL_CreateWindow(title,
+		SDL_WINDOWPOS_CENTERED_DISPLAY(displays),
+		SDL_WINDOWPOS_CENTERED_DISPLAY(displays),XRES,YRES,
+		SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_SHOWN);
+	screen = SDL_GetWindowSurface(window);
+	XRES=screen->w;
+	YRES=screen->h;
+} else {
+	window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XRES,YRES,0);if (!window) return -1;
 //renderer=SDL_CreateRenderer(window, -1, 0);if (!renderer) return -1;
 //texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STATIC,XRES,YRES);
-
-SDL_ShowCursor(SDL_DISABLE);
 //		SDL_WINDOW_FULLSCREEN_DESKTOP ..simulate
-if (f) SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
-screen = SDL_GetWindowSurface(window);
-
+	if (f==1) SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
+	screen = SDL_GetWindowSurface(window);
+}
+SDL_ShowCursor(SDL_DISABLE);
 gr_sizescreen=XRES*YRES;// tamanio en Uint32 
 //gr_buffer=(Uint32 *)malloc(gr_sizescreen<<2);
 gr_buffer=(Uint32*)screen->pixels;
