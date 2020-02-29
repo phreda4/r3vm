@@ -20,7 +20,7 @@
 ##switchfull	| FULL			set fullscreen mode
 ##switchresx	| SCR 640 480	set screen size
 ##switchresy
-##switchmem		| MEM 640 		set data memory size (in kb) min 1kb
+##switchmem	1 | MEM 640 		set data memory size (in kb) min 1kb
 
 |---- includes
 | 'string|'mem
@@ -95,20 +95,56 @@
 "MSEC" "TIME" "DATE"
 "LOAD" "SAVE" "APPEND"
 "FFIRST" "FNEXT"
+|"INK" "'INK" "ALPHA" "OPX" "OPY" |"OP" "LINE" "CURVE" "CURVE3" |"PLINE" "PCURVE" "PCURVE3" "POLI"
 "SYS"
-
-|"INK" "'INK" "ALPHA" "OPX" "OPY"
-|"OP" "LINE" "CURVE" "CURVE3"
-|"PLINE" "PCURVE" "PCURVE3" "POLI"
-
 ( 0 )
 
+#r3basefull
+";" "(" ")" "[" "]"
+"EX" "0?" "1?" "+?" "-?"
+"<?" ">?" "=?" ">=?" "<=?" "<>?" "AN?" "NA?" "BT?"
+"DUP" "DROP" "OVER" "PICK2" "PICK3" "PICK4" "SWAP" "NIP"
+"ROT" "2DUP" "2DROP" "3DROP" "4DROP" "2OVER" "2SWAP"
+">R" "R>" "R@"
+"AND" "OR" "XOR"
+"+" "-" "*" "/"
+"<<" ">>" ">>>"
+"MOD" "/MOD" "*/" "*>>" "<</"
+"NOT" "NEG" "ABS" "SQRT" "CLZ"
+"@" "C@" "Q@" "@+" "C@+" "Q@+"
+"!" "C!" "Q!" "!+" "C!+" "Q!+"
+"+!" "C+!" "Q+!"
+">A" "A>" "A@" "A!" "A+" "A@+" "A!+"
+">B" "B>" "B@" "B!" "B+" "B@+" "B!+"
+"MOVE" "MOVE>" "FILL"
+"CMOVE" "CMOVE>" "CFILL"
+"QMOVE" "QMOVE>" "QFILL"
+"UPDATE" "REDRAW"
+"MEM" "SW" "SH" "VFRAME"
+"XYPEN" "BPEN" "KEY" "CHAR"
+"MSEC" "TIME" "DATE"
+"LOAD" "SAVE" "APPEND"
+"FFIRST" "FNEXT"
+"INK" "'INK" "ALPHA" "OPX" "OPY"
+"OP" "LINE" "CURVE" "CURVE3"
+"PLINE" "PCURVE" "PCURVE3" "POLI"
+"SYS"
+| videoplay extension
+"VIDEO" "VIDEOSHOW" "VIDEOSIZE",
+"SLOAD" "SPLAY"
+( 0 )
+
+#basedicc 'r3base
+
+::r3fullmode
+	'r3basefull 'basedicc ! ;
+	
 ::r3basename | nro -- str
-	'r3base swap
+	basedicc swap
 	( 1? 1 - swap >>0 swap ) drop ;
 
 ::?base | adr -- nro/-1
-	0 'r3base			| adr 0 'r3base
+	0 basedicc			| adr 0 'r3base
 	( dup c@ 1? drop
 		pick2 over =s 1? ( 2drop nip ; ) drop
 		>>0 swap 1 + swap ) 4drop
@@ -280,6 +316,18 @@
 #ltok 0 0 0 0 0 0 0 tn tn tn tn ts tw tw taw taw
 
 ::,tokenprint | nro --
+	dup $ff and
+	15 >? ( 16 - r3basename ,s drop ; )
+	2 << 'ltok + @ ex ;
+
+|--------------------
+:tnn val src + "%w" mformat ,s ;
+:twn val "w%h" mformat ,s ;
+:tawn val "'w%h" mformat ,s ;
+
+#ltok 0 0 0 0 0 0 0 tnn tnn tnn tnn ts twn twn tawn tawn
+
+::,tokenprintn | nro --
 	dup $ff and
 	15 >? ( 16 - r3basename ,s drop ; )
 	2 << 'ltok + @ ex ;

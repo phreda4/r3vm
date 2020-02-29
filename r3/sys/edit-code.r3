@@ -185,6 +185,11 @@
 	"r3 " ,s 'name ,s ,eol
 	empty here sys drop
 	;
+	
+:mkplain
+	savetxt
+	"r3 r3/sys/r3plain.r3" sys drop
+	;
 
 |-------------------------------------------
 :copysel
@@ -540,6 +545,7 @@
 	>ctrl< =? ( controloff )
 
 	<f1> =? ( runfile )
+	<f4> =? ( mkplain )
 	drop
 	;
 
@@ -551,6 +557,7 @@
 	$3f $ffffff fontmcolor
 	" F1.Run " emits
 
+	" F4.Plain " emits
 |------------------------------
 |	'debugrun dup <f2> "2Debug" $fff37b flink sp
 |	'profiler dup <f3> "3Profile" $fff37b flink sp

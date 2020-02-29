@@ -75,7 +75,7 @@
 	0 'switchfull !
 	640 'switchresx	!
 	480 'switchresy !
-	$100000 'switchmem !
+	1024 'switchmem !
 
 |	here "r3/sys/asmbase.r3"
 |	2dup load
