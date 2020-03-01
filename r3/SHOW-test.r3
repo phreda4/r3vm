@@ -9,7 +9,7 @@
 
 :hitx vx neg 'vx ! ;
 :hity vy neg 'vy ! ;
-
+ 
 :show
  cls
  x 16 >> sw >=? ( hitx ) 4 <=? ( hitx )

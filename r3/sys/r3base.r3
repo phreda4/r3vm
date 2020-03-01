@@ -321,11 +321,11 @@
 	2 << 'ltok + @ ex ;
 
 |--------------------
-:tnn val src + "%w" mformat ,s ;
-:twn val "w%h" mformat ,s ;
-:tawn val "'w%h" mformat ,s ;
+:tn val src + ,w ;
+:tw val "w" ,s ,h ;
+:taw val "'w" ,s ,h ;
 
-#ltok 0 0 0 0 0 0 0 tnn tnn tnn tnn ts twn twn tawn tawn
+#ltok 0 0 0 0 0 0 0 tn tn tn tn ts tw tw taw taw
 
 ::,tokenprintn | nro --
 	dup $ff and

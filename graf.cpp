@@ -117,7 +117,7 @@ int gr_init(char *title,int XRES,int YRES,int f)
 if (SDL_Init(SDL_INIT_EVERYTHING)) return -1;
 
 if (f==2) {
-	int displays=SDL_GetNumVideoDisplays();
+	int displays=SDL_GetNumVideoDisplays()-1;
 	window=SDL_CreateWindow(title,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(displays),
 		SDL_WINDOWPOS_CENTERED_DISPLAY(displays),XRES,YRES,

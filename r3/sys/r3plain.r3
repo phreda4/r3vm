@@ -10,31 +10,31 @@
 
 #name * 1024
 
-:genword | adr -- 
+:genword | adr --
 	dup 8 + @
 |	$8 an? ( 2drop ; ) 		| cte!!
 	$fff000 na? ( 2drop ; )	| no calls
 	1 and ":#" + c@ ,c
 	dicc> 16 - <? ( dup adr>dicname ,s )
-	dup adr>toklen
+|	dup @ " | %w" ,format ,cr | debug plain
+	adr>toklen
 	( 1? 1 - swap
 		@+ ,sp ,tokenprintn
-		$7c na? ( ,cr ) 
+		$7c na? ( ,cr )
 		swap ) 2drop
-	drop
 	,cr ;
-	
+
 :r3-genplain
 	mark
 	switchresy switchresx "|SCR %d %d" ,format ,cr
 	switchfull 1? ( "|FULL" ,format ,cr ) drop
-	switchmem 1? ( dup "|MEM %d" ,format ,cr ) drop
+	switchmem "|MEM %d" ,format ,cr
 
 	dicc ( dicc> <?
 		dup genword
 		16 + ) drop
 
-	"asm/plain.r3"
+	"r3/plain.r3"
 	savemem
 	empty ;
 

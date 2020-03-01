@@ -6,7 +6,7 @@
 //	SDL graphics windows
 //
 //#define DEBUGWORD
-#define VIDEOWORD
+//#define VIDEOWORD
 
 #include <stdio.h>
 #include <time.h>
@@ -589,15 +589,16 @@ void printerror(char *name,char *src)
 int line=1;
 char *lc=src;
 for (char *p=src;p<cerror;p++)
-	if (*p==10) { 
-		line++;lc=trim(p);
-		}
+	if (*p==10) { if (*(p+1)==13) p++;
+		line++;lc=p+1;
+	} else if (*p==13) { if (*(p+1)==10) p++;
+		line++;lc=p+1; }
 *nextcr(lc)=0; // put 0 in the end of line
 printf("in: ");printword(name);printf("\n\n");	
 printf("%s\n",lc);
-for(char *p=lc;p<cerror;p++) printf(" ");
-printf("^-- ");
-printf("ERROR %s in line %d\n\n",werror,line);	
+for(char *p=lc;p<cerror;p++) if (*p==9) printf("\t"); else printf(" ");
+printf("^-");
+printf("ERROR %s, line %d\n\n",werror,line);	
 }
 
 // tokeniza string

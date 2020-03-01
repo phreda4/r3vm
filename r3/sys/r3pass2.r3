@@ -29,6 +29,8 @@
 	code> codeini - 2 >> | code_length
 	$fffff and 12 <<
 	dicc> 4 - ! | info in wordnow
+	code> 4 - @ $10 <>? ( drop ; ) drop
+	$80 dicc> 8 - +!
 	;
 
 :inidef
@@ -107,6 +109,7 @@
 	;
 
 :blocks
+	flag 1 an? ( drop ; ) drop
 	1 =? ( blockIn ; )	| (
 	2 =? ( blockOut ; )	| )
 	3 =? ( anonIn ; )	| [
@@ -137,9 +140,9 @@
 	$3A =? ( drop .def ; )	| $3a :  Definicion
 	$23 =? ( drop .var ; )	| $23 #  Variable
 	$22 =? ( drop .str ; )	| $22 "	 Cadena
-	$27 =? ( drop 1 + 		| $27 ' Direccion
-|		dup ?base 0 >=? ( drop "macro no address" 'error ! drop 0 ; ) drop
-		?word 1? ( .adr ; ) drop
+	$27 =? ( drop 			| $27 ' Direccion
+		dup ?base 0 >=? ( .base ; ) drop
+		1 + ?word 1? ( .adr ; ) drop
 		"Addr not exist" 'error !
 		drop 0 ; )
 	drop
@@ -157,6 +160,14 @@
 	( wrd2token 1? ) drop
 	;
 
+:contword | dicc -- dicc
+	dup 8 + @
+	$81 an? ( drop ; ) | code sin ;
+	drop
+	dup 28 + @ $fffff000 and
+	over 12 + +!
+	;
+
 ::r3-stage-2 | -- err/0
 	cntdef allocdic
 	here dup 'code ! 'code> !
@@ -172,5 +183,8 @@
 		dicc> 'dicc< !
 		) drop
 	callen
+	| real length
+	dicc> 16 -
+	( dicc >? 16 - contword ) drop
 	nbloques 1 + 3 << 'here +!
 	0 ;

@@ -50,7 +50,7 @@
 	"%l" mformat
 |	dup slog
 
-	load here =? ( drop 0 "File not found" 'error ! "File not found" slog ; ) | no existe
+	load here =? ( drop 0 "File not found" dup 'error ! slog ; ) | no existe
 	here
 	0 rot c!+ 'here !
 	;
