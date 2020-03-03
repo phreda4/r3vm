@@ -382,10 +382,10 @@
 
 :
 	mark
-|	"3do/tie fighter.3do"
-|	"3do/mario.3do"
-	"3do/ldhorse.3do"
-|	"3do/ovni31.3do"
+|	"media/3do/tie fighter.3do"
+|	"media/3do/mario.3do"
+	"media/3do/ldhorse.3do"
+|	"media/3do/ovni31.3do"
 	load3do 'octree !
 	octree 3do!
 	'main onshow ;

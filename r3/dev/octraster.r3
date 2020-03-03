@@ -17,6 +17,7 @@
 #$base
 ##$octree
 ##$pixels
+#$diff
 #$paleta
 
 #minx #lenx
@@ -75,7 +76,8 @@
 	;
 
 :octcolor | oct -- color
-    $octree - $pixels + @ ;
+	$diff + @ ;
+|    $octree - $pixels + @ ;
 
 :octcolor3 | oct -- color
 	$octree - 2 >> dup 1 << + 1 - $pixels + @ $ffffff and ;
@@ -102,7 +104,7 @@
 	pick3 x1 * pick3 y1 * + pick2 z1 * + 31 >> 1 and
 	pick4 x2 * pick4 y2 * + pick3 z2 * + 31 >> 2 and or
 	pick4 x4 * pick4 y4 * + pick3 z4 * + 31 >> 4 and or
-|	$7 xor
+	$7 xor
 	;
 
 :oct++ | adr -- adr bitmask
@@ -111,9 +113,6 @@
 |---------------------------
 :2/a | a -- b
 	dup 31 >> - 1 >> ;
-
-:2/b | a -- c
-	dup dup 31 >> - 1 >> - ;
 
 :reduce
 	isovec> dup >a 48 -
@@ -170,6 +169,13 @@
 :stack4! | a b c d --
 	stacko> !+ !+ !+ !+ 'stacko> ! ;
 
+:stack2@2 | -- a b
+	stacko> 16 - dup 'stacko> !
+	8 + @+ swap @ ;
+
+:stackvar
+	stacko> @+ 'zz ! @ 'xy ! ;
+
 :getyxmaskl | len -- len bm
 	xy dup 16 >> 'ymask + c@
 	swap $ffff and 'xmask + c@
@@ -181,26 +187,23 @@
 	and $ff and	;
 
 |--------------------------------------
-:stack4@2 | -- a b
-	stacko> 16 - dup 'stacko> !
-	@+ 'zz ! @+ 'xy !
-	@+ swap @ ;
-
 :prevchild | len -- ordenn len
 	1 >> 0? ( dup ; )
-	stack4@2 $ffffffff and
+	stack2@2 $ffffffff and
 	4 >>> 0? ( 2drop prevchild ; )
+	stackvar
 	swap >b swap ;
 
 :nextchild | norden len -- norden len
 	1 << swap		| len norden
-	a@ zz <? ( 2drop prevchild ; ) drop
+|	a@ zz <? ( 2drop prevchild ; ) drop
 	dup b> xy zz stack4!
 	$7 and 1 over << 1 - >r
 	3 << 'vecpos +
 	@+ xy swap - 1 << 'xy !
 	@ neg 'zz +!
     b@+ dup r> and popcnt swap 8 >> + 2 << b+
+	b> $pixels >=? ( zz a!+ octcolor a!+ 0 -8 a+ ; ) drop
 	getyxmaskl	| len bm
 	b@ and 0? ( drop prevchild ; )
 	fillchild	| len norden
@@ -214,11 +217,10 @@
 	'stacko 'stacko> !
 	fillchild	| norden
 	1 ( len <?		| norden len
-		b> $pixels >=? ( zz minz + a!+ octcolor a!+ 2drop ; ) drop
 		nextchild	| norden len
 		0? ( 2drop 8 a+ ; )
 		) 2drop
-	zz minz + a!+
+	zz a!+
 	b> octcolor a!+ ;
 
 :drawiso | octree --
@@ -229,7 +231,12 @@
 			rayoctree
 			1 + ) drop
 		over a+
-		1 + ) 3drop ;
+		1 + ) 3drop
+
+|	0 0 zdraw
+|	redraw
+
+		;
 
 |---------------------------------------------
 :sminmax3 | a b c -- sn sx
@@ -326,13 +333,6 @@
 	octcolor 'ink !
 	lenx leny minx miny fillrect
 	vec- ;
-|----------------------------
-
-:nchild | x y z node ordenn -- x y z node ordenn xn yn zn noct
-	1 over $7 and << 1 -
-	1 - pick2 and popcnt 2 << pick3 +	| x y z node bitm nro nnode
-	>r sumac r>			| x y z node bitm xn yn zn nnode
-	;
 
 |---------------- search iso ratio
 :viewrentry | x y z node bm norden -- x y z node
@@ -341,10 +341,9 @@
 :viewr | x y z node --
 	calco 'nminz !
 	over clz zlen <=? ( drop
-		isodraw
-|		testiso
+		isodraw | testiso
 		; ) drop
-	$pixels >=? ( isodraw ; ) |testiso ; ) |vecr exec ; )
+	$pixels >=? ( testiso ; ) |vecr exec ; )
 	1 'zlen +!
 	oct++		| x y z node+ bm
 	nminz >r
@@ -366,7 +365,7 @@
 	<? ( $2 ; ) 0 ;
 
 :culling | x y z -- cull
-	dup 2 - 59 >> $10 and >a | 1 <? ( $10 )( 0 ) >a
+	dup 2 - 63 >> $10 and >a | 	1 <? ( $10 )( 0 ) >a
 	swap hocc *. cullz a+
 	swap wocc *. cullz 2 << a+
 	drop a> ;
@@ -439,6 +438,7 @@
 	dup 28 + '$octree !
 	@+ setvec
 	@ $octree + '$pixels !
+	$pixels $octree - '$diff !
 	;
 
 #opila * 32
@@ -460,10 +460,12 @@
 :vecro	getoct viewr getocti ;
 :vecoo	getoct viewo getocti ;
 
+#cclen 7
+
 |--------- exportadas
 ::drawsoctree | size moctree --
 	adjustmem
-	dup clz 7 - 'zlen !
+	dup clz cclen - 'zlen !
 
 	0 0 0 transform 'sz ! 'sy ! 'sx !
 	'isovec >b
@@ -500,7 +502,7 @@
     ;
 
 |-------------
-#xcam 0 #ycam 0 #zcam 2.0
+#xcam 0 #ycam 0 #zcam 3.0
 
 |-------------
 :3dop transform p3d op ;
@@ -538,6 +540,10 @@
 	<ri> =? ( 0.01 'xcam +! )
 	<pgup> =? ( -0.01 'ycam +! )
 	<pgdn> =? ( 0.01 'ycam +! )
+
+	<f5> =? ( 1 'cclen +! )
+	<f6> =? ( -1 'cclen +! )
+
 	>esc< =? ( exit )
 	drop ;
 
@@ -590,10 +596,10 @@
 	mark
 	sw sh ini3do
 
-|	"3do/ldhorse1.3do"
-|	"3do/sibenika.3do"
-|	"3do/tree1.3do"
-	"3do/mario.3do"
+|	"media/3do/ldhorse.3do"
+|	"media/3do/esfera.3do"
+|	"media/3do/tree1.3do"
+	"media/3do/mario.3do"
 	load3do 'Omario !
 	33
 	'main onshow

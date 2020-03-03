@@ -430,7 +430,7 @@
 	34
 	33
 	mark
-	"3do/tie fighter.3do" load3do 'octree !
-|	"3do/mario.3do" load3do 'octree !
-|	"3do/ldhorse.3do" load3do 'octree !
+	"media/3do/tie fighter.3do" load3do 'octree !
+|	"media/3do/mario.3do" load3do 'octree !
+|	"media/3do/ldhorse.3do" load3do 'octree !
 	'main onshow ;
