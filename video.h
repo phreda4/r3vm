@@ -25,5 +25,6 @@ void videoclose();
 void videoresize(int vw,int vh);
 int redrawframe(int x,int y);
 void initsoundffmpeg(void);
+extern int mix_movie_channel;
 
 #endif

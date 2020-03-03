@@ -6,7 +6,7 @@
 //	SDL graphics windows
 //
 //#define DEBUGWORD
-//#define VIDEOWORD
+#define VIDEOWORD
 
 #include <stdio.h>
 #include <time.h>
@@ -108,6 +108,7 @@ const char *r3bas[]={
 #ifdef VIDEOWORD
 "VIDEO","VIDEOSHOW","VIDEOSIZE",
 "SLOAD","SPLAY",
+"MLOAD","MPLAY",
 #endif
 
 #ifdef DEBUGWORD
@@ -160,6 +161,7 @@ SYS,
 #ifdef VIDEOWORD
 VIDEO,VIDEOSHOW,VIDEOSIZE,
 SLOAD,SPLAY,
+MLOAD,MPLAY,
 #endif
 
 #ifdef DEBUGWORD
@@ -1177,10 +1179,21 @@ while(ip!=0) {
     case SPLAY: // pp --
         if (TOS!=0) 
 			Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
-        else 
-			Mix_HaltChannel(-1);
+        else for(int i=0;i<8;i++) 
+			if (i!=mix_movie_channel) Mix_HaltChannel(i);
         TOS=*NOS;NOS--;
         continue;
+    case MLOAD: // "" -- pp
+        TOS=(int64_t)Mix_LoadMUS((char *)TOS);
+        continue;
+    case MPLAY: // pp --
+        if (TOS!=0) 
+			Mix_PlayMusic((Mix_Music *)TOS, 0);
+        else 
+			Mix_HaltMusic();
+        TOS=*NOS;NOS--;
+        continue;
+        
 /*
     case SINFO: // "" -- mm
          TOS=0;
