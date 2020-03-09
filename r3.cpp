@@ -107,8 +107,8 @@ const char *r3bas[]={
 
 #ifdef VIDEOWORD
 "VIDEO","VIDEOSHOW","VIDEOSIZE",
-"SLOAD","SPLAY",
-"MLOAD","MPLAY",
+"SLOAD","SFREE","SPLAY",
+"MLOAD","MFREE","MPLAY",
 #endif
 
 #ifdef DEBUGWORD
@@ -160,8 +160,8 @@ OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
 SYS,
 #ifdef VIDEOWORD
 VIDEO,VIDEOSHOW,VIDEOSIZE,
-SLOAD,SPLAY,
-MLOAD,MPLAY,
+SLOAD,SFREE,SPLAY,
+MLOAD,MFREE,MPLAY,
 #endif
 
 #ifdef DEBUGWORD
@@ -1176,6 +1176,10 @@ while(ip!=0) {
     case SLOAD: // "" -- pp
         TOS=(int64_t)Mix_LoadWAV((char *)TOS);
         continue;
+    case SFREE: // pp --
+    	Mix_FreeChunk((Mix_Chunk *)TOS);
+    	TOS=*NOS;NOS--;
+    	continue;
     case SPLAY: // pp --
         if (TOS!=0) 
 			Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
@@ -1186,6 +1190,10 @@ while(ip!=0) {
     case MLOAD: // "" -- pp
         TOS=(int64_t)Mix_LoadMUS((char *)TOS);
         continue;
+    case MFREE:
+    	Mix_FreeMusic((Mix_Music *)TOS);
+    	TOS=*NOS;NOS--;
+    	continue;
     case MPLAY: // pp --
         if (TOS!=0) 
 			Mix_PlayMusic((Mix_Music *)TOS, 0);

@@ -225,7 +225,7 @@ int DecodeThread(void* pUserData)
 {
 AVPacket pkt;
 while(!is.quit) {
-	if (is.videoq.size>=MAX_QUEUE_SIZE || is.audioq.size>=MAX_QUEUE_SIZE) { Sleep(50);continue; }
+	if (is.videoq.size>=MAX_QUEUE_SIZE || is.audioq.size>=MAX_QUEUE_SIZE) { Sleep(100);continue; }
 	if (av_read_frame(is.pFormatCtx, &pkt)<0) break;
 	if (pkt.stream_index == is.audioStream) 
 		{ PacketQueuePut(&is.audioq, &pkt); }
@@ -244,7 +244,7 @@ void videoclose()
 if (videoa==0) return;
 videoa=0;
 is.quit=1;
-Sleep(100);
+Sleep(10);
 SDL_WaitThread(hParseThread, NULL);
 if (is.audioStream!=-1) {
 //	Mix_Pause(mix_movie_channel);	
