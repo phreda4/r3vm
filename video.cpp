@@ -44,6 +44,7 @@ SDL_Thread *hVideoThread;
 
 VideoState is;
 int videow,videoh,videostride;
+int padx,pady;
 
 int sleepfps,sleepfr;
 int videoa=0;
@@ -207,7 +208,7 @@ if (videoh>vh) {
 	videow=is.videoCtx->width*vh/is.videoCtx->height;	// aspect ratio
 	}
 videostride=gr_ancho-vw;
-
+padx=(vw-videow)/2;pady=(vh-videoh)/2;
 av_free(is.pFrameBuffer);
 is.pFrameBuffer=NULL;
 av_frame_unref(is.pFrameRGB);
@@ -338,6 +339,7 @@ if (videoh>vh) {
 	videow=codecCtx->width*vh/codecCtx->height;	// aspect ratio
 	}
 videostride=gr_ancho-videow;
+padx=(vw-videow)/2;pady=(vh-videoh)/2;
 
 is.pSwsCtx = sws_getContext(codecCtx->width,codecCtx->height,codecCtx->pix_fmt,videow,videoh,AV_PIX_FMT_RGB32,SWS_BILINEAR,NULL,NULL,NULL);
 is.pFrameRGB=av_frame_alloc();
@@ -391,7 +393,7 @@ if (is.pFrameBuffer==NULL) return -1;
 if (is.videoq.nb_packets+is.audioq.nb_packets==0) return -1; 
 int i,j;
 Uint32 *s=(Uint32*)is.pFrameBuffer;
-Uint32 *d=gr_buffer+(y*gr_ancho+x);
+Uint32 *d=gr_buffer+((y+pady)*gr_ancho+(x+padx));
 for(i=0;i<videoh;i++,d+=videostride) 
 	for(j=0;j<videow;j++) *d++=*s++;
 return 0;

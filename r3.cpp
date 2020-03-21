@@ -563,7 +563,7 @@ if (n>=IFL && n<=IFNAND && (token&0xff)==LIT && (token<<8>>16)==(token>>8)) {
 	}
 
 // optimize operation with constant
-if (n>=AND && n<=CDIVSH && (token&0xff)==LIT) { 
+if (n>=AND && n<=CDIVSH && (token&0xff)==LIT && lastblock!=memc) { 
 	memcode[memc-1]=(token^LIT)|(n-ADD+ADD1);
 	return; 
 	}
