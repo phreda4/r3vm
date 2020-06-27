@@ -55,8 +55,8 @@
 2 -1 0 3	|>=? ab -- a
 2 -1 0 3	|<=? ab -- a
 2 -1 0 3	|<>? ab -- a
-2 -1 0 3	|AN?  ab -- a
-2 -1 0 3	|NA? ab -- a
+2 -1 0 3	|and?  ab -- a
+2 -1 0 3	|nand? ab -- a
 3 -2 0 3	|BTW? abc -- a
 
 1  1 0 0	|DUP    a -- aa
@@ -199,7 +199,7 @@
 :es??
 	dup 4 - @
 	8 >> 3 << blok + @
-	$10000000 na? ( drop ; ) drop
+	$10000000 nand? ( drop ; ) drop
 	dropvar
 	pushvar
 	;
@@ -296,7 +296,7 @@ inA usoA inB usoB usomem
 	;
 
 :inlinemark
-|	$fc na? (  | no dir, no r, no ;;, no []
+|	$fc nand? (  | no dir, no r, no ;;, no []
 |		pick2
 |		cntwords 1 - <? (
 |			dic>len@ MAXINLINE <? ( drop $100 or )( drop ) | inline
@@ -392,8 +392,8 @@ inA usoA inB usoB usomem
 :setvars | nro -- nro
 	dup dic>len@ decodeinfov nip
 	24 << over dic>inf dup @ rot or
-|	$f000004 na? ( $8 or )	| solo nros??
-	$4 na? ( $8 or )
+|	$f000004 nand? ( $8 or )	| solo nros??
+	$4 nand? ( $8 or )
 	swap !
 
 	deltaS over dic>mov dup @ rot or swap !	| stack mov of vectors in var
@@ -413,7 +413,7 @@ inA usoA inB usoB usomem
 
 |	dup dic>adr @ "::%w" slog
 
-	dup dic>inf @ 1 an? ( drop analisisvar ; ) drop
+	dup dic>inf @ 1 and? ( drop analisisvar ; ) drop
 	analisiscode
 	;
 

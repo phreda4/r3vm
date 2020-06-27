@@ -132,7 +132,7 @@
 ::.0?		TOS 1? ( drop @ ; ) drop 4 + ;
 ::.1?		TOS 0?  ( drop @ ; ) drop 4 + ;
 ::.+?		TOS -?  ( drop @ ; ) drop 4 + ;
-::.-?		TOS $80000000 na? ( drop @ ; ) drop 4 + ;
+::.-?		TOS $80000000 nand? ( drop @ ; ) drop 4 + ;
 
 ::.=?		NOS @ TOS <>? ( drop @ .DROP ; ) drop 4 + .DROP ;
 ::.<?		NOS @ TOS >=? ( drop @ .DROP ; ) drop 4 + .DROP ;
@@ -140,10 +140,10 @@
 ::.<=?		NOS @ TOS >? ( drop @ .DROP ; ) drop 4 + .DROP ;
 ::.>=?		NOS @ TOS <? ( drop @ .DROP ; ) drop 4 + .DROP ;
 ::.<>?		NOS @ TOS =? ( drop @ .DROP ; ) drop 4 + .DROP ;
-::.A?		NOS @ TOS na? ( drop @ .DROP ; ) drop 4 + .DROP ;
-::.N?		NOS @ TOS an? ( drop @ .DROP ; ) drop 4 + .DROP ;
+::.A?		NOS @ TOS nand? ( drop @ .DROP ; ) drop 4 + .DROP ;
+::.N?		NOS @ TOS and? ( drop @ .DROP ; ) drop 4 + .DROP ;
 
-::.B?		NOS @ TOS an? ( drop @ .DROP ; ) drop 4 + .DROP ; |****
+::.B?		NOS @ TOS and? ( drop @ .DROP ; ) drop 4 + .DROP ; |****
 
 ::.>R		4 'RTOS +! TOS RTOS ! .DROP ;
 ::.R>		.DUP RTOS dup @ 'TOS ! 4 - 'RTOS ! ;
@@ -380,7 +380,7 @@
 
 ::newreg | -- reg
 	0 maskreg
-	( 1 an? 1 >> swap 1 + swap ) drop
+	( 1 and? 1 >> swap 1 + swap ) drop
 	;
 
 ::setreg | reg --
@@ -626,7 +626,7 @@
 ::needECXcte | 'cell --
 	dup @
 	2 8 << 5 or =? ( 2drop ; )
-	$f na? ( 2drop ; )
+	$f nand? ( 2drop ; )
 	"mov ecx," ,s ,cell ,cr
 	2 8 << 5 or swap !
 	;

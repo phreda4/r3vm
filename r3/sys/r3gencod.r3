@@ -100,7 +100,7 @@
 
 :ivar
 	getval
-	dup dic>inf @ $8 an? ( drop icte ; ) drop | inline
+	dup dic>inf @ $8 and? ( drop icte ; ) drop | inline
 	push.var
 	2code!+
 	;
@@ -228,8 +228,8 @@
 :*nro
 	code<<
 	vTOS
-	dup 1 - na? ( *pot ; )
-	dup 1 + na? ( *pot-1 ; )
+	dup 1 - nand? ( *pot ; )
+	dup 1 + nand? ( *pot-1 ; )
 	drop
 	;
 
@@ -261,7 +261,7 @@
 :/nro
 	code<<
 	vTOS
-	dup 1 - an? ( /cte ; )
+	dup 1 - and? ( /cte ; )
 	2 =? ( /cte2 ; )
 	swap
 	31 cte!+
@@ -320,7 +320,7 @@
 :/MODnro
 	code<<
 	vTOS
-	dup 1 - an? ( /modcte ; )
+	dup 1 - and? ( /modcte ; )
 	swap
     TKdup code!+ 	| dup
 	TKdup code!+	| dup  
@@ -371,7 +371,7 @@
 |	dup 31 >> (33-4)29 >>> swap over + 7 and swap -
 :modnro
     code<<
-	dup 1 - an? ( modcte ; )
+	dup 1 - and? ( modcte ; )
 	TKdup code!+ | dup 31
 	31 cte!+
 	TK>> code!+ | >>
@@ -505,7 +505,7 @@ iFNEXT iSYS
 |-----------------------------
 :gencode | adr --
 	dup 8 + @
-	1 an? ( 2drop ; )	| code
+	1 and? ( 2drop ; )	| code
 	12 >> $fff and 0? ( 2drop ; )	| no calls
 	drop
 	codeini

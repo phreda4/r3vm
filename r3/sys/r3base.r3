@@ -72,7 +72,7 @@
 #r3base
 ";" "(" ")" "[" "]"
 "EX" "0?" "1?" "+?" "-?"
-"<?" ">?" "=?" ">=?" "<=?" "<>?" "AN?" "NA?" "BT?"
+"<?" ">?" "=?" ">=?" "<=?" "<>?" "and?" "nand?" "BT?"
 "DUP" "DROP" "OVER" "PICK2" "PICK3" "PICK4" "SWAP" "NIP"
 "ROT" "2DUP" "2DROP" "3DROP" "4DROP" "2OVER" "2SWAP"
 ">R" "R>" "R@"
@@ -102,7 +102,7 @@
 #r3basefull
 ";" "(" ")" "[" "]"
 "EX" "0?" "1?" "+?" "-?"
-"<?" ">?" "=?" ">=?" "<=?" "<>?" "AN?" "NA?" "BT?"
+"<?" ">?" "=?" ">=?" "<=?" "<>?" "and?" "nand?" "BT?"
 "DUP" "DROP" "OVER" "PICK2" "PICK3" "PICK4" "SWAP" "NIP"
 "ROT" "2DUP" "2DROP" "3DROP" "4DROP" "2OVER" "2SWAP"
 ">R" "R>" "R@"
@@ -199,7 +199,7 @@
 		dup @ pick2			| str ind pal str
 		=s 1? ( drop
 			dup 8 + @
-			%10 an? ( drop ; )
+			%10 and? ( drop ; )
 			drop dicc< >=? ( ; ) dup
 			) drop
 		16 - ) drop
@@ -295,7 +295,7 @@
 
 ::,wordinfo
 	dup dic>adr 8 + @
-	$1 na? ( drop ,codeinfo ; )
+	$1 nand? ( drop ,codeinfo ; )
 	drop ,datainfo ;
 
 |--------------------

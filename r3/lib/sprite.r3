@@ -31,7 +31,7 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 
 |---- w/alpha
 :alp!+ | col --
-|	$ff na? ( drop 4 a+ ; )
+|	$ff nand? ( drop 4 a+ ; )
 	dup 24 >> $ff and
 	0? ( 2drop 4 a+ ; )
 	$ff =? ( drop a!+ ; )
@@ -95,7 +95,7 @@ $FF004Dff $FFA300ff $FFEC27ff $00E436ff $29ADFFff $83769Cff $FF77A8ff $FFCCAAff
 		1 - ) 3drop ;
 
 :d2p
-	$f0000000 an? ( dup 28 >> $f and pala!+ ; )
+	$f0000000 and? ( dup 28 >> $f and pala!+ ; )
 	4 a+ ;
 
 :d2l | wi val -- wi2

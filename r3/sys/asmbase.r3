@@ -151,7 +151,7 @@
 |	r> + r> 						| y1 x1 y2 x2 c2 c1
 	2dup and 1? ( drop or ; ) drop
 	2dup or 0? ( drop or ; ) drop
-	>r 12 an? ( clip2 ) r> swap >r 12 an? ( clip1 ) r>
+	>r 12 and? ( clip2 ) r> swap >r 12 and? ( clip1 ) r>
 	2dup and 1? ( drop or ; ) drop
 	2dup or 0? ( drop or ; ) drop
 	>r 1? ( clip4 ) r> swap >r 1? ( clip3 ) r> or ;
@@ -160,7 +160,7 @@
 	16 << over / 		| sx dy ea
 	0 rot 				| sx ea ec dy
 	( 1? 1 - >r
-		over + $ffff0000 an? ( $ffff and pick2 2 << a+ )
+		over + $ffff0000 and? ( $ffff and pick2 2 << a+ )
 		sw 2 << a+
 		dup 8 >>
 		dup pxa pick3 1 - 2 << a+
@@ -185,7 +185,7 @@
 	swap 16 << over / 		| sx dx ea
 	0 rot 					| sx ea ec dx
 	( 1? 1 - >r	| sx ea ec
-		over + $ffff0000 an? ( $ffff and sw 2 << a+ )
+		over + $ffff0000 and? ( $ffff and sw 2 << a+ )
 		pick2 2 << a+		| sx ea ec
 		dup 8 >> 		| sx ea ec ci
 		dup pxa sw 1 - 2 << a+
