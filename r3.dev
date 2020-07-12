@@ -11,7 +11,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=-Dmain=SDL_main_@@_
 CppCompiler=
-Linker=-lmingw32  -lSDL2main -lSDL2_@@__@@_
+Linker=-lmingw32  -lSDL2main -lSDL2 -lSDL2_mixer_@@__@@_
 IsCpp=1
 Icon=
 ExeOutput=

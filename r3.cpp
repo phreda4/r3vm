@@ -7,9 +7,19 @@
 //
 //#define DEBUGWORD
 #define VIDEOWORD
+//#define LINUX
 
 #include <stdio.h>
 #include <time.h>
+
+#ifdef LINUX
+#include <unistd.h>
+#include <dirent.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+
+#define strnicmp strncasecmp
+#endif
 
 #include "graf.h"
 
@@ -107,9 +117,9 @@ const char *r3bas[]={
 
 #ifdef VIDEOWORD
 "VIDEO","VIDEOSHOW","VIDEOSIZE",
+#endif
 "SLOAD","SFREE","SPLAY",
 "MLOAD","MFREE","MPLAY",
-#endif
 
 #ifdef DEBUGWORD
 "DEBUG","TDEBUG",	// DEBUG
@@ -160,9 +170,9 @@ OP,LINE,CURVE,CURVE3,PLINE,PCURVE,PCURVE3,POLI,
 SYS,
 #ifdef VIDEOWORD
 VIDEO,VIDEOSHOW,VIDEOSIZE,
+#endif
 SLOAD,SFREE,SPLAY,
 MLOAD,MFREE,MPLAY,
-#endif
 
 #ifdef DEBUGWORD
 DEBUG,TDEBUG,	// DEBUG
@@ -603,6 +613,22 @@ printf("^-");
 printf("ERROR %s, line %d\n\n",werror,line);	
 }
 
+// |LIN| code linux only
+// |WIN| code win only
+char *nextcom(char *str)
+{
+#ifdef LINUX
+if (strnicmp(str,"|LIN|",5)==0) {	// linux especific
+	return str+5;
+	}
+#else
+if (strnicmp(str,"|WIN|",5)==0) {	// window especific
+	return str+5;
+	}
+#endif
+return nextcr(str);
+}
+
 // tokeniza string
 int r3token(char *str) 
 {
@@ -613,7 +639,7 @@ while(*str!=0) {
 		case '^':	// include
 			str=nextcr(str);break;
 		case '|':	// comments	
-			str=nextcr(str);break; 
+			str=nextcom(str);break; 
 		case '"':	// strings		
 			compilaSTR(str);str=nextstr(str);break;
 		case ':':	// $3a :  Definicion	// :CODE
@@ -725,7 +751,7 @@ if (strnicmp(str,"|SCR ",5)==0) {	// screen size
 if (strnicmp(str,"|FULL",5)==0) {	// fullscreen mode
 	scrf=1;
 	}
-return nextcr(str);
+return nextcom(str);
 }
 
 // resolve includes, recursive definition
@@ -793,8 +819,13 @@ boot=-1;
 memc=1; // direccion 0 para null
 memd=0;
 
+#ifdef LINUX
+memcode=(int*)mmap(NULL,sizeof(int)*memcsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE|MAP_32BIT,-1,0);
+memdata=(char*)mmap(NULL,memdsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE|MAP_32BIT,-1,0);
+#else
 memcode=(int*)malloc(sizeof(int)*memcsize);
 memdata=(char*)malloc(memdsize);
+#endif
 
 // tokenize includes
 for (int i=0;i<cntstacki;i++) {
@@ -851,16 +882,23 @@ int64_t stack[STACKSIZE];
 
 SDL_Event evt;
 
+#ifdef LINUX
+DIR *dirp=0;
+struct dirent *dp;
+#else
 WIN32_FIND_DATA ffd;
 HANDLE hFind=NULL;
+#endif
 
 FILE *file;
 
 time_t sit;
 tm *sitime;
 
+#ifndef LINUX
 PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
 STARTUPINFO StartupInfo; //This is an [in] parameter
+#endif
 
 int sw,sh;
 int xm=0;
@@ -889,7 +927,8 @@ if (SDL_PollEvent(&evt)) {
 		}
 	}	
 }
-         
+
+        
 // run code, from adress "boot"
 void runr3(int boot) 
 {
@@ -1076,8 +1115,13 @@ while(ip!=0) {
         do { W=fread((void*)TOS,sizeof(char),1024,file); TOS+=W; } while (W==1024);
         fclose(file);continue;
     case SAVE: //SAVE: // 'from cnt "filename" --
-        if (TOS==0||*NOS==0) 
-			{ DeleteFile((char*)TOS);NOS-=2;TOS=*NOS;NOS--;continue; }
+        if (TOS==0||*NOS==0) { 
+#ifdef LINUX
+ 			remove((char*)TOS);
+#else
+			DeleteFile((char*)TOS);
+#endif			
+		NOS-=2;TOS=*NOS;NOS--;continue; }
         file=fopen((char*)TOS,"wb");
         TOS=*NOS;NOS--;
         if (file==NULL) { NOS--;TOS=*NOS;NOS--;continue; }
@@ -1092,15 +1136,27 @@ while(ip!=0) {
         fwrite((void*)*NOS,sizeof(char),TOS,file);
         fclose(file);
         NOS--;TOS=*NOS;NOS--;continue;
-	case FFIRST://"FFIRST"
+    case FFIRST://"FFIRST"
+#ifdef LINUX
+	if (dirp!=NULL) closedir(dirp);
+	dirp=opendir((char*)TOS);
+    	if (dirp!=NULL) dp=readdir(dirp); else dp=0;
+        TOS=dp;
+#else
         if (hFind!=NULL) FindClose(hFind);
         strcpy(path,(char*)TOS);strcat(path,"\\*");
         hFind=FindFirstFile(path, &ffd);
         if (hFind == INVALID_HANDLE_VALUE) TOS=0; else TOS=(int64_t)&ffd;
+#endif        
         continue;
-	case FNEXT://"FNEXT"
-        NOS++;*NOS=TOS;
+    case FNEXT://"FNEXT"
+	NOS++;*NOS=TOS;
+#ifdef LINUX
+	if (dp!=NULL) dp=readdir(dirp); else dp=0;
+	TOS=dp;
+#else
         if (FindNextFile(hFind, &ffd)==0) TOS=0; else TOS=(int64_t)&ffd;
+#endif        
         continue ;
         
 	case INK:	// INK
@@ -1137,26 +1193,16 @@ while(ip!=0) {
 		gr_drawPoli();continue;
 
 	case SYS: 
-//		printf("%s",TOS);
-    	if (TOS==0) {	// 0 sys | end process
-            if (ProcessInfo.hProcess!=0) {
-               TerminateProcess(ProcessInfo.hProcess,0);
-               CloseHandle(ProcessInfo.hThread);
-               CloseHandle(ProcessInfo.hProcess);
-               ProcessInfo.hProcess=0;
-               }
-            TOS=-1;
-            continue; }
-        if (TOS==-1) {	// -1 sys | end process??
-            if (ProcessInfo.hProcess==0) continue;
-            W=WaitForSingleObject(ProcessInfo.hProcess,0);
-            if (W==WAIT_TIMEOUT) TOS=0; else TOS=-1;
-            continue; }
+#ifdef LINUX
+		system((char*)TOS);
+#else
         ZeroMemory(&StartupInfo, sizeof(StartupInfo));
         StartupInfo.cb=sizeof StartupInfo ; //Only compulsory field
         //TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
 		TOS=CreateProcess(NULL,(char*)TOS,NULL,NULL,FALSE,NULL,NULL,NULL,&StartupInfo,&ProcessInfo);        
 		WaitForSingleObject(ProcessInfo.hProcess,INFINITE);// wait termination
+#endif		
+		TOS=*NOS;NOS--;
 		continue;
 		
 #ifdef VIDEOWORD
@@ -1173,6 +1219,8 @@ while(ip!=0) {
 		videoresize(*NOS,TOS);
 		NOS--;TOS=*NOS;NOS--;
 		continue;		
+#endif
+		
     case SLOAD: // "" -- pp
         TOS=(int64_t)Mix_LoadWAV((char *)TOS);
         continue;
@@ -1184,7 +1232,7 @@ while(ip!=0) {
         if (TOS!=0) 
 			Mix_PlayChannel(-1,(Mix_Chunk *)TOS, 0);
         else for(int i=0;i<8;i++) 
-			if (i!=mix_movie_channel) Mix_HaltChannel(i);
+			/*if (i!=mix_movie_channel) */Mix_HaltChannel(i);
         TOS=*NOS;NOS--;
         continue;
     case MLOAD: // "" -- pp
@@ -1201,7 +1249,7 @@ while(ip!=0) {
 			Mix_HaltMusic();
         TOS=*NOS;NOS--;
         continue;
-        
+      
 /*
     case SINFO: // "" -- mm
          TOS=0;
@@ -1214,8 +1262,6 @@ while(ip!=0) {
          if (TOS!=0) FSOUND_Sample_SetDefaults((FSOUND_SAMPLE *)TOS,int(*NOS),int(*(NOS-1)),int(*(NOS-2)),-1);
         TOS=*(NOS-3);NOS-=4;continue;
 */
-
-#endif
 
 #ifdef DEBUGWORD //----------------- DEBUG
 	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;
@@ -1270,6 +1316,7 @@ else
 
 if (!r3compile(filename)) return -1;
 
+Mix_OpenAudio(44100,AUDIO_S16SYS,2,4096);
 #ifdef VIDEOWORD
 av_register_all();
 avformat_network_init();
@@ -1284,9 +1331,9 @@ SDL_StopTextInput();
 
 #ifdef VIDEOWORD
 videoclose();
-Mix_CloseAudio();
 avformat_network_deinit();
 #endif
+Mix_CloseAudio();
 
 gr_fin();
 return 0;

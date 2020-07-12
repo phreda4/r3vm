@@ -401,8 +401,8 @@ return 0;
 
 void initsoundffmpeg(void)
 {
-//Mix_OpenAudio(SDL_AUDIO_FREC,AUDIO_F32,2,SDL_AUDIO_BUFFER_SIZE);
-Mix_OpenAudio(SDL_AUDIO_FREC,AUDIO_S16SYS,2,SDL_AUDIO_BUFFER_SIZE);
+//Mix_OpenAudio(SDL_AUDIO_FREC,AUDIO_S16SYS,2,SDL_AUDIO_BUFFER_SIZE);
+
 memset(chunk_buffer, 0, sizeof(chunk_buffer));
 chunk_movie = Mix_QuickLoad_RAW(chunk_buffer,SDL_AUDIO_BUFFER_SIZE);
 /*

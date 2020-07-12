@@ -27,10 +27,14 @@
 
 |--------------------------------
 :FNAME | adr -- adrname
-	44 + ;
+|WIN| 44 +
+|LIN| 19 +
+	;
 
 :FDIR? | adr -- 1/0
-	@ 4 >> 1 and ;
+|WIN| @ 4 >>
+|LIN| 18 + c@ 2 >>
+	1 and ;
 
 :FINFO | adr -- adr info
 	dup FDIR? 0? ( 2 + ; ) drop 0 ;
@@ -235,8 +239,10 @@
 	drop
 
 	mark
-	"r3 " ,s 'path ,s "/" ,s ,s ,eol
-|	"r3v " ,s 'path ,s "/" ,s ,s ,eol
+|	"r3 " ,s 'path ,s "/" ,s ,s ,eol
+|WIN|	"r3v "
+|LIN|	"./r3lin"
+	,s 'path ,s "/" ,s ,s ,eol
 	empty here
 	sys drop
 	;
