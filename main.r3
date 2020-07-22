@@ -29,11 +29,13 @@
 :FNAME | adr -- adrname
 |WIN| 44 +
 |LIN| 19 +
+|RPI| 11 +
 	;
 
 :FDIR? | adr -- 1/0
 |WIN| @ 4 >>
 |LIN| 18 + c@ 2 >>
+|RPI| 10 + c@ 2 >>
 	1 and ;
 
 :FINFO | adr -- adr info
@@ -242,6 +244,7 @@
 |	"r3 " ,s 'path ,s "/" ,s ,s ,eol
 |WIN|	"r3v "
 |LIN|	"./r3lin"
+|RPI|	"./r3lin "                                       | ,s does not add a space for RPI ?
 	,s 'path ,s "/" ,s ,s ,eol
 	empty here
 	sys drop

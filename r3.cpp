@@ -8,6 +8,7 @@
 //#define DEBUGWORD
 #define VIDEOWORD
 //#define LINUX
+//#define RPI   // Tested on a Raspberry PI 4
 
 #include <stdio.h>
 #include <time.h>
@@ -17,7 +18,7 @@
 #define LINUX
 #endif
 
-#ifdef LINUX
+#if defined(LINUX) || defined(RPI)
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/mman.h>
@@ -621,24 +622,30 @@ printf("ERROR %s, line %d\n\n",werror,line);
 // |WEB| code linux only
 // |LIN| code linux only
 // |WIN| code win only
+// |RPI| code Raspberry PI only
 char *nextcom(char *str)
 {
 #ifdef LINUX
- #ifdef EMSCRIPTEN
-if (strnicmp(str,"|WEB|",5)==0) {	// web especific
-	return str+5;
-	}
- #else
-if (strnicmp(str,"|LIN|",5)==0) {	// linux especific
-	return str+5;
-	}
- #endif
+#ifdef EMSCRIPTEN
+  if (strnicmp(str,"|WEB|",5)==0) {	// web especific
+    return str+5;
+  }
 #else
-if (strnicmp(str,"|WIN|",5)==0) {	// window especific
-	return str+5;
-	}
+  if (strnicmp(str,"|LIN|",5)==0) {	// linux especific
+    return str+5;
+  }
 #endif
-return nextcr(str);
+#endif
+#ifdef RPI
+  if (strnicmp(str,"|RPI|",5)==0) {	// raspberry pi specific
+    return str+5;
+  }
+#else
+  if (strnicmp(str,"|WIN|",5)==0) {	// window especific
+    return str+5;
+  }
+#endif
+  return nextcr(str);
 }
 
 // tokeniza string
@@ -834,6 +841,9 @@ memd=0;
 #ifdef LINUX
 memcode=(int*)mmap(NULL,sizeof(int)*memcsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE|MAP_32BIT,-1,0);
 memdata=(char*)mmap(NULL,memdsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE|MAP_32BIT,-1,0);
+ #elseif RPI
+ memcode=(int*)mmap(NULL,sizeof(int)*memcsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE/*|MAP_32BIT*/,-1,0);
+ memdata=(char*)mmap(NULL,memdsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE/*|MAP_32BIT*/,-1,0);
 #else
 memcode=(int*)malloc(sizeof(int)*memcsize);
 memdata=(char*)malloc(memdsize);
@@ -894,7 +904,7 @@ int64_t stack[STACKSIZE];
 
 SDL_Event evt;
 
-#ifdef LINUX
+#if defined(LINUX) || defined(RPI)
 DIR *dirp=0;
 struct dirent *dp;
 #else
@@ -907,7 +917,7 @@ FILE *file;
 time_t sit;
 tm *sitime;
 
-#ifndef LINUX
+#if !defined(LINUX) && !defined(RPI)
 PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
 STARTUPINFO StartupInfo; //This is an [in] parameter
 #endif
@@ -1166,7 +1176,7 @@ while(ip!=0) {
         fclose(file);continue;
     case SAVE: //SAVE: // 'from cnt "filename" --
         if (TOS==0||*NOS==0) { 
-#ifdef LINUX
+#if defined(LINUX) || defined(RPI)
  			remove((char*)TOS);
 #else
 			DeleteFile((char*)TOS);
@@ -1187,11 +1197,12 @@ while(ip!=0) {
         fclose(file);
         NOS--;TOS=*NOS;NOS--;continue;
     case FFIRST://"FFIRST"
-#ifdef LINUX
+#if defined(LINUX) || defined(RPI)
 		if (dirp!=NULL) closedir(dirp);
 		dirp=opendir((char*)TOS);
     	if (dirp!=NULL) dp=readdir(dirp); else dp=0;
         TOS=(int64_t)dp;
+
 #else
         if (hFind!=NULL) FindClose(hFind);
         strcpy(path,(char*)TOS);strcat(path,"\\*");
@@ -1201,9 +1212,11 @@ while(ip!=0) {
         continue;
     case FNEXT://"FNEXT"
 		NOS++;*NOS=TOS;
-#ifdef LINUX
+#if defined(LINUX) || defined(RPI)
+
 		if (dp!=NULL) dp=readdir(dirp); else dp=0;
 		TOS=(int64_t)dp;
+
 #else
         if (FindNextFile(hFind, &ffd)==0) TOS=0; else TOS=(int64_t)&ffd;
 #endif        
@@ -1243,7 +1256,7 @@ while(ip!=0) {
 		gr_drawPoli();continue;
 
 	case SYS: 
-#ifdef LINUX
+#if defined(LINUX) || defined(RPI)
 		system((char*)TOS);
 #else
         ZeroMemory(&StartupInfo, sizeof(StartupInfo));
