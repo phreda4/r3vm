@@ -3,12 +3,17 @@
 
 #include <stdio.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
+
 #include "graf.h"
 
 SDL_Window *window;
-//SDL_Renderer *renderer;
-//SDL_Texture *texture;
-
+#ifdef EMSCRIPTEN
+SDL_Renderer *renderer;
+SDL_Texture *texture;
+#endif
 SDL_Surface *screen;
 
 //---- buffer de video
@@ -127,18 +132,31 @@ if (f==2) {
 	YRES=screen->h;
 } else {
 	window=SDL_CreateWindow(title,SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,XRES,YRES,0);if (!window) return -1;
-//renderer=SDL_CreateRenderer(window, -1, 0);if (!renderer) return -1;
-//texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STATIC,XRES,YRES);
-//		SDL_WINDOW_FULLSCREEN_DESKTOP ..simulate
 	if (f==1) SDL_SetWindowFullscreen(window,SDL_WINDOW_FULLSCREEN);
 	screen = SDL_GetWindowSurface(window);
+#ifdef EMSCRIPTEN
+	renderer=SDL_CreateRenderer(window, -1, 0);
+	texture=SDL_CreateTexture(renderer,SDL_PIXELFORMAT_ARGB8888,SDL_TEXTUREACCESS_STREAMING,XRES,YRES);
+#else
+	screen = SDL_GetWindowSurface(window);
+#endif
 }
+
+
+
 SDL_ShowCursor(SDL_DISABLE);
 gr_sizescreen=XRES*YRES;// tamanio en Uint32 
-//gr_buffer=(Uint32 *)malloc(gr_sizescreen<<2);
+#ifdef EMSCRIPTEN
+gr_buffer=(Uint32 *)malloc(gr_sizescreen<<2);
+#else
 gr_buffer=(Uint32*)screen->pixels;
+#endif
 gr_ancho=XRES;
+#ifdef EMSCRIPTEN
+gr_ypitch=XRES;
+#else
 gr_ypitch=screen->pitch>>2;
+#endif
 gr_alto=YRES;
 //---- poligonos2
 fillSol();
@@ -152,22 +170,24 @@ return 0;
 
 void gr_fin(void) 
 {
-//free(gr_buffer);
-//SDL_DestroyTexture(texture);
-//SDL_DestroyRenderer(renderer);
+#ifdef EMSCRIPTEN
+free(gr_buffer);
+SDL_DestroyTexture(texture);
+SDL_DestroyRenderer(renderer);
+#endif
 SDL_DestroyWindow(window);
 SDL_Quit();
 }
 
 void gr_redraw(void) 
 {
-/*
-//	SDL_RenderClear(renderer);
-SDL_UpdateTexture(texture,NULL,gr_buffer,gr_ypitchbytes);
+#ifdef EMSCRIPTEN
+SDL_UpdateTexture(texture,NULL,gr_buffer,gr_ypitch<<2);
 SDL_RenderCopy(renderer,texture,NULL,NULL);
 SDL_RenderPresent(renderer);
-*/
+#else
 SDL_UpdateWindowSurface(window);
+#endif
 }
 
 void gr_cls(int color)

@@ -12,6 +12,11 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#define LINUX
+#endif
+
 #ifdef LINUX
 #include <unistd.h>
 #include <dirent.h>
@@ -613,14 +618,21 @@ printf("^-");
 printf("ERROR %s, line %d\n\n",werror,line);	
 }
 
+// |WEB| code linux only
 // |LIN| code linux only
 // |WIN| code win only
 char *nextcom(char *str)
 {
 #ifdef LINUX
+ #ifdef EMSCRIPTEN
+if (strnicmp(str,"|WEB|",5)==0) {	// web especific
+	return str+5;
+	}
+ #else
 if (strnicmp(str,"|LIN|",5)==0) {	// linux especific
 	return str+5;
 	}
+ #endif
 #else
 if (strnicmp(str,"|WIN|",5)==0) {	// window especific
 	return str+5;
@@ -915,8 +927,10 @@ void r3update()
 {
 key=0;
 keychar=0;
+#ifndef EMSCRIPTEN
 SDL_Delay(10); // cpu free time
-if (SDL_PollEvent(&evt)) {
+#endif
+while (SDL_PollEvent(&evt)) {
 	switch (evt.type) {
 	case SDL_KEYDOWN:key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
 	case SDL_KEYUP:	key=0x1000|(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
@@ -928,7 +942,36 @@ if (SDL_PollEvent(&evt)) {
 	}	
 }
 
+#ifdef EMSCRIPTEN
+int64_t cTOS=0;
+int64_t *cNOS=&stack[0];
+int64_t *cRTOS=&stack[STACKSIZE-1];
+int64_t cREGA=0;
+int64_t cREGB=0;
+int ip=boot;
         
+void initr3(int boot)
+{
+stack[STACKSIZE-1]=0;	
+cTOS=0;
+cNOS=&stack[0];
+cRTOS=&stack[STACKSIZE-1];
+cREGA=0;
+cREGB=0;
+ip=boot;
+}
+// run code, from until UPDATE
+void runr3(void) 
+{
+int64_t TOS=cTOS;
+int64_t *NOS=cNOS;
+int64_t *RTOS=cRTOS;
+int64_t REGA=cREGA;
+int64_t REGB=cREGB;
+int64_t op=0;
+int64_t W=0;
+#else
+       
 // run code, from adress "boot"
 void runr3(int boot) 
 {
@@ -941,7 +984,7 @@ register int64_t REGB=0;
 register int64_t op=0;
 register int ip=boot;
 register int64_t W=0;
-
+#endif
 while(ip!=0) { 
 	op=memcode[ip++]; 
 
@@ -1080,7 +1123,14 @@ while(ip!=0) {
 		while (TOS--) { *(uint64_t*)W=op;W+=8; }
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case UPDATE://"UPDATE"
+#ifdef EMSCRIPTEN	
+		r3update();
+		cTOS=TOS;cNOS=NOS;cRTOS=RTOS;
+		cREGA=REGA;cREGB=REGB;
+		return; /* BREAK */
+#else
 		r3update();continue;
+#endif
 	case REDRAW://"REDRAW"
 		gr_redraw();continue;
 	case MEM://"MEM"
@@ -1138,10 +1188,10 @@ while(ip!=0) {
         NOS--;TOS=*NOS;NOS--;continue;
     case FFIRST://"FFIRST"
 #ifdef LINUX
-	if (dirp!=NULL) closedir(dirp);
-	dirp=opendir((char*)TOS);
+		if (dirp!=NULL) closedir(dirp);
+		dirp=opendir((char*)TOS);
     	if (dirp!=NULL) dp=readdir(dirp); else dp=0;
-        TOS=dp;
+        TOS=(int64_t)dp;
 #else
         if (hFind!=NULL) FindClose(hFind);
         strcpy(path,(char*)TOS);strcat(path,"\\*");
@@ -1150,10 +1200,10 @@ while(ip!=0) {
 #endif        
         continue;
     case FNEXT://"FNEXT"
-	NOS++;*NOS=TOS;
+		NOS++;*NOS=TOS;
 #ifdef LINUX
-	if (dp!=NULL) dp=readdir(dirp); else dp=0;
-	TOS=dp;
+		if (dp!=NULL) dp=readdir(dirp); else dp=0;
+		TOS=(int64_t)dp;
 #else
         if (FindNextFile(hFind, &ffd)==0) TOS=0; else TOS=(int64_t)&ffd;
 #endif        
@@ -1301,7 +1351,9 @@ while(ip!=0) {
 		
 	}
    }
-
+#ifdef EMSCRIPTEN   
+emscripten_cancel_main_loop();
+#endif
 }
 	
 	
@@ -1326,7 +1378,14 @@ if (scrf==1) scrf=2;
 
 gr_init(filename,srcw,srch,scrf);
 SDL_StartTextInput();
+
+#ifdef EMSCRIPTEN
+initr3(boot);
+emscripten_set_main_loop(runr3, -1, 1);
+#else
 runr3(boot);
+#endif
+
 SDL_StopTextInput();
 
 #ifdef VIDEOWORD
