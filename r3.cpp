@@ -6,9 +6,9 @@
 //	SDL graphics windows
 //
 //#define DEBUGWORD
-#define VIDEOWORD
+//#define VIDEOWORD
 //#define LINUX
-//#define RPI   // Tested on a Raspberry PI 4
+#define RPI   // Tested on a Raspberry PI 4
 
 #include <stdio.h>
 #include <time.h>
@@ -619,32 +619,30 @@ printf("^-");
 printf("ERROR %s, line %d\n\n",werror,line);	
 }
 
-// |WEB| code linux only
-// |LIN| code linux only
-// |WIN| code win only
-// |RPI| code Raspberry PI only
+// |WEB| emscripten only
+// |LIN| linux only
+// |WIN| windows only
+// |RPI| Raspberry PI only
 char *nextcom(char *str)
 {
-#ifdef LINUX
-#ifdef EMSCRIPTEN
-  if (strnicmp(str,"|WEB|",5)==0) {	// web especific
+#if defined(LINUX)
+  if (strnicmp(str,"|LIN|",5)==0) {	// linux specific
     return str+5;
   }
-#else
-  if (strnicmp(str,"|LIN|",5)==0) {	// linux especific
+#elif defined(EMSCRIPTEN)
+  if (strnicmp(str,"|WEB|",5)==0) {	// web specific
     return str+5;
   }
-#endif
-#endif
-#ifdef RPI
+#elif defined(RPI)
   if (strnicmp(str,"|RPI|",5)==0) {	// raspberry pi specific
     return str+5;
   }
 #else
-  if (strnicmp(str,"|WIN|",5)==0) {	// window especific
+  if (strnicmp(str,"|WIN|",5)==0) {	// window specific
     return str+5;
   }
 #endif
+  
   return nextcr(str);
 }
 
@@ -838,10 +836,10 @@ boot=-1;
 memc=1; // direccion 0 para null
 memd=0;
 
-#ifdef LINUX
+#if defined(LINUX)
  memcode=(int*)mmap(NULL,sizeof(int)*memcsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE|MAP_32BIT,-1,0);
  memdata=(char*)mmap(NULL,memdsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE|MAP_32BIT,-1,0);
-#elif RPI
+#elif defined(RPI)
  memcode=(int*)mmap(NULL,sizeof(int)*memcsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE/*|MAP_32BIT*/,-1,0);
  memdata=(char*)mmap(NULL,memdsize,PROT_READ|PROT_WRITE,MAP_PRIVATE|MAP_ANONYMOUS|MAP_POPULATE/*|MAP_32BIT*/,-1,0);
 #else
