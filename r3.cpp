@@ -8,7 +8,7 @@
 //#define DEBUGWORD
 //#define VIDEOWORD
 //#define LINUX
-#define RPI   // Tested on a Raspberry PI 4
+//#define RPI   // Tested on a Raspberry PI 4
 
 #include <stdio.h>
 #include <time.h>
@@ -940,12 +940,12 @@ SDL_Delay(10); // cpu free time
 #endif
 while (SDL_PollEvent(&evt)) {
 	switch (evt.type) {
-	case SDL_KEYDOWN:key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
-	case SDL_KEYUP:	key=0x1000|(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;break;
-	case SDL_MOUSEBUTTONDOWN:bm|=evt.button.button;break;
-	case SDL_MOUSEBUTTONUP:bm&=~evt.button.button;break;
-	case SDL_MOUSEMOTION:xm=evt.motion.x;ym=evt.motion.y;break;
-	case SDL_TEXTINPUT: keychar=*(int*)evt.text.text;break;
+	case SDL_KEYDOWN:key=(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;return;
+	case SDL_KEYUP:	key=0x1000|(evt.key.keysym.sym&0xffff)|evt.key.keysym.sym>>16;return;
+	case SDL_MOUSEBUTTONDOWN:bm|=evt.button.button;return;
+	case SDL_MOUSEBUTTONUP:bm&=~evt.button.button;return;
+	case SDL_MOUSEMOTION:xm=evt.motion.x;ym=evt.motion.y;return;
+	case SDL_TEXTINPUT: keychar=*(int*)evt.text.text;return;
 		}
 	}	
 }
@@ -1051,9 +1051,9 @@ while(ip!=0) {
 	case SHR0:TOS=((uint64_t)*NOS)>>TOS;NOS--;continue;	//SHR
 	case MOD:TOS=*NOS%TOS;NOS--;continue;					//MOD
 	case DIVMOD:W=*NOS;*NOS=W/TOS;TOS=W%TOS;continue;	//DIVMOD
-	case MULDIV:TOS=(*(NOS-1)*(*NOS)/TOS);NOS-=2;continue;	//MULDIV
-	case MULSHR:TOS=(*(NOS-1)*(*NOS))>>TOS;NOS-=2;continue;	//MULSHR
-	case CDIVSH:TOS=(*(NOS-1)<<TOS)/(*NOS);NOS-=2;continue;//CDIVSH
+	case MULDIV:TOS=((__int128)(*(NOS-1)*(*NOS))/TOS);NOS-=2;continue;	//MULDIV
+	case MULSHR:TOS=((__int128)(*(NOS-1)*(*NOS))>>TOS);NOS-=2;continue;	//MULSHR
+	case CDIVSH:TOS=((__int128)(*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
 	case NOT:TOS=~TOS;continue;							//NOT
 	case NEG:TOS=-TOS;continue;							//NEG
 	case ABS:W=(TOS>>63);TOS=(TOS+W)^W;continue;		//ABS
