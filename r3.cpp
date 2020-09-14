@@ -930,6 +930,12 @@ int gy1=0;
 int key=0;
 char keychar;
 
+void memset32(uint32_t *dest, uint32_t val, uint32_t count)
+{ while (count--) *dest++ = val; }
+
+void memset64(uint64_t *dest, uint64_t val, uint32_t count)
+{ while (count--) *dest++ = val; }
+
 // Update event for OS interaction
 void r3update()
 {
@@ -977,7 +983,7 @@ int64_t *RTOS=cRTOS;
 int64_t REGA=cREGA;
 int64_t REGB=cREGB;
 int64_t op=0;
-int64_t W=0;
+//int64_t W=0;
 #else
        
 // run code, from adress "boot"
@@ -991,7 +997,7 @@ register int64_t REGA=0;
 register int64_t REGB=0;
 register int64_t op=0;
 register int ip=boot;
-register int64_t W=0;
+//register int64_t W=0;
 #endif
 while(ip!=0) { 
 	op=memcode[ip++]; 
@@ -1025,17 +1031,17 @@ while(ip!=0) {
 	case PICK2:NOS++;*NOS=TOS;TOS=*(NOS-2);continue;//PICK2
 	case PICK3:NOS++;*NOS=TOS;TOS=*(NOS-3);continue;//PICK3
 	case PICK4:NOS++;*NOS=TOS;TOS=*(NOS-4);continue;//PICK4
-	case SWAP:W=*NOS;*NOS=TOS;TOS=W;continue;		//SWAP
+	case SWAP:op=*NOS;*NOS=TOS;TOS=op;continue;		//SWAP
 	case NIP:NOS--;continue; 						//NIP
-	case ROT:W=TOS;TOS=*(NOS-1);*(NOS-1)=*NOS;*NOS=W;continue;	//ROT
-	case DUP2:W=*NOS;NOS++;*NOS=TOS;NOS++;*NOS=W;continue;//DUP2
+	case ROT:op=TOS;TOS=*(NOS-1);*(NOS-1)=*NOS;*NOS=op;continue;	//ROT
+	case DUP2:op=*NOS;NOS++;*NOS=TOS;NOS++;*NOS=op;continue;//DUP2
 	case DROP2:NOS--;TOS=*NOS;NOS--;continue;				//DROP2
 	case DROP3:NOS-=2;TOS=*NOS;NOS--;continue;				//DROP3
 	case DROP4:NOS-=3;TOS=*NOS;NOS--;continue;				//DROP4
 	case OVER2:NOS++;*NOS=TOS;TOS=*(NOS-3);
 		NOS++;*NOS=TOS;TOS=*(NOS-3);continue;	//OVER2
-	case SWAP2:W=*NOS;*NOS=*(NOS-2);*(NOS-2)=W;
-		W=TOS;TOS=*(NOS-1);*(NOS-1)=W;continue;	//SWAP2
+	case SWAP2:op=*NOS;*NOS=*(NOS-2);*(NOS-2)=op;
+		op=TOS;TOS=*(NOS-1);*(NOS-1)=op;continue;	//SWAP2
 	case TOR:RTOS--;*RTOS=TOS;TOS=*NOS;NOS--;continue;	//>r
 	case RFROM:NOS++;*NOS=TOS;TOS=*RTOS;RTOS++;continue;	//r>
 	case ERRE:NOS++;*NOS=TOS;TOS=*RTOS;continue;			//r@
@@ -1050,13 +1056,13 @@ while(ip!=0) {
 	case SHR:TOS=*NOS>>TOS;NOS--;continue;				//SAR
 	case SHR0:TOS=((uint64_t)*NOS)>>TOS;NOS--;continue;	//SHR
 	case MOD:TOS=*NOS%TOS;NOS--;continue;					//MOD
-	case DIVMOD:W=*NOS;*NOS=W/TOS;TOS=W%TOS;continue;	//DIVMOD
+	case DIVMOD:op=*NOS;*NOS=op/TOS;TOS=op%TOS;continue;	//DIVMOD
 	case MULDIV:TOS=((__int128)(*(NOS-1)*(*NOS))/TOS);NOS-=2;continue;	//MULDIV
 	case MULSHR:TOS=((__int128)(*(NOS-1)*(*NOS))>>TOS);NOS-=2;continue;	//MULSHR
 	case CDIVSH:TOS=((__int128)(*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
 	case NOT:TOS=~TOS;continue;							//NOT
 	case NEG:TOS=-TOS;continue;							//NEG
-	case ABS:W=(TOS>>63);TOS=(TOS+W)^W;continue;		//ABS
+	case ABS:op=(TOS>>63);TOS=(TOS+op)^op;continue;		//ABS
 	case CSQRT:TOS=isqrt(TOS);continue;					//CSQRT
 	case CLZ:TOS=iclz(TOS);continue;					//CLZ
 	case FECH:TOS=*(int*)TOS;continue;//@
@@ -1099,8 +1105,8 @@ while(ip!=0) {
 		memmove((void*)*(NOS-1),(void*)*NOS,TOS<<2);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case FILL://FILL
-		W=*(NOS-1);op=*NOS;
-		while (TOS--) { *(int*)W=op;W+=4; }
+//		W=*(NOS-1);op=*NOS;while (TOS--) { *(int*)W=op;W+=4; }
+		memset32((uint32_t*)*(NOS-1),*NOS,TOS);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CMOVED://CMOVE 
 //		W=(int64_t)*(NOS-1);op=(int64_t)*NOS;
@@ -1113,8 +1119,8 @@ while(ip!=0) {
 		memmove((void*)*(NOS-1),(void*)*NOS,TOS);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case CFILL://CFILL
-		W=(int64_t)*(NOS-1);op=*NOS;
-		while (TOS--) { *(char*)W=op;W++; }
+//		W=(int64_t)*(NOS-1);op=*NOS;while (TOS--) { *(char*)W=op;W++; }
+		memset((void*)*(NOS-1),*NOS,TOS);
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QMOVED://QMOVE 
 //		W=(uint64_t)*(NOS-1);op=(uint64_t)*NOS;
@@ -1127,8 +1133,8 @@ while(ip!=0) {
 		memmove((void*)*(NOS-1),(void*)*NOS,TOS<<3);		
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case QFILL://QFILL
-		W=(uint64_t)*(NOS-1);op=*NOS;
-		while (TOS--) { *(uint64_t*)W=op;W+=8; }
+//		W=(uint64_t)*(NOS-1);op=*NOS;while (TOS--) { *(uint64_t*)W=op;W+=8; }
+		memset64((uint64_t*)*(NOS-1),*NOS,TOS);		
 		NOS-=2;TOS=*NOS;NOS--;continue;
 	case UPDATE://"UPDATE"
 #ifdef EMSCRIPTEN	
@@ -1170,7 +1176,7 @@ while(ip!=0) {
         file=fopen((char*)TOS,"rb");
         TOS=*NOS;NOS--;
         if (file==NULL) continue;
-        do { W=fread((void*)TOS,sizeof(char),1024,file); TOS+=W; } while (W==1024);
+        do { op=fread((void*)TOS,sizeof(char),1024,file); TOS+=op; } while (op==1024);
         fclose(file);continue;
     case SAVE: //SAVE: // 'from cnt "filename" --
         if (TOS==0||*NOS==0) { 
