@@ -1057,9 +1057,9 @@ while(ip!=0) {
 	case SHR0:TOS=((uint64_t)*NOS)>>TOS;NOS--;continue;	//SHR
 	case MOD:TOS=*NOS%TOS;NOS--;continue;					//MOD
 	case DIVMOD:op=*NOS;*NOS=op/TOS;TOS=op%TOS;continue;	//DIVMOD
-	case MULDIV:TOS=((__int128)(*(NOS-1)*(*NOS))/TOS);NOS-=2;continue;	//MULDIV
+	case MULDIV:TOS=((__int128)(*(NOS-1))*(*NOS)/TOS);NOS-=2;continue;	//MULDIV
 	case MULSHR:TOS=((__int128)(*(NOS-1)*(*NOS))>>TOS);NOS-=2;continue;	//MULSHR
-	case CDIVSH:TOS=((__int128)(*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
+	case CDIVSH:TOS=(__int128)((*(NOS-1)<<TOS)/(*NOS));NOS-=2;continue;//CDIVSH
 	case NOT:TOS=~TOS;continue;							//NOT
 	case NEG:TOS=-TOS;continue;							//NEG
 	case ABS:op=(TOS>>63);TOS=(TOS+op)^op;continue;		//ABS
@@ -1354,9 +1354,9 @@ while(ip!=0) {
 	case SHR01:TOS=(uint64_t)TOS>>(op>>8);continue;
 	case MOD1:TOS=TOS%(op>>8);continue;
 	case DIVMOD1:op>>=8;NOS++;*NOS=TOS/op;TOS=TOS%op;continue;	//DIVMOD
-	case MULDIV1:op>>=8;TOS=(*NOS)*TOS/op;NOS--;continue;		//MULDIV
-	case MULSHR1:op>>=8;TOS=((*NOS)*TOS)>>op;NOS--;continue;	//MULSHR
-	case CDIVSH1:op>>=8;TOS=((*NOS)<<op)/TOS;NOS--;continue;	//CDIVSH
+	case MULDIV1:op>>=8;TOS=(__int128)(*NOS)*TOS/op;NOS--;continue;		//MULDIV
+	case MULSHR1:op>>=8;TOS=((__int128)(*NOS)*TOS)>>op;NOS--;continue;	//MULSHR
+	case CDIVSH1:op>>=8;TOS=(__int128)((*NOS)<<op)/TOS;NOS--;continue;	//CDIVSH
 	case IFL1:if ((op<<32>>48)<=TOS) ip+=(op<<48>>56);continue;	//IFL
 	case IFG1:if ((op<<32>>48)>=TOS) ip+=(op<<48>>56);continue;	//IFG
 	case IFE1:if ((op<<32>>48)!=TOS) ip+=(op<<48>>56);continue;	//IFN
