@@ -7,8 +7,8 @@ LIBS     = -lSDL2main -lSDL2 -lSDL2_mixer -s
 INCS     = 
 CXXINCS  = 
 BIN      = r3lin
-CXXFLAGS = $(CXXINCS) -Ofast -fpermissive
-CFLAGS   = $(INCS) -Ofast -Dmain=SDL_main
+CXXFLAGS = $(CXXINCS) -Os -fpermissive
+CFLAGS   = $(INCS) -Os -Dmain=SDL_main
 RM       = rm -f
 
 .PHONY: all all-before all-after clean clean-custom
