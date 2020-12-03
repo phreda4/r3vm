@@ -99,7 +99,7 @@ int *rl;
 #define GETPOS(a) (((a)>>20)&0xfff)
 #define GETLEN(a) (((a)>>9)&0x7ff)
 #define GETVAL(a) ((a)&0x1ff)
-#define GETPOSF(a) ((((a)>>20)&0xfff)+(((a)>>9)&0x7ff))
+#define GETPOSF(a) (((a)>>20)+(((a)>>9)&0x7ff))
 
 #define SETPOS(a) ((a)<<20)
 #define SETLEN(a) ((a)<<9)
@@ -597,7 +597,7 @@ Segm *v=*j;
 int vx=v->x;
 if ((*(j-1))->x<=vx) return;
 *j=*(j-1);j--;
-while ((*(j-1))->x>vx) { *j=*(j-1);j--; }
+while (activelist<j && (*(j-1))->x>vx)  { *j=*(j-1);j--; }
 *j=v;
 }
 
@@ -635,10 +635,9 @@ Uint32  *gr_pant=(Uint32 *)gr_buffer+(yMin>>BPP)*gr_ypitch;
 for (;yMin<yMax;) {
   *runlenscan=SETLEN(gr_ancho+1);
   *(runlenscan+1)=0;
-  
   for (i=VALUES;i!=0;--i) {
-    while (heapIHY()>>16==yMin)
-      { addactive(&segmentos[remIHY()&0xffff]); }
+	while (heapIHY()>>16==yMin)
+		{ addactive(&segmentos[remIHY()&0xffff]); }
     rl=runlenscan;
     for (jj=&activelist[1];jj+1<activelast;jj+=2) {
         coverpixels(((*jj)->x)>>FBASE,((*(jj+1))->x)>>FBASE);
