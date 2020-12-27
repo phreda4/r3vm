@@ -14,8 +14,8 @@
 	'scliente ! ;
 
 :recibe
-	scliente
-	0? ( drop acepta ; )
+	scliente 0? ( drop acepta ; )
+	dup netcheck 0? ( 2drop ; ) drop
 	'mensaje 1024 tcprecv
 	'mensaje + 0 swap c!
 	1 'nn +!
@@ -34,7 +34,7 @@
 
 	key
 	>esc< =? ( exit )
-	drop 
+	drop
 	15 framelimit ;
 
 :netini

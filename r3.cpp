@@ -30,11 +30,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define SDL_MAIN_HANDLED
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_thread.h>
-#include <SDL2/SDL_syswm.h>
-#include <SDL2/SDL_render.h>
 #include <SDL2/SDL_audio.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_net.h>
@@ -146,6 +141,12 @@ const char *r3bas[]={
 "TCPOPEN","TCPACCEPT","TCPADR",
 "TCPSEND","TCPRECV","TCPCLOSE",
 
+"UDPALLOC","UDPFREE",
+"UDPOPEN","UDPBIN","UDPUNBIN","UDPPEER",
+"UDPSEND","UDPRECV","UDPCLOSE",
+"NETSET","TCPADD","UDPADD","TCPDEL","UDPDEL",
+"NETSETCHECK","SETFREE",
+
 #ifdef DEBUGWORD
 "DEBUG","TDEBUG",	// DEBUG
 #endif
@@ -201,6 +202,12 @@ MLOAD,MFREE,MPLAY,
 NETRHOST,NETRIP,NETCHECK,
 NETTOPEN,NETTACCEPT,NETTPADR,
 NETTSEND,NETTRECV,NETTCLOSE,
+
+UDPALLOC,UDPFREE,
+UDPOPEN,UDPBIN,UDPUNBIN,UDPPEER,
+UDPSEND,UDPRECV,UDPCLOSE,
+NETSET,TCPADD,UDPADD,TCPDEL,UDPDEL,
+NETSETCHECK,SETFREE,
 
 #ifdef DEBUGWORD
 DEBUG,TDEBUG,	// DEBUG
@@ -1360,7 +1367,8 @@ while(ip!=0) {
 		TOS=(int64_t)SDLNet_ResolveIP((IPaddress*)TOS);
 		continue;
 	case NETCHECK: // res -- sock
-		 TOS=(int64_t)SDLNet_SocketReady((SDLNet_GenericSocket)TOS);
+		if (SDLNet_SocketReady((SDLNet_GenericSocket)TOS)) { TOS=-1;continue; }
+		TOS=0;
 		continue;
 	case NETTOPEN: // ip -- socket
 		TOS=(int64_t)SDLNet_TCP_Open((IPaddress*)TOS);
@@ -1383,6 +1391,74 @@ while(ip!=0) {
 		SDLNet_TCP_Close((TCPsocket)TOS);
 		TOS=*NOS;NOS--;
 		continue;
+
+
+	case UDPALLOC: //size -- udp		
+		TOS=(int64_t)SDLNet_AllocPacket(TOS);
+		continue;
+	case UDPFREE: // pack --
+		SDLNet_FreePacket((UDPpacket *)TOS);
+		TOS=*NOS;NOS--;
+		continue;
+
+	case UDPOPEN: // port --sockudp
+		TOS=(int64_t)SDLNet_UDP_Open(TOS);
+		continue;
+	case UDPBIN: // son channel,ipa -- err
+		TOS=(int64_t)SDLNet_UDP_Bind((UDPsocket)*(NOS-1),*NOS,(IPaddress *)TOS);
+		NOS-=2;
+		continue;
+	case UDPUNBIN: // sock channel --
+		SDLNet_UDP_Unbind((UDPsocket)*NOS,TOS);
+		NOS--;TOS=*NOS;NOS--;
+		continue;
+	case UDPPEER: // udp channel -- ipadress
+		TOS=(int64_t)SDLNet_UDP_GetPeerAddress((UDPsocket)*NOS,TOS);
+		NOS--;
+		continue;
+	case UDPSEND: // sock channel,pack -- len?
+		TOS=(int64_t)SDLNet_UDP_Send((UDPsocket)*(NOS-1),*NOS,(UDPpacket *)TOS);
+		NOS-=2;
+		continue;
+	case UDPRECV: // sock pack -- len
+		TOS=(int64_t)SDLNet_UDP_Recv((UDPsocket)*NOS,(UDPpacket *)TOS);
+		NOS--;
+		continue;		
+	case UDPCLOSE: // sock --
+		SDLNet_UDP_Close((UDPsocket)TOS);
+		TOS=*NOS;NOS--;
+		continue;
+
+	case NETSET: // max -- set
+		TOS=(int64_t)SDLNet_AllocSocketSet(TOS);
+		continue;
+	case TCPADD: // set soc --
+		SDLNet_TCP_AddSocket((SDLNet_SocketSet)*NOS,(TCPsocket)TOS);
+		NOS--;TOS=*NOS;NOS--;
+		continue;
+	case UDPADD: // set soc --
+		SDLNet_UDP_AddSocket((SDLNet_SocketSet)*NOS,(UDPsocket)TOS);
+		NOS--;TOS=*NOS;NOS--;
+		continue;
+
+	case TCPDEL: // set soc --
+		SDLNet_TCP_DelSocket((SDLNet_SocketSet)*NOS,(TCPsocket)TOS);
+		NOS--;TOS=*NOS;NOS--;
+		continue;
+	case UDPDEL: // set soc --
+		SDLNet_UDP_DelSocket((SDLNet_SocketSet)*NOS,(UDPsocket)TOS);
+		NOS--;TOS=*NOS;NOS--;
+		continue;
+
+	case NETSETCHECK: // set timeout -- cnt
+		TOS=SDLNet_CheckSockets((SDLNet_SocketSet)*NOS,TOS);
+		NOS--;
+		continue;
+	case SETFREE: // set --
+		SDLNet_FreeSocketSet((SDLNet_SocketSet)TOS);
+		TOS=*NOS;NOS--;
+		continue;
+
 
 #ifdef DEBUGWORD //----------------- DEBUG
 	case DEBUG:printf((char*)TOS);TOS=*NOS;NOS--;continue;

@@ -246,7 +246,7 @@
 |RPI|	"./r3lin "                                       | ,s does not add a space for RPI ?
 	,s 'path ,s "/" ,s ,s ,eol
 	empty here
-	sys drop
+	sys 
 	;
 
 
