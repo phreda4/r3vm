@@ -1,40 +1,53 @@
 | Server test
+| PHREDA 2020
 ^r3/lib/gui.r3
 
 #mensaje * 1024
 #sockserver 0
-#sockclient 0
 #ip 0 0
 #nn 0
 
-:recive
-	sockserver TCPACCEPT
-	0? ( drop ; )
-	'sockclient !
-	sockclient 'mensaje 1024 tcprecv
-	'mensaje + 0 swap c!
+#scliente 0
 
-	sockclient tcpclose
+:acepta
+	sockserver TCPACCEPT 0? ( drop ; )
+	'scliente ! ;
+
+:recibe
+	scliente
+	0? ( drop acepta ; )
+	'mensaje 1024 tcprecv
+	'mensaje + 0 swap c!
 	1 'nn +!
 	;
+
 
 :main
 	cls home
 	"r3 server" print cr
 	nn msec "%h %d" print cr
 	'ip q@ "IP:%h" print cr cr
-	sockclient sockserver "SEVER:%h CLIENT:%h" print cr cr
+	sockserver "SEVER:%h" print cr cr
 	'mensaje emits cr cr
-	recive
+
+	recibe
+
 	key
 	>esc< =? ( exit )
-	drop ;
+	drop 
+	15 framelimit ;
 
-:inicio
-	'ip 0 9999 NETHOST | server
-	'ip tcpOpen 'sockserver !
+:netini
+	'ip 0 9999 nethost | 0=server 9999 port
+	'ip tcpopen 'sockserver !
+	;
+
+:netend
+	scliente 1? ( dup tcpclose ) drop
+    sockserver 1? ( dup tcpclose ) drop
 	;
 
 :
-	inicio
-	'main onshow ;
+	netini
+	'main onshow
+	netend ;

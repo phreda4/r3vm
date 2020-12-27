@@ -1363,7 +1363,6 @@ while(ip!=0) {
 		 TOS=(int64_t)SDLNet_SocketReady((SDLNet_GenericSocket)TOS);
 		continue;
 	case NETTOPEN: // ip -- socket
-		//(TCPsocket)
 		TOS=(int64_t)SDLNet_TCP_Open((IPaddress*)TOS);
 		continue;
 	case NETTACCEPT: // newsock -- sock
