@@ -1,6 +1,7 @@
 | Server test
 | PHREDA 2020
 ^r3/lib/gui.r3
+^./console.r3
 
 #mensaje * 1024
 #sockserver 0
@@ -11,39 +12,58 @@
 
 :acepta
 	sockserver TCPACCEPT 0? ( drop ; )
+	dup "Acepta %d" c.print c.cr
 	'scliente ! ;
 
 :recibe
 	scliente 0? ( drop acepta ; )
 	dup netcheck 0? ( 2drop ; ) drop
-	'mensaje 1024 tcprecv
+	dup 'mensaje 1024 tcprecv -? ( drop 0 'scliente ! ; )
 	'mensaje + 0 swap c!
+	'mensaje c.print c.cr
+	tcpclose
+	0 'scliente !
 	1 'nn +!
 	;
 
 
 :main
-	cls home
-	"r3 server" print cr
-	nn msec "%h %d" print cr
-	'ip q@ "IP:%h" print cr cr
-	sockserver "SEVER:%h" print cr cr
-	'mensaje emits cr cr
-
+	c.draw
+	c.keys
 	recibe
 
 	key
 	>esc< =? ( exit )
 	drop
-	15 framelimit ;
+	;
+
+:printserver
+	'ip @ dup $ff and
+	swap 8 >> dup $ff and
+	swap 8 >> dup $ff and
+	swap 8 >> $ff and
+	"Server IP Address : %d.%d.%d.%d" c.print c.cr
+	'ip 4 + @
+	"port: %d" c.print c.cr
+	;
 
 :netini
+	mark
+	sw sh c.full
+	$111111 c.paper
+	c.cls
+	$ff0000 c.ink "r" c.print
+	$ff00 c.ink "3" c.print
+	$ffffff c.ink " server demo" c.print c.cr
+
 	'ip 0 9999 nethost | 0=server 9999 port
+	printserver
 	'ip tcpopen 'sockserver !
+	sockserver "server:%d" c.print c.cr
 	;
 
 :netend
-	scliente 1? ( dup tcpclose ) drop
+
     sockserver 1? ( dup tcpclose ) drop
 	;
 

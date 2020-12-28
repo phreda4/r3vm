@@ -1360,15 +1360,14 @@ while(ip!=0) {
 */
 //----------NET
 	case NETRHOST: // ipaddr host port --
-		SDLNet_ResolveHost((IPaddress*)*(NOS-1),(char*)(*NOS),(Uint16)TOS);
+		SDLNet_ResolveHost((IPaddress*)*(NOS-1),(char*)(*NOS),TOS);
 		NOS-=2;TOS=*NOS;NOS--;
 		continue;
 	case NETRIP: // ip -- "host"
 		TOS=(int64_t)SDLNet_ResolveIP((IPaddress*)TOS);
 		continue;
 	case NETCHECK: // res -- sock
-		if (SDLNet_SocketReady((SDLNet_GenericSocket)TOS)) { TOS=-1;continue; }
-		TOS=0;
+		TOS=SDLNet_SocketReady((SDLNet_GenericSocket)TOS);
 		continue;
 	case NETTOPEN: // ip -- socket
 		TOS=(int64_t)SDLNet_TCP_Open((IPaddress*)TOS);

@@ -13,6 +13,9 @@
 	sockclient 0? ( drop ; )
 	'mensaje count tcpsend
 	'err !
+	sockclient tcpclose
+	0 'sockclient !
+	'ip tcpopen 'sockclient !
 	1 'nn +!
 	;
 
@@ -26,8 +29,7 @@
 	key
 	>esc< =? ( exit )
 	<ret> =? ( sendmsg 	0 'mensaje ! refreshfoco )
-	drop
-	15 framelimit ;
+	drop ;
 
 :netini
 	'ip "localhost" 9999 nethost | cliente port=9999
