@@ -63,7 +63,6 @@
 	;
 
 :netend
-
     sockserver 1? ( dup tcpclose ) drop
 	;
 
