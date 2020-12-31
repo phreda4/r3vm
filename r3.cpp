@@ -1012,7 +1012,6 @@ int64_t *RTOS=cRTOS;
 int64_t REGA=cREGA;
 int64_t REGB=cREGB;
 int64_t op=0;
-//int64_t W=0;
 #else
        
 // run code, from adress "boot"
@@ -1026,12 +1025,10 @@ register int64_t REGA=0;
 register int64_t REGB=0;
 register int64_t op=0;
 register int ip=boot;
-//register int64_t W=0;
+
 #endif
 while(ip!=0) { 
-	op=memcode[ip++]; 
-
-//	printcode(op);
+	op=memcode[ip++]; //	printcode(op);
 	
 	switch(op&0xff){
 	case FIN:ip=*RTOS;RTOS++;continue; 							// ;
@@ -1345,16 +1342,13 @@ while(ip!=0) {
 			Mix_HaltMusic();
         TOS=*NOS;NOS--;
         continue;
-      
 /*
     case SINFO: // "" -- mm
          TOS=0;
          for(int i=0;i<FSOUND_GetMaxChannels();i++) TOS|=FSOUND_IsPlaying(i); 
          continue;
     case SSET: // pan vol frec mm --
- 
-     Mix_Volume(int channel, int volume);
-
+	     Mix_Volume(int channel, int volume);
          if (TOS!=0) FSOUND_Sample_SetDefaults((FSOUND_SAMPLE *)TOS,int(*NOS),int(*(NOS-1)),int(*(NOS-2)),-1);
         TOS=*(NOS-3);NOS-=4;continue;
 */
@@ -1390,8 +1384,6 @@ while(ip!=0) {
 		SDLNet_TCP_Close((TCPsocket)TOS);
 		TOS=*NOS;NOS--;
 		continue;
-
-
 	case UDPALLOC: //size -- udp		
 		TOS=(int64_t)SDLNet_AllocPacket(TOS);
 		continue;
@@ -1399,7 +1391,6 @@ while(ip!=0) {
 		SDLNet_FreePacket((UDPpacket *)TOS);
 		TOS=*NOS;NOS--;
 		continue;
-
 	case UDPOPEN: // port --sockudp
 		TOS=(int64_t)SDLNet_UDP_Open(TOS);
 		continue;
@@ -1427,7 +1418,6 @@ while(ip!=0) {
 		SDLNet_UDP_Close((UDPsocket)TOS);
 		TOS=*NOS;NOS--;
 		continue;
-
 	case NETSET: // max -- set
 		TOS=(int64_t)SDLNet_AllocSocketSet(TOS);
 		continue;
@@ -1439,7 +1429,6 @@ while(ip!=0) {
 		SDLNet_UDP_AddSocket((SDLNet_SocketSet)*NOS,(UDPsocket)TOS);
 		NOS--;TOS=*NOS;NOS--;
 		continue;
-
 	case TCPDEL: // set soc --
 		SDLNet_TCP_DelSocket((SDLNet_SocketSet)*NOS,(TCPsocket)TOS);
 		NOS--;TOS=*NOS;NOS--;
@@ -1448,7 +1437,6 @@ while(ip!=0) {
 		SDLNet_UDP_DelSocket((SDLNet_SocketSet)*NOS,(UDPsocket)TOS);
 		NOS--;TOS=*NOS;NOS--;
 		continue;
-
 	case NETSETCHECK: // set timeout -- cnt
 		TOS=SDLNet_CheckSockets((SDLNet_SocketSet)*NOS,TOS);
 		NOS--;

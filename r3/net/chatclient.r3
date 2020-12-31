@@ -43,7 +43,7 @@
 
 :sendmsg
 	"hola" c.print c.cr
-	sock "hola" count tcpsend
+	sock "hola" 512 tcpsend
 	drop ;
 
 :main

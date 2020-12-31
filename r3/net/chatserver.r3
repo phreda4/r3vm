@@ -21,7 +21,6 @@
 	0 a> 1 - c!
 	a> 'players> ! ;
 
-#newsock
 
 :printplay
 	@+ "a:%d " c.print
@@ -33,10 +32,9 @@
 
 :serverop
 	"severop" c.print c.cr
-	serversock TCPACCEPT 'newsock !
-	"jugador n"
-	newsock TCPADR
-	newsock 1 +player
+	serversock TCPACCEPT | newsock
+	socketset over TCPADD
+	"jugador n" over TCPADR rot 1 +player
 	'players ( players> <? printplay ) drop
 	;
 
@@ -45,7 +43,7 @@
 :clientop | adr -- adr+8*4
 	dup 'players - 5 << "client %d" c.print c.cr
 	dup 4 + @ netcheck 0? ( drop 8 4 * + ; ) drop
-	dup 4 + @ 'data 1024 TCPRECV
+	dup 4 + @ 'data 512 TCPRECV
 |	-? ( finconeccion )
 	drop
 	'data c.print c.cr
@@ -57,6 +55,8 @@
 	0? ( drop ; ) drop
 	"." c.print
 	serversock netcheck 1? ( serverop ) drop
+	socketset 0 NETSETCHECK
+	0? ( drop ; ) drop
 	'players ( players> <? clientop ) drop
 	;
 
@@ -70,14 +70,14 @@
 	drop
 	;
 
-:printserver
-	'serverip @ dup $ff and
+:printserver | 'ip --
+	@+ dup $ff and
 	swap 8 >> dup $ff and
 	swap 8 >> dup $ff and
 	swap 8 >> $ff and
-	"Server IP Address : %d.%d.%d.%d" c.print c.cr
-	'serverip 4 + @
-	"port: %d" c.print c.cr
+	"Server:%d.%d.%d.%d:" c.print
+	@ dup 8 >> $ff and swap $ff and 8 << or
+	"%d" c.print c.cr
 	;
 
 :netini
@@ -91,7 +91,7 @@
 
 	16 netset 'socketset !
 	'serverip 0 7777 nethost | 0=server 7777 port
-	printserver
+	'serverip printserver
 	'serverip tcpopen 'serversock !
 	serversock "server:%d" c.print c.cr
 	socketset serversock tcpadd
